@@ -1,0 +1,20 @@
+{
+  "illuminati": {
+    "name": "The Illuminati",
+    "energy_type": "Influence",
+    "lore_summary": "Ancient secret society controlling world events from shadows.",
+    "key_mechanics": ["Control & Manipulation", "Resource Generation", "Stealth/Infiltration"]
+  },
+  "templars": {
+    "name": "The Templars",
+    "energy_type": "Faith",
+    "lore_summary": "Re-emerged order protecting ancient relics and maintaining stability.",
+    "key_mechanics": ["Defense & Resilience", "Direct Damage/Removal", "Buffs & Auras"]
+  },
+  "reptilians": {
+    "name": "The Reptilians",
+    "energy_type": "Psionics",
+    "lore_summary": "Shape-shifting reptilian beings infiltrating humanity.",
+    "key_mechanics": ["Disruption & Debuffs", "Stealth/Evasion", "Transformation/Adaptation", "Mind Control"]
+  }
+}

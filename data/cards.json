@@ -1,0 +1,134 @@
+[
+  {
+    "id": "illuminati_char_001",
+    "name": "Shadow Broker",
+    "type": "Character",
+    "faction": "illuminati",
+    "cost": 3,
+    "energy_type": "Influence",
+    "attack": 2,
+    "health": 3,
+    "ability": "When played, look at opponent's hand and discard one card.",
+    "lore": "A master of secrets, always trading in whispers and shadows."
+  },
+  {
+    "id": "illuminati_char_002",
+    "name": "Corporate Shill",
+    "type": "Character",
+    "faction": "illuminati",
+    "cost": 2,
+    "energy_type": "Influence",
+    "attack": 1,
+    "health": 4,
+    "ability": "At the start of your turn, gain 1 Influence.",
+    "lore": "Their pockets are lined with gold, their loyalty bought and sold."
+  },
+  {
+    "id": "illuminati_spell_001",
+    "name": "Media Blackout",
+    "type": "Spell",
+    "faction": "illuminati",
+    "cost": 4,
+    "energy_type": "Influence",
+    "effect": "Silence all enemy characters until end of turn.",
+    "lore": "Control the narrative, control the masses."
+  },
+  {
+    "id": "illuminati_loc_001",
+    "name": "Secret Society Lodge",
+    "type": "Location",
+    "faction": "illuminati",
+    "cost": 5,
+    "energy_type": "Influence",
+    "effect": "All your Illuminati characters gain +1 Attack.",
+    "lore": "Where plans are hatched in the dead of night."
+  },
+  {
+    "id": "templars_char_001",
+    "name": "Knight Commander",
+    "type": "Character",
+    "faction": "templars",
+    "cost": 4,
+    "energy_type": "Faith",
+    "attack": 3,
+    "health": 5,
+    "ability": "Other Templar characters you control gain +1 Health.",
+    "lore": "A beacon of unwavering resolve on the battlefield."
+  },
+  {
+    "id": "templars_char_002",
+    "name": "Templar Guardian",
+    "type": "Character",
+    "faction": "templars",
+    "cost": 2,
+    "energy_type": "Faith",
+    "attack": 1,
+    "health": 6,
+    "ability": "Taunt (Enemy characters must attack this character if able).",
+    "lore": "Stands as an impenetrable wall against the forces of chaos."
+  },
+  {
+    "id": "templars_spell_001",
+    "name": "Divine Smite",
+    "type": "Spell",
+    "faction": "templars",
+    "cost": 3,
+    "energy_type": "Faith",
+    "effect": "Deal 4 damage to a target character.",
+    "lore": "The wrath of the heavens, delivered swiftly."
+  },
+  {
+    "id": "templars_loc_001",
+    "name": "Sacred Chapel",
+    "type": "Location",
+    "faction": "templars",
+    "cost": 4,
+    "energy_type": "Faith",
+    "effect": "At the start of your turn, heal 1 damage from all your characters.",
+    "lore": "A place of solace and restoration."
+  },
+  {
+    "id": "reptilians_char_001",
+    "name": "Shape-Shifter Infiltrator",
+    "type": "Character",
+    "faction": "reptilians",
+    "cost": 3,
+    "energy_type": "Psionics",
+    "attack": 2,
+    "health": 2,
+    "ability": "Stealth (Cannot be targeted by enemy attacks or abilities until it attacks.)",
+    "lore": "Blends seamlessly into the crowd, striking when least expected."
+  },
+  {
+    "id": "reptilians_char_002",
+    "name": "Psionic Dominator",
+    "type": "Character",
+    "faction": "reptilians",
+    "cost": 5,
+    "energy_type": "Psionics",
+    "attack": 3,
+    "health": 4,
+    "ability": "When played, take control of an enemy character with 2 or less Attack until end of turn.",
+    "lore": "Its gaze can bend the will of the weak-minded."
+  },
+  {
+    "id": "reptilians_spell_001",
+    "name": "Neural Scramble",
+    "type": "Spell",
+    "faction": "reptilians",
+    "cost": 2,
+    "energy_type": "Psionics",
+    "effect": "Give an enemy character -2 Attack until end of turn.",
+    "lore": "Disrupts the very thoughts of its target."
+  },
+  {
+    "id": "reptilians_loc_001",
+    "name": "Hidden Hive",
+    "type": "Location",
+    "faction": "reptilians",
+    "cost": 4,
+    "energy_type": "Psionics",
+    "effect": "Your Reptilian characters gain 'When this character attacks, draw a card.'",
+    "lore": "A nexus of alien activity, buzzing with silent intent."
+  }
+]
