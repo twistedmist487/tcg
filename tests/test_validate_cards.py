@@ -1,7 +1,5 @@
 """Tests for the card validator."""
 
-import json
-import pytest
 
 from tools.validate_cards import validate_cards
 

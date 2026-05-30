@@ -26,23 +26,22 @@ tests/          Unit and integration tests
 
 ## Data Model
 
-### Card (in cards.json)
+### Card (defined in engine/models.py)
 
-Every card is a JSON object with these fields:
+All cards are validated through Pydantic models:
 
-| Field        | Type   | Required | Description                          |
-|--------------|--------|----------|--------------------------------------|
-| id           | string | Yes      | Unique ID, format: `{faction}_{type}_{nnn}` |
-| name         | string | Yes      | Display name                         |
-| type         | string | Yes      | One of: Character, Spell, Location   |
-| faction      | string | Yes      | One of: illuminati, templars, reptilians |
-| cost         | int    | Yes      | Energy cost to play (0+)             |
-| energy_type  | string | Yes      | Influence, Faith, or Psionics        |
-| attack       | int    | For Char | Attack power (0+)                    |
-| health       | int    | For Char | Health points (1+)                   |
-| ability      | string | For Char | Ability text                         |
-| effect       | string | For Spell/Location | Effect text               |
-| lore         | string | Yes      | Flavor text                          |
+| Model           | Type disp. | Extra fields                        |
+|-----------------|------------|-------------------------------------|
+| CharacterCard   | "Character"| attack (int), health (int), ability |
+| SpellCard       | "Spell"    | effect (str)                        |
+| LocationCard    | "Location" | effect (str)                        |
+
+Usage:
+```python
+from engine.models import load_cards, load_factions
+cards = load_cards("data/cards.json")
+factions = load_factions("data/factions.json")
+```
 
 ### Adding a New Card
 

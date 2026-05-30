@@ -1,6 +1,7 @@
 import json
 import os
 
+
 class BaseAgent:
     def __init__(self, name, data_directory="data/"):
         self.name = name
@@ -17,15 +18,15 @@ class BaseAgent:
         locations_path = os.path.join(self.data_directory, "locations.json")
 
         if os.path.exists(cards_path):
-            with open(cards_path, 'r') as f:
+            with open(cards_path) as f:
                 self.cards_data = json.load(f)
-        
+
         if os.path.exists(factions_path):
-            with open(factions_path, 'r') as f:
+            with open(factions_path) as f:
                 self.factions_data = json.load(f)
-        
+
         if os.path.exists(locations_path):
-            with open(locations_path, 'r') as f:
+            with open(locations_path) as f:
                 self.locations_data = json.load(f)
 
     def _save_data(self, filename, data):

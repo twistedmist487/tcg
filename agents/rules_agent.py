@@ -1,6 +1,7 @@
-import json
 import os
+
 from agents.base_agent import BaseAgent
+
 
 class RulesAgent(BaseAgent):
     def __init__(self, data_directory="data/", rules_docs_directory="docs/"):
@@ -13,7 +14,7 @@ class RulesAgent(BaseAgent):
         rules_path = os.path.join(self.rules_docs_directory, "rules_draft.md")
         rules_content = {}
         if os.path.exists(rules_path):
-            with open(rules_path, 'r') as f:
+            with open(rules_path) as f:
                 current_section = None
                 for line in f:
                     line = line.strip()
@@ -41,7 +42,7 @@ class RulesAgent(BaseAgent):
             elif total_stats > cost + 2: # Allow some flexibility for powerful abilities
                 balance_report["is_balanced"] = False
                 balance_report["comments"].append(f"Overcosted: Total stats ({total_stats}) are significantly higher than cost ({cost}).")
-            
+
             # Check for very high attack or health for cost
             if attack > cost + 1:
                 balance_report["comments"].append(f"High Attack ({attack}) for cost ({cost}).")
@@ -94,21 +95,21 @@ class RulesAgent(BaseAgent):
                     suggestions.append(f"Consider increasing Attack or Health to bring total stats closer to {cost + 1}.")
                 elif total_stats > cost + 2:
                     suggestions.append(f"Consider reducing Attack or Health to bring total stats closer to {cost + 1}.")
-                
+
                 if "High Attack" in " ".join(balance_report["comments"]):
-                    suggestions.append(f"Consider reducing Attack by 1.")
+                    suggestions.append("Consider reducing Attack by 1.")
                 if "High Health" in " ".join(balance_report["comments"]):
-                    suggestions.append(f"Consider reducing Health by 1.")
+                    suggestions.append("Consider reducing Health by 1.")
 
             elif card.get("type") == "Spell":
                 if "High damage" in " ".join(balance_report["comments"]):
-                    suggestions.append(f"Consider reducing damage or increasing cost.")
+                    suggestions.append("Consider reducing damage or increasing cost.")
                 elif "Low damage" in " ".join(balance_report["comments"]):
-                    suggestions.append(f"Consider increasing damage or decreasing cost.")
+                    suggestions.append("Consider increasing damage or decreasing cost.")
 
             elif card.get("type") == "Location":
                 if "Potentially low cost" in " ".join(balance_report["comments"]):
-                    suggestions.append(f"Consider increasing cost by 1 or 2.")
+                    suggestions.append("Consider increasing cost by 1 or 2.")
 
         return suggestions
 

@@ -1,6 +1,7 @@
-import json
 import os
+
 from agents.base_agent import BaseAgent
+
 
 class LoreAgent(BaseAgent):
     def __init__(self, data_directory="data/", docs_directory="docs/"):
@@ -13,7 +14,7 @@ class LoreAgent(BaseAgent):
         lore_path = os.path.join(self.docs_directory, "factions.md")
         lore_content = {}
         if os.path.exists(lore_path):
-            with open(lore_path, 'r') as f:
+            with open(lore_path) as f:
                 current_faction = None
                 for line in f:
                     line = line.strip()
@@ -40,7 +41,7 @@ class LoreAgent(BaseAgent):
         """Generates lore for a card based on its faction."""
         faction_key = faction_name.lower().replace(" ", "_")
         faction_lore = self.lore_data.get(faction_key, {})
-        
+
         base_lore = faction_lore.get("lore", "A mysterious entity.")
         philosophy = faction_lore.get("philosophy", "Unknown motives.")
         mechanics = faction_lore.get("key_mechanics", ["Unknown abilities."])
@@ -49,14 +50,14 @@ class LoreAgent(BaseAgent):
         generated_lore = f"The {card_name} is a figure shrouded in secrecy, operating under the philosophy of '{philosophy}'. "
         generated_lore += f"Its very existence is tied to the {faction_name}'s goal of {base_lore.lower()}. "
         generated_lore += f"Known for its {mechanics[0].lower()}, it plays a crucial role in the grand scheme."
-        
+
         return generated_lore
 
     def suggest_new_lore_element(self, faction_name):
         """Suggests a new lore element for a faction."""
         faction_key = faction_name.lower().replace(" ", "_")
         faction_lore = self.lore_data.get(faction_key, {})
-        
+
         # Placeholder for more sophisticated lore generation
         return f"A new hidden chapter in the history of the {faction_name}, revealing their involvement in a forgotten historical event."
 
