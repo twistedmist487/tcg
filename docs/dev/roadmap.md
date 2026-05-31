@@ -45,8 +45,16 @@ Goal: 8+ cards per faction, new thematic depth.
 - [x] Balance-tuned stats to match cost heuristics
 - [x] 27 total cards (12 original + 15 new)
 
-## Phase 4: Single-Player vs AI [PENDING]
+## Phase 4: Single-Player vs AI [COMPLETE]
 Goal: Play against a heuristic AI opponent.
+
+- [x] Create engine/ai.py — AIPlayer class with faction-specific weights
+- [x] Heuristic action scoring (play, attack, end turn)
+- [x] Faction weights (Illuminati: card draw/control, Templars: defense/healing, Reptilians: aggression)
+- [x] execute_turn() — full AI turn loop
+- [x] AI respects energy costs, Taunt rules, board limits
+- [x] 19 new tests covering AI behavior, scoring, and full game completion
+- [x] CLI updated with mode selector: 2-player or vs AI
 
 ## Phase 5: Web Playable Prototype [PENDING]
 Goal: Browser-based UI with FastAPI backend.

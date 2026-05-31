@@ -1,17 +1,20 @@
 #!/usr/bin/env python3
 """
-Two-human CLI game runner for Conspiracy TCG.
+CLI game runner for Conspiracy TCG.
+
+Modes:
+  [1] Two-player (both human, shared terminal)
+  [2] Single-player (vs AI)
 
 Run with: python -m cli.game
-
-Both players share one terminal. The game shows the active player's
-state and asks for actions: play a card, attack, or end turn.
 """
 
 from __future__ import annotations
 
+import random
 import sys
 
+from engine.ai import AIPlayer, execute_turn
 from engine.game import Game
 from engine.models import load_cards
 
@@ -225,35 +228,71 @@ def _handle_attack(game: Game) -> dict:
 def main():
     """Main game loop."""
     print("=" * 50)
-    print("  CONSPIRACY TCG — Two-Player Mode")
+    print("  CONSPIRACY TCG")
     print("=" * 50)
+
+    # Choose game mode
+    print("\nGame Mode:")
+    print("  [1] Two Players (shared terminal)")
+    print("  [2] Single Player (vs AI)")
+    while True:
+        mode = input("\nChoose mode [1/2]: ").strip()
+        if mode in ("1", "2"):
+            break
+        print("Invalid choice. Enter 1 or 2.")
+
+    two_player = mode == "1"
 
     # Load card pool
     cards = load_cards("data/cards.json")
+    factions = ["illuminati", "templars", "reptilians"]
 
-    # Choose factions
-    print("\nFactions:")
-    print("  [1] Illuminati (Influence)")
-    print("  [2] Templars (Faith)")
-    print("  [3] Reptilians (Psionics)")
+    if two_player:
+        # Human vs Human
+        print("\nFactions:")
+        print("  [1] Illuminati (Influence)")
+        print("  [2] Templars (Faith)")
+        print("  [3] Reptilians (Psionics)")
 
-    # Player 1
-    p1_name = input("\nPlayer 1 name: ").strip() or "Player 1"
-    p1_faction = _choose_faction("Player 1")
+        p1_name = input("\nPlayer 1 name: ").strip() or "Player 1"
+        p1_faction = _choose_faction("Player 1")
+        p2_name = input("Player 2 name: ").strip() or "Player 2"
+        p2_faction = _choose_faction("Player 2")
 
-    # Player 2
-    p2_name = input("Player 2 name: ").strip() or "Player 2"
-    p2_faction = _choose_faction("Player 2")
+        deck1 = build_deck(cards, p1_faction)
+        deck2 = build_deck(cards, p2_faction)
 
-    # Build decks
-    deck1 = build_deck(cards, p1_faction)
-    deck2 = build_deck(cards, p2_faction)
+        print(f"\n{p1_name} plays {p1_faction.title()} ({len(deck1)} cards)")
+        print(f"{p2_name} plays {p2_faction.title()} ({len(deck2)} cards)")
 
-    print(f"\n{p1_name} plays {p1_faction.title()} ({len(deck1)} cards)")
-    print(f"{p2_name} plays {p2_faction.title()} ({len(deck2)} cards)")
+        game = Game.setup(deck1, deck2, p1_name, p2_name)
+        ai_player = None
 
-    # Setup game
-    game = Game.setup(deck1, deck2, p1_name, p2_name)
+    else:
+        # Human vs AI
+        print("\nYour faction:")
+        print("  [1] Illuminati (Influence)")
+        print("  [2] Templars (Faith)")
+        print("  [3] Reptilians (Psionics)")
+
+        human_name = input("\nYour name: ").strip() or "Human"
+        human_faction = _choose_faction(human_name)
+
+        # AI picks a random other faction
+        ai_factions = [f for f in factions if f != human_faction]
+        ai_faction = random.choice(ai_factions)
+        ai_name = random.choice(["Overmind", "Admiral Vex", "Agent Smith", "The Architect"])
+
+        # Human is player 1, AI is player 2
+        deck1 = build_deck(cards, human_faction)
+        deck2 = build_deck(cards, ai_faction)
+
+        ai_player = AIPlayer(name=ai_name, faction=ai_faction, aggression=0.6)
+
+        print(f"\n{human_name} plays {human_faction.title()} ({len(deck1)} cards)")
+        print(f"{ai_name} plays {ai_faction.title()} ({len(deck2)} cards)")
+
+        game = Game.setup(deck1, deck2, human_name, ai_name)
 
     print(f"\n{game.active_player.name} goes first!")
     input("Press Enter to start...")
@@ -270,20 +309,42 @@ def main():
 
         display_game_state(game, game.active_player_index)
 
-        # Action phase — player gets unlimited actions
-        while True:
-            if game.is_over:
-                break
+        # Check if it's the AI's turn
+        is_ai_turn = (ai_player is not None and
+                      game.active_player.name == ai_player.name)
 
-            action = get_action(game)
+        if is_ai_turn:
+            # AI turn
+            input("\nPress Enter to see AI's move...")
+            action_results = execute_turn(game, ai_player)
+            for action_result in action_results:
+                ar = action_result.get("result", {})
+                if action_result["action"] == "play" and ar.get("success"):
+                    print(f"  AI plays: {ar.get('card', '?')}")
+                elif action_result["action"] == "attack" and ar.get("success"):
+                    print(f"  AI attacks: {ar['attacker']} -> {ar['target']}")
+                    print(f"    Dealt {ar['damage_dealt']}, took {ar['damage_taken']}")
+                    if ar.get("killed_target"):
+                        print(f"    {ar['target']} was slain!")
+                    if ar.get("killed_attacker"):
+                        print(f"    {ar['attacker']} died!")
+                elif action_result["action"] == "end_turn":
+                    print(f"  AI ends turn.")
+        else:
+            # Human turn
+            while True:
+                if game.is_over:
+                    break
 
-            if action["action"] == "end_turn":
-                game.end_turn()
-                break
+                action = get_action(game)
 
-            # Show updated state after playing a card or attacking
-            if action["action"] in ("play", "attack"):
-                display_game_state(game, game.active_player_index)
+                if action["action"] == "end_turn":
+                    game.end_turn()
+                    break
+
+                # Show updated state after playing a card or attacking
+                if action["action"] in ("play", "attack"):
+                    display_game_state(game, game.active_player_index)
 
     # Game over
     if game.winner:
