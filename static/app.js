@@ -9,6 +9,7 @@ let sessionId = null;
 let selectedCardIndex = null;
 let selectedAttackerIndex = null;
 let attackMode = false;
+let myPlayerName = '';
 
 // ---- API helpers ----
 
@@ -55,9 +56,34 @@ async function startGame() {
   }
 }
 
-function showGame() {
+async function showGame() {
   document.getElementById('landing').style.display = 'none';
   document.getElementById('game-screen').style.display = 'block';
+}
+
+async function startGame() {
+  const faction = document.querySelector('.faction-btn.selected')?.dataset.faction || 'illuminati';
+  const name = document.getElementById('player-name').value || 'Player';
+  myPlayerName = name;
+  try {
+    const data = await api('POST', `/api/game/new?player_name=${encodeURIComponent(name)}&player_faction=${faction}`);
+    sessionId = data.session_id;
+    showGame();
+
+    // Auto-start the first turn (whoever goes first)
+    const startData = await api('POST', `/api/game/${sessionId}/start-turn`);
+    state = startData.state || startData;
+    // If it's not the player's turn, auto-play AI
+    if (state.active_player !== myPlayerName && !state.is_over) {
+      addLog(`Opponent (${state.active_player}) goes first.`, 'turn');
+      await autoPlayAI();
+    } else {
+      addLog(`Game started. You go first!`, 'turn');
+    }
+    await loadState();
+  } catch (e) {
+    alert('Failed to start game: ' + e.message);
+  }
 }
 
 // ---- State loading ----
@@ -82,7 +108,7 @@ function render() {
 
   // Turn info
   const turnEl = document.getElementById('turn-info');
-  turnEl.innerHTML = `Turn ${state.turn_number || 1} — <span class="${isMyTurn ? 'energy' : ''}">${state.active_player}'s turn</span>`;
+  turnEl.innerHTML = "Turn " + (state.turn_number || 1) + " - <span class=\"" + (isMyTurn ? 'energy' : '') + "\">" + state.active_player + "'s turn</span>";
 
   // Highlight active section
   document.getElementById('player-section').classList.toggle('active', isMyTurn);
@@ -109,14 +135,20 @@ function render() {
     document.getElementById('player-hand').innerHTML = renderHand(me.hand || [], me.energy);
   }
 
-  const hasStartedTurn = me && me.energy > 0;
-  const canAct = isMyTurn && !state.is_over && hasStartedTurn;
+  // Button logic:
+  // - Start Turn: shown when it's your turn AND (no energy yet OR you just started)
+  // - Play/Attack: shown when it's your turn AND you have energy
+  // - End Turn: shown when it's your turn after starting
+  const turnStarted = me && me.energy > 0;
+  const canAct = isMyTurn && !state.is_over && turnStarted;
 
-  document.getElementById('btn-start-turn').style.display = (isMyTurn && !hasStartedTurn) ? 'inline-block' : 'none';
+  document.getElementById('btn-start-turn').style.display = (isMyTurn && !turnStarted) ? 'inline-block' : 'none';
+  document.getElementById('btn-play').style.display = (isMyTurn && turnStarted) ? 'inline-block' : 'none';
   document.getElementById('btn-play').disabled = !canAct;
+  document.getElementById('btn-attack').style.display = (isMyTurn && turnStarted) ? 'inline-block' : 'none';
   document.getElementById('btn-attack').disabled = !canAct;
+  document.getElementById('btn-end-turn').style.display = (isMyTurn && turnStarted) ? 'inline-block' : 'none';
   document.getElementById('btn-end-turn').disabled = !isMyTurn;
-  document.getElementById('btn-end-turn').style.display = hasStartedTurn ? 'inline-block' : 'none';
 
   // Reset selection
   selectedCardIndex = null;
@@ -316,7 +348,7 @@ async function submitAttack() {
 }
 
 function autoPlayAI() {
-  // AI plays its turn — call server endpoints until it ends turn
+  // AI plays its turn - call server endpoints until it ends turn
   // We use the same game engine on the client side to decide AI actions
   // by reading the state and making calls
   return new Promise(async (resolve) => {
@@ -465,13 +497,15 @@ async function submitEndTurn() {
 
 function getMyPlayer() {
   if (!state) return null;
-  // The player whose name matches the input field name
-  const myName = document.getElementById('player-name').value || 'Player';
-  // Try to find by name first
-  let me = state.players.find(p => p.name === myName);
+  // Use the stored player name from game creation
+  let me = state.players.find(p => p.name === myPlayerName);
   if (!me) {
-    // Fallback: if names don't match (e.g. after restart), use the non-AI player
-    me = state.players.find(p => !p.name.startsWith('Overmind') && !p.name.startsWith('Admiral') && !p.name.startsWith('Agent'));
+    // Fallback: use the non-AI player
+    me = state.players.find(p => p.name !== state.players[0].name || p.name === myPlayerName);
+  }
+  // Last resort: if active player name matches, use that
+  if (!me && state.active_player === myPlayerName) {
+    me = state.players.find(p => p.name === state.active_player);
   }
   return me;
 }
