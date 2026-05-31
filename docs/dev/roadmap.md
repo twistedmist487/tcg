@@ -22,8 +22,17 @@ Goal: Robust, validated card data model.
 - [x] Add 18 tests for models and loader (29 total with Phase 0)
 - [x] Validate all 12 existing cards against new models
 
-## Phase 2: Game Engine -- Core Logic [PENDING]
+## Phase 2: Game Engine -- Core Logic [COMPLETE]
 Goal: Python game engine, two-human CLI play.
+
+- [x] CardInstance — mutable runtime state (health, buffs, stealth, etc.)
+- [x] Player state — deck, hand, board, life, energy management
+- [x] Combat resolution — character vs character, direct attacks, simultaneous damage
+- [x] Keyword mechanics — Taunt, Stealth, Silence, Exhausted
+- [x] Game engine — turn loop, setup, win conditions, action dispatch
+- [x] JSON serialization — save/load full game state
+- [x] CLI game — two-human text interface with faction selection
+- [x] 65 new tests (94 total) covering all engine modules
 
 ## Phase 3: Card Expansion [PENDING]
 Goal: 30+ cards per faction, deckbuilder tool.
