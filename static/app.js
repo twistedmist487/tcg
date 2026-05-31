@@ -37,9 +37,19 @@ async function startGame() {
     const data = await api('POST', `/api/game/new?player_name=${encodeURIComponent(name)}&player_faction=${faction}`);
     sessionId = data.session_id;
     showGame();
+
+    // Auto-start the first turn (whoever goes first)
+    const startData = await api('POST', `/api/game/${sessionId}/start-turn`);
+    state = startData.state || startData;
+    // If it's not the player's turn, auto-play AI
+    const myName = name;
+    if (state.active_player !== myName && !state.is_over) {
+      addLog(`Opponent (${state.active_player}) goes first.`, 'turn');
+      await autoPlayAI();
+    } else {
+      addLog(`Game started. You go first!`, 'turn');
+    }
     await loadState();
-    addLog(`Game started. You are ${name} (${faction}).`, 'turn');
-    addLog(`Opponent: ${data.ai_name} (${data.ai_faction}).`, 'turn');
   } catch (e) {
     alert('Failed to start game: ' + e.message);
   }
@@ -66,14 +76,13 @@ async function loadState() {
 function render() {
   if (!state) return;
 
-  const me = state.players[state.active_player_index === 0 ? 0 : 1];
-  const opp = state.players[state.active_player_index === 0 ? 1 : 0];
-  const playerIdx = state.active_player_index;
+  const me = getMyPlayer();
+  const opp = state.players.find(p => p !== me) || state.players[0];
+  const isMyTurn = me && state.active_player === me.name;
 
   // Turn info
-  const isMyTurn = state.active_player === (document.getElementById('player-name').value || 'Player');
   const turnEl = document.getElementById('turn-info');
-  turnEl.innerHTML = `Turn ${state.turn_number} — <span class="${isMyTurn ? 'energy' : ''}">${state.active_player}'s turn</span>`;
+  turnEl.innerHTML = `Turn ${state.turn_number || 1} — <span class="${isMyTurn ? 'energy' : ''}">${state.active_player}'s turn</span>`;
 
   // Highlight active section
   document.getElementById('player-section').classList.toggle('active', isMyTurn);
@@ -90,19 +99,24 @@ function render() {
   document.getElementById('opponent-board').innerHTML = renderBoard(opp.board, false);
 
   // Player
-  document.getElementById('player-name-display').textContent = me.name;
-  document.getElementById('player-stats').innerHTML =
-    `<span class="life">&#9829; ${me.life}</span>` +
-    `<span class="energy">&#9733; ${me.energy}/${me.max_energy}</span>` +
-    `<span>Deck: ${me.deck_size}</span>`;
-  document.getElementById('player-board').innerHTML = renderBoard(me.board, true, me.name);
-  document.getElementById('player-hand').innerHTML = renderHand(me.hand, me.energy);
+  document.getElementById('player-name-display').textContent = me ? me.name : '?';
+  if (me) {
+    document.getElementById('player-stats').innerHTML =
+      `<span class="life">&#9829; ${me.life}</span>` +
+      `<span class="energy">&#9733; ${me.energy}/${me.max_energy}</span>` +
+      `<span>Deck: ${me.deck_size}</span>`;
+    document.getElementById('player-board').innerHTML = renderBoard(me.board, true);
+    document.getElementById('player-hand').innerHTML = renderHand(me.hand || [], me.energy);
+  }
 
-  // Buttons
-  const canAct = isMyTurn && !state.is_over;
+  const hasStartedTurn = me && me.energy > 0;
+  const canAct = isMyTurn && !state.is_over && hasStartedTurn;
+
+  document.getElementById('btn-start-turn').style.display = (isMyTurn && !hasStartedTurn) ? 'inline-block' : 'none';
   document.getElementById('btn-play').disabled = !canAct;
   document.getElementById('btn-attack').disabled = !canAct;
   document.getElementById('btn-end-turn').disabled = !isMyTurn;
+  document.getElementById('btn-end-turn').style.display = hasStartedTurn ? 'inline-block' : 'none';
 
   // Reset selection
   selectedCardIndex = null;
@@ -112,7 +126,7 @@ function render() {
   // Game over
   if (state.is_over) {
     document.getElementById('game-over').style.display = 'block';
-    const youWon = state.winner === me.name;
+    const youWon = me && state.winner === me.name;
     document.getElementById('game-over-text').textContent = youWon ? 'VICTORY' : 'DEFEAT';
     document.getElementById('game-over-text').className = youWon ? 'winner' : 'loser';
     document.getElementById('game-over-sub').textContent = `${state.winner} has won the game!`;
@@ -238,6 +252,19 @@ function selectAttacker(index) {
 
 // ---- Action submission ----
 
+async function submitStartTurn() {
+  try {
+    const data = await api('POST', `/api/game/${sessionId}/start-turn`);
+    state = data.state || data;
+    addLog(`Turn started. Energy: ${getMyEnergy()}`, 'turn');
+    selectedCardIndex = null;
+    selectedAttackerIndex = null;
+    render();
+  } catch (e) {
+    addLog('Start turn failed: ' + e.message, 'damage');
+  }
+}
+
 async function submitPlay() {
   if (selectedCardIndex === null) return;
   try {
@@ -288,15 +315,146 @@ async function submitAttack() {
   }
 }
 
+function autoPlayAI() {
+  // AI plays its turn — call server endpoints until it ends turn
+  // We use the same game engine on the client side to decide AI actions
+  // by reading the state and making calls
+  return new Promise(async (resolve) => {
+    try {
+      const myTurnAfterAI = await playAITurn();
+      resolve(myTurnAfterAI);
+    } catch (e) {
+      addLog('AI error: ' + e.message, 'damage');
+      resolve(false);
+    }
+  });
+}
+
+async function playAITurn() {
+  // Keep taking AI actions until the turn ends or game is over
+  const maxSteps = 30;
+  for (let step = 0; step < maxSteps; step++) {
+    // Always start the turn first (draw, gain energy, clear exhaust)
+    let data = await api('POST', `/api/game/${sessionId}/start-turn`);
+    state = data.state || data;
+
+    if (state.is_over) {
+      await loadState();
+      return true;
+    }
+
+    const myName = document.getElementById('player-name').value || 'Player';
+    // If it's now the human's turn, AI is done
+    if (state.active_player === myName) {
+      await loadState();
+      return true;
+    }
+
+    // AI decision loop
+    let actionsTaken = 0;
+    while (actionsTaken < 20) {
+      state = await api('GET', `/api/game/${sessionId}/state`);
+      if (state.is_over || state.active_player === myName) break;
+
+      const aiPlayerIdx = state.players.findIndex(p => p.name === state.active_player);
+      const aiPlayer = state.players[aiPlayerIdx];
+
+      // Try to play a card
+      let played = false;
+      if (aiPlayer.hand && aiPlayer.hand.length > 0) {
+        // Play highest-cost affordable card
+        let bestIdx = -1;
+        let bestCost = -1;
+        for (let i = 0; i < aiPlayer.hand.length; i++) {
+          const card = aiPlayer.hand[i];
+          if (aiPlayer.energy >= card.cost && card.cost > bestCost) {
+            bestCost = card.cost;
+            bestIdx = i;
+          }
+        }
+        if (bestIdx >= 0) {
+          const playData = await api('POST', `/api/game/${sessionId}/play?card_index=${bestIdx}`);
+          if (playData.action_result?.success) {
+            addLog(`AI plays ${playData.action_result.card}`, 'play');
+            played = true;
+            actionsTaken++;
+          }
+        }
+      }
+
+      // Try to attack
+      state = await api('GET', `/api/game/${sessionId}/state`);
+      if (state.is_over || state.active_player === myName) break;
+
+      const aiBoard = state.players[aiPlayerIdx].board;
+      const oppIdx = aiPlayerIdx === 0 ? 1 : 0;
+      const oppBoard = state.players[oppIdx].board;
+      const opp = state.players[oppIdx];
+
+      if (aiBoard && aiBoard.length > 0) {
+        // Attack with first available character
+        for (let ai = 0; ai < aiBoard.length; ai++) {
+          if (aiBoard[ai].current_attack > 0 && !aiBoard[ai].exhausted) {
+            let targetIdx = null;
+            if (oppBoard && oppBoard.length > 0) {
+              // Target weakest enemy
+              let weakestHP = 999;
+              for (let ti = 0; ti < oppBoard.length; ti++) {
+                if (oppBoard[ti].health < weakestHP) {
+                  weakestHP = oppBoard[ti].health;
+                  targetIdx = ti;
+                }
+              }
+            }
+            const atkData = await api('POST', `/api/game/${sessionId}/attack`,
+              { attacker_index: ai, target_index: targetIdx });
+            if (atkData.action_result?.success) {
+              const ar = atkData.action_result;
+              addLog(`AI: ${ar.attacker} attacks ${ar.target}`, 'damage');
+              actionsTaken++;
+              break;  // one attack per loop iteration
+            }
+          }
+        }
+      }
+
+      // If nothing was done, end turn
+      if (!played) {
+        break;
+      }
+    }
+
+    // End AI turn
+    await api('POST', `/api/game/${sessionId}/end-turn`);
+    addLog('AI ends turn.', 'turn');
+    state = await api('GET', `/api/game/${sessionId}/state`);
+
+    const myName2 = document.getElementById('player-name').value || 'Player';
+    if (state.is_over || state.active_player === myName2) {
+      await loadState();
+      return true;
+    }
+    // Otherwise it's another player's turn (shouldn't happen in 2-player)
+    await loadState();
+    return true;
+  }
+  await loadState();
+  return true;
+}
+
 async function submitEndTurn() {
   try {
     await api('POST', `/api/game/${sessionId}/end-turn`);
     addLog('Turn ended.', 'turn');
-    // AI turn — load state after a delay
+
+    // Load state and let AI play
     await loadState();
-    if (!state.is_over && state.active_player !== (document.getElementById('player-name').value || 'Player')) {
-      addLog(`${state.active_player} is thinking...`, 'turn');
-      await loadState();
+    if (!state.is_over) {
+      const myName = document.getElementById('player-name').value || 'Player';
+      if (state.active_player !== myName) {
+        addLog(`${state.active_player} is thinking...`, 'turn');
+        await autoPlayAI();
+      }
     }
   } catch (e) {
     addLog('End turn failed: ' + e.message, 'damage');
