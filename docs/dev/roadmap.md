@@ -56,8 +56,17 @@ Goal: Play against a heuristic AI opponent.
 - [x] 19 new tests covering AI behavior, scoring, and full game completion
 - [x] CLI updated with mode selector: 2-player or vs AI
 
-## Phase 5: Web Playable Prototype [PENDING]
+## Phase 5: Web Playable Prototype [COMPLETE]
 Goal: Browser-based UI with FastAPI backend.
+
+- [x] FastAPI server with REST API for all game actions
+- [x] In-memory session management (create/play/attack/end-turn)
+- [x] Dark-themed HTML/CSS/JS frontend (no build step)
+- [x] Faction selection screen, card rendering, board display
+- [x] Click-to-play cards, click-to-attack, end turn
+- [x] Game log, turn info, player stats display
+- [x] 14 new server tests (127 total)
+- [x] Run with: uvicorn server.app:app --reload --port 8080
 
 ## Phase 6: Playtest & Iterate [PENDING]
 Goal: Balance tuning based on real games.

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conspiracy TCG</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>CONSPIRACY TCG</h1>
+      <div class="subtitle">Three factions. One world. No mercy.</div>
+    </header>
+
+    <!-- Landing / setup screen -->
+    <div id="landing">
+      <h2>Choose Your Faction</h2>
+      <div class="faction-select">
+        <div class="faction-btn illuminati" data-faction="illuminati" onclick="selectFaction(this)">
+          <span class="icon">&#9760;</span>
+          <span class="name">Illuminati</span>
+          <span class="energy-type">Influence</span>
+        </div>
+        <div class="faction-btn templars" data-faction="templars" onclick="selectFaction(this)">
+          <span class="icon">&#9770;</span>
+          <span class="name">Templars</span>
+          <span class="energy-type">Faith</span>
+        </div>
+        <div class="faction-btn reptilians" data-faction="reptilians" onclick="selectFaction(this)">
+          <span class="icon">&#9650;</span>
+          <span class="name">Reptilians</span>
+          <span class="energy-type">Psionics</span>
+        </div>
+      </div>
+      <div style="margin: 12px 0;">
+        <input type="text" id="player-name" placeholder="Your name (optional)"
+               style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);
+                      background: var(--bg-card); color: var(--text-primary); width: 220px;">
+      </div>
+      <button class="primary" onclick="startGame()" style="font-size: 1em; padding: 12px 32px;">
+        Begin Game
+      </button>
+    </div>
+
+    <!-- Game screen (hidden initially) -->
+    <div id="game-screen" style="display:none;">
+      <div id="turn-info"></div>
+
+      <div id="game-board">
+        <!-- Opponent section -->
+        <div class="player-section" id="opponent-section">
+          <div class="player-header">
+            <span class="player-name" id="opponent-name"></span>
+            <div class="player-stats" id="opponent-stats"></div>
+          </div>
+          <div class="hand-label">Hand (<span id="opponent-hand-count">0</span>)</div>
+          <div class="hand" id="opponent-hand"></div>
+          <div class="board-label">Board</div>
+          <div class="board" id="opponent-board"></div>
+        </div>
+
+        <!-- Player section -->
+        <div class="player-section active" id="player-section">
+          <div class="player-header">
+            <span class="player-name" id="player-name-display"></span>
+            <div class="player-stats" id="player-stats"></div>
+          </div>
+          <div class="board-label">Board</div>
+          <div class="board" id="player-board"></div>
+          <div class="hand-label">Hand</div>
+          <div class="hand" id="player-hand"></div>
+        </div>
+      </div>
+
+      <div id="actions">
+        <button id="btn-play" class="primary" onclick="submitPlay()" disabled>Play Card</button>
+        <button id="btn-attack" onclick="submitAttack()" disabled>Attack</button>
+        <button id="btn-end-turn" onclick="submitEndTurn()">End Turn</button>
+      </div>
+
+      <div id="log"></div>
+
+      <!-- Game over overlay -->
+      <div id="game-over" style="display:none;">
+        <h2 id="game-over-text"></h2>
+        <p id="game-over-sub"></p>
+        <button class="primary" onclick="location.reload()" style="margin-top: 16px;">
+          Play Again
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

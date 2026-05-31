@@ -335,6 +335,8 @@ class Game:
                     "board": [
                         {
                             "name": c.name,
+                            "cost": c.cost,
+                            "faction": c.card.faction.value if hasattr(c.card, 'faction') else '',
                             "attack": c.current_attack,
                             "health": c.current_health,
                             "alive": c.is_alive,
@@ -342,8 +344,21 @@ class Game:
                             "stealth": c.is_stealth,
                             "silenced": c.is_silenced,
                             "taunt": c.has_taunt,
+                            "damage_taken": c.damage_taken,
                         }
                         for c in p.board
+                    ],
+                    "hand": [
+                        {
+                            "name": c.name,
+                            "cost": c.cost,
+                            "faction": c.faction.value if hasattr(c, 'faction') else '',
+                            "type": c.type.value if hasattr(c, 'type') else '',
+                            "lore": c.lore,
+                            **({"attack": c.attack, "health": c.health, "ability": c.ability} if c.type.value == "Character" else {}),
+                            **({"effect": c.effect} if c.type.value in ("Spell", "Location") else {}),
+                        }
+                        for c in p.hand
                     ],
                     "location": (
                         None if p.location is None else {"name": p.location.name}
