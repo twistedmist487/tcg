@@ -130,5 +130,167 @@
     "energy_type": "Psionics",
     "effect": "Your Reptilian characters gain 'When this character attacks, draw a card.'",
     "lore": "A nexus of alien activity, buzzing with silent intent."
+  },
+  {
+    "id": "illuminati_char_003",
+    "name": "Corporate Gauntlet",
+    "type": "Character",
+    "faction": "illuminati",
+    "cost": 5,
+    "energy_type": "Influence",
+    "attack": 4,
+    "health": 4,
+    "ability": "Enemy characters cost (1) more Influence to play.",
+    "lore": "The invisible fist that guides every election, every war, every market crash."
+  },
+  {
+    "id": "illuminati_char_004",
+    "name": "PR Operative",
+    "type": "Character",
+    "faction": "illuminati",
+    "cost": 2,
+    "energy_type": "Influence",
+    "attack": 2,
+    "health": 2,
+    "ability": "When this character attacks, gain 1 Influence.",
+    "lore": "A smile that conceals a dagger, a pen that signs away nations."
+  },
+  {
+    "id": "illuminati_spell_002",
+    "name": "Black Budget",
+    "type": "Spell",
+    "faction": "illuminati",
+    "cost": 3,
+    "energy_type": "Influence",
+    "effect": "Draw 2 cards. Each player discards 1 card.",
+    "lore": "Where the money flows, the truth drowns."
+  },
+  {
+    "id": "illuminati_spell_003",
+    "name": "Manchurian Protocol",
+    "type": "Spell",
+    "faction": "illuminati",
+    "cost": 6,
+    "energy_type": "Influence",
+    "effect": "Take control of an enemy character with 3 or less Attack. It gains +2 Attack.",
+    "lore": "The perfect soldier doesn't know they're programmed."
+  },
+  {
+    "id": "illuminati_loc_002",
+    "name": "Bilderberg Estate",
+    "type": "Location",
+    "faction": "illuminati",
+    "cost": 6,
+    "energy_type": "Influence",
+    "effect": "At the end of your turn, if you control more characters than your opponent, draw a card.",
+    "lore": "The most important meeting you've never been invited to."
+  },
+  {
+    "id": "templars_char_003",
+    "name": "Exorcist",
+    "type": "Character",
+    "faction": "templars",
+    "cost": 4,
+    "energy_type": "Faith",
+    "attack": 3,
+    "health": 3,
+    "ability": "Destroyed enemy characters cannot be resurrected or returned to hand.",
+    "lore": "Some doors, once opened, can never be closed. She makes sure of it."
+  },
+  {
+    "id": "templars_char_004",
+    "name": "Relic Keeper",
+    "type": "Character",
+    "faction": "templars",
+    "cost": 3,
+    "energy_type": "Faith",
+    "attack": 2,
+    "health": 4,
+    "ability": "Taunt. When this character is damaged, deal 1 damage to a random enemy character.",
+    "lore": "The old relics whisper secrets to those who bleed for them."
+  },
+  {
+    "id": "templars_spell_002",
+    "name": "Holy Inquisition",
+    "type": "Spell",
+    "faction": "templars",
+    "cost": 5,
+    "energy_type": "Faith",
+    "effect": "Silence and deal 3 damage to an enemy character.",
+    "lore": "Truth is a blade — it cuts both ways."
+  },
+  {
+    "id": "templars_spell_003",
+    "name": "Absolution",
+    "type": "Spell",
+    "faction": "templars",
+    "cost": 1,
+    "energy_type": "Faith",
+    "effect": "Restore 5 Health to your hero or a character. Draw a card.",
+    "lore": "Even the damned deserve a second prayer."
+  },
+  {
+    "id": "templars_loc_002",
+    "name": "Holy Grail Sanctum",
+    "type": "Location",
+    "faction": "templars",
+    "cost": 5,
+    "energy_type": "Faith",
+    "effect": "At the start of your turn, if you have a damaged character, restore 2 Health to it.",
+    "lore": "The cup that grants eternity — to those pure enough to drink."
+  },
+  {
+    "id": "reptilians_char_003",
+    "name": "Xenomorph Drone",
+    "type": "Character",
+    "faction": "reptilians",
+    "cost": 3,
+    "energy_type": "Psionics",
+    "attack": 2,
+    "health": 4,
+    "ability": "When this character destroys an enemy character, gain +1/+1.",
+    "lore": "It learns from every kill. Every death feeds the swarm."
+  },
+  {
+    "id": "reptilians_char_004",
+    "name": "Abduction Specialist",
+    "type": "Character",
+    "faction": "reptilians",
+    "cost": 4,
+    "energy_type": "Psionics",
+    "attack": 3,
+    "health": 3,
+    "ability": "When played, return an enemy character with 3 or less Attack to its owner's hand.",
+    "lore": "They vanish into the light between the stars."
+  },
+  {
+    "id": "reptilians_spell_002",
+    "name": "Ancient Star Map",
+    "type": "Spell",
+    "faction": "reptilians",
+    "cost": 3,
+    "energy_type": "Psionics",
+    "effect": "Deal 2 damage to all enemy characters. Draw a card.",
+    "lore": "The constellation that should not exist — points the way home."
+  },
+  {
+    "id": "reptilians_spell_003",
+    "name": "Orbital Strike",
+    "type": "Spell",
+    "faction": "reptilians",
+    "cost": 7,
+    "energy_type": "Psionics",
+    "effect": "Deal 6 damage to an enemy character. Deal 3 damage to all other enemy characters.",
+    "lore": "From orbit, no one hears them scream."
+  },
+  {
+    "id": "reptilians_loc_002",
+    "name": "Underground Ant Colony",
+    "type": "Location",
+    "faction": "reptilians",
+    "cost": 5,
+    "energy_type": "Psionics",
+    "effect": "Your Reptilian characters gain +1 Attack. When one of your characters dies, draw a card.",
+    "lore": "Beneath the bedrock, the hive mind stirs — patient, ancient, hungry."
   }
 ]
