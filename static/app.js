@@ -136,17 +136,19 @@ function render() {
   }
 
   // Button logic:
-  // - Start Turn: shown when it's your turn AND (no energy yet OR you just started)
-  // - Play/Attack: shown when it's your turn AND you have energy
-  // - End Turn: shown when it's your turn after starting
+  // - Start Turn: shown when it's your turn and energy == 0 (turn not started yet)
+  // - Play Card: shown when it's your turn and can afford at least one card
+  // - Attack: shown when it's your turn and has a character that can attack
+  // - End Turn: shown when it's your turn after starting (energy > 0)
   const turnStarted = me && me.energy > 0;
-  const canAct = isMyTurn && !state.is_over && turnStarted;
+  const canAffordCard = isMyTurn && me && me.hand && me.hand.some(c => me.energy >= c.cost);
+  const canAttack = isMyTurn && me && me.board && me.board.some(c => c.current_attack > 0 && !c.exhausted);
 
   document.getElementById('btn-start-turn').style.display = (isMyTurn && !turnStarted) ? 'inline-block' : 'none';
   document.getElementById('btn-play').style.display = (isMyTurn && turnStarted) ? 'inline-block' : 'none';
-  document.getElementById('btn-play').disabled = !canAct;
+  document.getElementById('btn-play').disabled = !canAffordCard;
   document.getElementById('btn-attack').style.display = (isMyTurn && turnStarted) ? 'inline-block' : 'none';
-  document.getElementById('btn-attack').disabled = !canAct;
+  document.getElementById('btn-attack').disabled = !canAttack;
   document.getElementById('btn-end-turn').style.display = (isMyTurn && turnStarted) ? 'inline-block' : 'none';
   document.getElementById('btn-end-turn').disabled = !isMyTurn;
 
