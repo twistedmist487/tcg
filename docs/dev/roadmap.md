@@ -83,21 +83,18 @@ Goal: Cards that actually do something when played.
 
 ---
 
-## Phase 7: Content Expansion [PENDING]
+## Phase 7: Content Expansion [IN PROGRESS]
 Goal: Make decks feel complete and gameplay more varied.
 
-**More Cards (40+ per faction, 120+ total):**
-- 10+ new cards per faction (30+ new total)
-- Fill gameplay gaps: Illuminati (more discard/control), Templars (more healing/buffs), Reptilians (more stealth/swarm)
-- Neutral cards usable by any faction (5-10)
-- Higher cost cards (7-10 mana) for late-game impact
-- New card mechanics: Charge (attack same turn), Deathrattle (on-death effect), Combo
-- Each faction gets a Legendary character (cost 8+, powerful unique effect)
-
-**Deck Builder Improvements:**
-- Auto-generated balanced decks per faction (30 cards, max 3 copies)
-- Deck validation: enforce single faction, 30 cards, max 3 copies
-- Mulligan system (redraw starting hand)
+**Completed:**
+- [x] 10+ new cards per faction (30+ new total, 90 cards / 30 per faction)
+- [x] Fill gameplay gaps: Illuminati (more discard/control/stealth), Templars (more healing/buffs/charge), Reptilians (more stealth/swarm/summon)
+- [x] Higher cost cards (7-10 mana) for late-game impact — 3 new legendaries
+- [x] New card mechanics: Charge, Deathrattle (on-death summon), Stealth assassins
+- [x] Each faction gets a Legendary character (cost 8-10, powerful unique effect)
+- [x] Curated 30-card faction decks in data/decks.json
+- [x] Deck validation: enforce 30 cards, single faction, max 3 copies
+- [x] Mulligan system (redraw starting hand before first turn)
 
 **Balancing Pass:**
 - Playtesting with AI to identify overpowered/undercosted cards
@@ -155,6 +152,7 @@ Goal: Make the game feel complete and replayable.
 
 ---
 
-*Total tests: 166 (as of Phase 6 completion)*
-*Total cards: 27 (to be expanded in Phase 7)*
-*Total code files: 29 Python + 3 frontend*
+*Total tests: 197 (as of Phase 7 content expansion)*
+*Total cards: 90 (30 per faction: 14 chars, 10 spells, 6 locs)*
+*Total code files: 31 Python + 3 frontend*
+*Curated 30-card faction decks in data/decks.json*

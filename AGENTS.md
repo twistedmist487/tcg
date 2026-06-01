@@ -326,15 +326,22 @@ The game draws thematic inspiration from Robert Storey's "Ancient Origins" ficti
 
 ## Deck Building
 
-Each faction now has 21 unique cards (10 characters, 7 spells, 4 locations). Decks are 30 cards built from a single faction with max 3 copies per card. The auto-builder in server/session.py cycles through available cards to fill a 30-card deck.
+Each faction has 30 unique cards pool (14 characters, 10 spells, 6 locations). Curated 30-card faction decks are defined in data/decks.json with balanced mana curves. The server/session.py loads these by card ID, validates 30-card count / single faction / max 3 copies, and falls back to auto-build from the faction pool if needed.
 
-**Current card counts (Phase 6+expansion):**
+**Current card counts:**
 | Faction | Characters | Spells | Locations | Total |
 |---------|-----------|--------|-----------|-------|
-| Illuminati | 10 | 7 | 4 | 21 |
-| Templars | 10 | 7 | 4 | 21 |
-| Reptilians | 10 | 7 | 4 | 21 |
-| **Total** | **30** | **21** | **12** | **63** |
+| Illuminati | 14 | 10 | 6 | 30 |
+| Templars | 14 | 10 | 6 | 30 |
+| Reptilians | 14 | 10 | 6 | 30 |
+| **Total** | **42** | **30** | **18** | **90** |
+
+**Curated faction decks (data/decks.json):**
+- Illuminati Shadow Council (20C/8S/3L) — control/disruption
+- Templar Holy Host (17C/8S/5L) — defense/healing
+- Reptilian Invasion Force (17C/9S/4L) — aggro/swarm
+
+Each deck is 30 cards with max 3 copies per card. The auto-builder cycles through the faction pool taking up to 3 copies each. Mulligan system allows redrawing any number of starting hand cards once per player before turn 1.
 
 ## Game Rules Summary
 
