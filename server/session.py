@@ -8,18 +8,65 @@ ephemeral — they die when the server restarts.
 from __future__ import annotations
 
 import uuid
-from typing import Optional
 
-from engine.ai import AIPlayer, execute_turn
 from engine.game import Game
-from engine.models import load_cards
-
+from engine.models import Card, load_cards
 
 # ---------------------------------------------------------------------------
 # Session store (in-memory, ephemeral)
 # ---------------------------------------------------------------------------
 
 _sessions: dict[str, Game] = {}
+
+
+def _load_deck(faction: str) -> list[Card]:
+    """
+    Build a 30-card deck for the given faction using the curated deck list
+    in data/decks.json.
+
+    Falls back to auto-building from the faction card pool if no curated
+    deck is defined.
+    """
+    all_cards = load_cards("data/cards.json")
+    card_lookup = {c.id: c for c in all_cards}
+    faction_cards = {c.id: c for c in all_cards if c.faction.value == faction}
+
+    # Try loading curated deck
+    try:
+        import json
+        from pathlib import Path
+
+        decks_path = Path(__file__).resolve().parent.parent / "data" / "decks.json"
+        if decks_path.exists():
+            with open(decks_path) as f:
+                curated = json.load(f)
+            if faction in curated:
+                deck: list[Card] = []
+                for entry in curated[faction]["cards"]:
+                    card_id = entry["id"]
+                    copies = entry["copies"]
+                    if card_id not in card_lookup:
+                        raise ValueError(f"Deck references unknown card ID: {card_id}")
+                    for _ in range(copies):
+                        deck.append(card_lookup[card_id])
+                return deck
+    except (FileNotFoundError, KeyError, ValueError):
+        pass
+
+    # Fallback: auto-build from faction card pool
+    pool = list(faction_cards.values())
+    deck: list[Card] = []
+    idx = 0
+    max_copies = 3
+    while len(deck) < 30:
+        card = pool[idx % len(pool)]
+        copies = sum(1 for c in deck if c.id == card.id)
+        if copies < max_copies:
+            deck.append(card)
+        idx += 1
+        if idx > len(pool) * max_copies + 10:
+            break
+    return deck
 
 
 def create_session(
@@ -29,38 +76,15 @@ def create_session(
     ai_name: str = "AI",
 ) -> str:
     """Create a new game session. Returns the session ID."""
-    cards = load_cards("data/cards.json")
+    player_deck = _load_deck(player_faction)
+    ai_deck = _load_deck(ai_faction)
 
-    # Filter cards by faction
-    faction_cards = [c for c in cards if c.faction.value == player_faction]
-    ai_cards = [c for c in cards if c.faction.value == ai_faction]
-    if not faction_cards or not ai_cards:
+    if not player_deck or not ai_deck:
         raise ValueError("Invalid faction selection")
-
-    # Build decks from card pool (max 3 copies per card, up to 30 cards)
-    player_deck: list = []
-    ai_deck: list = []
-    idx = 0
-    max_copies = 3
-    while len(player_deck) < 30:
-        card = faction_cards[idx % len(faction_cards)]
-        copies = sum(1 for c in player_deck if c.id == card.id)
-        if copies < max_copies:
-            player_deck.append(card)
-        idx += 1
-        # Safety: break if we've cycled through all cards enough times
-        if idx > len(faction_cards) * max_copies + 10:
-            break
-
-    idx = 0
-    while len(ai_deck) < 30:
-        card = ai_cards[idx % len(ai_cards)]
-        copies = sum(1 for c in ai_deck if c.id == card.id)
-        if copies < max_copies:
-            ai_deck.append(card)
-        idx += 1
-        if idx > len(ai_cards) * max_copies + 10:
-            break
+    if len(player_deck) != 30:
+        raise ValueError(f"Player deck has {len(player_deck)} cards (expected 30)")
+    if len(ai_deck) != 30:
+        raise ValueError(f"AI deck has {len(ai_deck)} cards (expected 30)")
 
     game = Game.setup(player_deck, ai_deck, player_name, ai_name)
     session_id = str(uuid.uuid4())[:8]
@@ -68,7 +92,7 @@ def create_session(
     return session_id
 
 
-def get_session(session_id: str) -> Optional[Game]:
+def get_session(session_id: str) -> Game | None:
     """Get the Game for a session, or None if not found."""
     return _sessions.get(session_id)
 

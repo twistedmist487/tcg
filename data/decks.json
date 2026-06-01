@@ -1,0 +1,236 @@
+{
+  "illuminati": {
+    "name": "Illuminati Shadow Council",
+    "description": "A control-focused deck leveraging disruption, hand advantage, and resource denial to outlast opponents.",
+    "cards": [
+      {
+        "id": "illuminati_char_009",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_char_006",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_char_002",
+        "copies": 3
+      },
+      {
+        "id": "illuminati_char_004",
+        "copies": 3
+      },
+      {
+        "id": "illuminati_spell_004",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_char_001",
+        "copies": 3
+      },
+      {
+        "id": "illuminati_char_008",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_loc_003",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_spell_002",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_spell_006",
+        "copies": 1
+      },
+      {
+        "id": "illuminati_spell_001",
+        "copies": 1
+      },
+      {
+        "id": "illuminati_char_003",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_loc_001",
+        "copies": 1
+      },
+      {
+        "id": "illuminati_spell_005",
+        "copies": 1
+      },
+      {
+        "id": "illuminati_char_007",
+        "copies": 1
+      },
+      {
+        "id": "illuminati_char_010",
+        "copies": 1
+      },
+      {
+        "id": "illuminati_loc_002",
+        "copies": 1
+      }
+    ]
+  },
+  "templars": {
+    "name": "Templar Holy Host",
+    "description": "A resilient defensive deck built around healing, taunts, and powerful mid-game board presence.",
+    "cards": [
+      {
+        "id": "templars_spell_003",
+        "copies": 2
+      },
+      {
+        "id": "templars_char_009",
+        "copies": 2
+      },
+      {
+        "id": "templars_char_006",
+        "copies": 3
+      },
+      {
+        "id": "templars_char_002",
+        "copies": 3
+      },
+      {
+        "id": "templars_spell_005",
+        "copies": 2
+      },
+      {
+        "id": "templars_spell_001",
+        "copies": 2
+      },
+      {
+        "id": "templars_char_004",
+        "copies": 2
+      },
+      {
+        "id": "templars_loc_003",
+        "copies": 3
+      },
+      {
+        "id": "templars_char_001",
+        "copies": 2
+      },
+      {
+        "id": "templars_char_007",
+        "copies": 1
+      },
+      {
+        "id": "templars_char_005",
+        "copies": 1
+      },
+      {
+        "id": "templars_loc_001",
+        "copies": 1
+      },
+      {
+        "id": "templars_spell_002",
+        "copies": 1
+      },
+      {
+        "id": "templars_spell_006",
+        "copies": 1
+      },
+      {
+        "id": "templars_char_008",
+        "copies": 1
+      },
+      {
+        "id": "templars_char_010",
+        "copies": 1
+      },
+      {
+        "id": "templars_loc_002",
+        "copies": 1
+      },
+      {
+        "id": "templars_char_003",
+        "copies": 1
+      }
+    ]
+  },
+  "reptilians": {
+    "name": "Reptilian Invasion Force",
+    "description": "An aggressive swarm deck using stealth, card draw, and psionics to overwhelm opponents quickly.",
+    "cards": [
+      {
+        "id": "reptilians_char_007",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_spell_004",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_char_009",
+        "copies": 3
+      },
+      {
+        "id": "reptilians_spell_001",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_char_005",
+        "copies": 3
+      },
+      {
+        "id": "reptilians_char_001",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_char_003",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_char_008",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_loc_003",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_spell_002",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_char_006",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_spell_006",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_loc_001",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_char_004",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_spell_005",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_char_002",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_loc_002",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_spell_003",
+        "copies": 1
+      },
+      {
+        "id": "reptilians_char_010",
+        "copies": 1
+      }
+    ]
+  }
+}
