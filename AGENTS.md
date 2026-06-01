@@ -23,12 +23,12 @@ UI dependencies -- CLI, web UI, and AI all wrap around the same engine.
 | 2 | Game engine (Game, Player, CardInstance, Combat, Keywords) | COMPLETE |
 | 3 | Card expansion (27 cards, 9 per faction) | COMPLETE |
 | 4 | Heuristic AI opponent with faction weights | COMPLETE |
-| 5 | FastAPI web server + browser UI | COMPLETE |
-| 6 | Spell & location effect resolution engine | PENDING |
-| 7 | Deck builder + WebSocket online multiplayer | PENDING |
-| 8 | Content expansion (120+ cards) & polish | PENDING |
+|| 5 | FastAPI web server + browser UI | COMPLETE |
+|| 6 | Spell & location effect resolution engine | COMPLETE |
+|| 7 | Deck builder + WebSocket online multiplayer | PENDING |
+|| 8 | Content expansion (120+ cards) & polish | PENDING |
 
-**Stats:** 127 tests, 27 cards, 27 Python source files, 3 frontend files
+**Stats:** 166 tests, 63 cards (21 per faction), 29 Python source files, 3 frontend files
 
 ## Directory Layout
 
@@ -322,7 +322,19 @@ The game draws thematic inspiration from Robert Storey's "Ancient Origins" ficti
 - Ancient orders protecting relics (Templars)
 - Alien infiltration and mind control (Reptilians)
 
-The tone is dark, conspiratorial, and blends sci-fi with ancient mystery.
+*The tone is dark, conspiratorial, and blends sci-fi with ancient mystery.
+
+## Deck Building
+
+Each faction now has 21 unique cards (10 characters, 7 spells, 4 locations). Decks are 30 cards built from a single faction with max 3 copies per card. The auto-builder in server/session.py cycles through available cards to fill a 30-card deck.
+
+**Current card counts (Phase 6+expansion):**
+| Faction | Characters | Spells | Locations | Total |
+|---------|-----------|--------|-----------|-------|
+| Illuminati | 10 | 7 | 4 | 21 |
+| Templars | 10 | 7 | 4 | 21 |
+| Reptilians | 10 | 7 | 4 | 21 |
+| **Total** | **30** | **21** | **12** | **63** |
 
 ## Game Rules Summary
 

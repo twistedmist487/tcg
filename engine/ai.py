@@ -18,12 +18,10 @@ import math
 from typing import Any
 
 from engine.card import CardInstance
-from engine.combat import can_attack_player_directly, get_valid_attack_targets
 from engine.game import Game
 from engine.keywords import has_taunt
 from engine.models import Card
 from engine.player import Player
-
 
 # ---------------------------------------------------------------------------
 # Faction weight presets
@@ -64,6 +62,7 @@ FACTION_WEIGHTS: dict[str, dict[str, float]] = {
 # AIPlayer configuration
 # ---------------------------------------------------------------------------
 
+
 class AIPlayer:
     """
     Configuration for an AI player.
@@ -84,7 +83,9 @@ class AIPlayer:
         self.name = name
         self.faction = faction
         self.aggression = max(0.0, min(1.0, aggression))
-        self.weights: dict[str, float] = dict(FACTION_WEIGHTS.get(faction, FACTION_WEIGHTS["illuminati"]))
+        self.weights: dict[str, float] = dict(
+            FACTION_WEIGHTS.get(faction, FACTION_WEIGHTS["illuminati"])
+        )
         # Adjust weights based on aggression
         self.weights["face_damage"] *= 0.5 + aggression
         self.weights["taunt_value"] *= 1.5 - aggression
@@ -93,6 +94,7 @@ class AIPlayer:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def choose_action(game: Game) -> dict[str, Any]:
     """
@@ -110,7 +112,7 @@ def choose_action(game: Game) -> dict[str, Any]:
     best_score: float = score_action(game, best_action)
 
     # Score all possible card plays
-    for i, card in enumerate(player.hand):
+    for i, _card in enumerate(player.hand):
         action = {"action": "play", "card_index": i}
         score = score_action(game, action)
         if score > best_score:
@@ -177,7 +179,9 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
             result = game.play_card(action["card_index"])
             results.append({"action": "play", "result": result})
             if not result.get("success"):
-                # If play failed, don't try the same thing again
+                # If play failed, end turn rather than breaking silently
+                result = game.end_turn()
+                results.append({"action": "end_turn", "result": result})
                 break
         elif action["action"] == "attack":
             result = game.attack(
@@ -190,6 +194,11 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
 
         if game.is_over:
             break
+    else:
+        # Safety: if we hit max_actions without ending, force end turn
+        if not game.is_over:
+            result = game.end_turn()
+            results.append({"action": "end_turn", "result": result})
 
     return results
 
@@ -200,9 +209,6 @@ def score_action(game: Game, action: dict[str, Any]) -> float:
 
     Returns -inf for invalid/unplayable actions.
     """
-    player = game.active_player
-    opponent = game.inactive_player
-
     if action["action"] == "end_turn":
         return _score_end_turn(game)
     elif action["action"] == "play":
@@ -215,6 +221,7 @@ def score_action(game: Game, action: dict[str, Any]) -> float:
 # ---------------------------------------------------------------------------
 # Scoring functions
 # ---------------------------------------------------------------------------
+
 
 def _score_end_turn(game: Game) -> float:
     """Score ending the turn. Baseline — only do this when nothing better."""
@@ -284,7 +291,12 @@ def _score_character_card(game: Game, card: Card) -> float:
     score = 0.0
 
     # Board presence
-    score += FACTION_WEIGHTS.get(player.board_size < 7 and "illuminati" or "illuminati", {}).get("board_presence", 1.0) * 2.0
+    score += (
+        FACTION_WEIGHTS.get(player.board_size < 7 and "illuminati" or "illuminati", {}).get(
+            "board_presence", 1.0
+        )
+        * 2.0
+    )
 
     # Stats value: (attack + health) relative to cost
     if hasattr(card, "attack") and hasattr(card, "health"):
@@ -339,9 +351,7 @@ def _score_location_card(game: Game, card: Card) -> float:
     return score
 
 
-def _score_attack(
-    game: Game, attacker_index: int, target_index: int | None
-) -> float:
+def _score_attack(game: Game, attacker_index: int, target_index: int | None) -> float:
     """Score a specific attack action."""
     player = game.active_player
     opponent = game.inactive_player
@@ -420,9 +430,12 @@ def _score_character_attack(
         score += 1.5
 
     # Prefer not to waste stealth on bad trades
-    if attacker.is_stealth and attacker.current_attack < defender.current_health:
-        if defender.current_attack >= attacker.current_health:
-            score -= 1.0  # Bad stealth trade
+    if (
+        attacker.is_stealth
+        and attacker.current_attack < defender.current_health
+        and defender.current_attack >= attacker.current_health
+    ):
+        score -= 1.0  # Bad stealth trade
 
     return score
 

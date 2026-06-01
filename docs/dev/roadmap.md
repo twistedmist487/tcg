@@ -68,70 +68,71 @@ Goal: Browser-based UI with FastAPI backend.
 - [x] 14 new server tests (127 total)
 - [x] Run with: uvicorn server.app:app --port 8080
 
----
-
-## Phase 6: Spell & Location Resolution [PENDING]
+## Phase 6: Spell & Location Resolution [COMPLETE]
 Goal: Cards that actually do something when played.
 
-Currently spells and locations are played but their effects are not resolved — they just spend energy and discard. This phase implements the card effect engine so that every card in the pool has a meaningful, working ability.
-
-**What needs building:**
-- `engine/effects.py` — effect resolution system (damage, heal, draw, silence, buff, debuff, bounce, destroy, etc.)
-- Effect parser that reads card ability/effect text and dispatches to the right handler
-- Trigger system for "when played", "on attack", "start of turn", "on death" effects
-- Location persistence and ongoing effect application
-- Update all 27 cards to have proper effects reflected in gameplay
-- Balancing pass after effects are live
-
-**Example effects to implement:**
-- Direct damage spells (Neural Scramble: -2 ATK, Divine Smite: 4 damage)
-- AOE (Orbital Strike: 6 to target + 3 to others)
-- Card draw (Black Budget: draw 2, each discards 1)
-- Mind control (Manchurian Protocol: take control of enemy)
-- Healing (Absolution: restore 5 HP)
-- Stat buffs/debuffs (Corporate Gauntlet: enemy cards cost +1)
-- Taunt activation (Templar Guardian, Relic Keeper)
-- Stealth activation (Shape-Shifter Infiltrator)
-- Location effects (Sacred Chapel: heal 1 each turn)
-
-**Tests:** ~20 new tests for effect resolution
+- [x] engine/effects.py -- effect resolution system (damage, heal, draw, silence, buff, debuff, bounce, destroy, mind control)
+- [x] Spell dispatcher that reads card effect text and routes to handlers
+- [x] Trigger system: on-play character abilities, start-of-turn location effects, end-of-turn location effects, ongoing auras
+- [x] All 27 existing cards resolve effects in gameplay
+- [x] Integrated into Game.play_card(), start_turn(), end_turn()
+- [x] Added spell_target_index parameter to play_card for targeted spells
+- [x] Fixed AI execute_turn to always end turn even on failed plays
+- [x] 39 new tests for effect resolution (166 total)
+- [x] Real card effects: Divine Smite deals 4 damage, Media Blackout silences all, Sacred Chapel heals 1 each turn, etc.
 
 ---
 
-## Phase 7: Deck Builder & Matchmaking [PENDING]
+## Phase 7: Content Expansion [PENDING]
+Goal: Make decks feel complete and gameplay more varied.
+
+**More Cards (40+ per faction, 120+ total):**
+- 10+ new cards per faction (30+ new total)
+- Fill gameplay gaps: Illuminati (more discard/control), Templars (more healing/buffs), Reptilians (more stealth/swarm)
+- Neutral cards usable by any faction (5-10)
+- Higher cost cards (7-10 mana) for late-game impact
+- New card mechanics: Charge (attack same turn), Deathrattle (on-death effect), Combo
+- Each faction gets a Legendary character (cost 8+, powerful unique effect)
+
+**Deck Builder Improvements:**
+- Auto-generated balanced decks per faction (30 cards, max 3 copies)
+- Deck validation: enforce single faction, 30 cards, max 3 copies
+- Mulligan system (redraw starting hand)
+
+**Balancing Pass:**
+- Playtesting with AI to identify overpowered/undercosted cards
+- Adjust stats and costs based on win rates
+
+---
+
+## Phase 8: Deck Builder & Matchmaking [PENDING]
 Goal: Build custom decks and play against other humans online.
 
-**Deck Builder:**
-- Web UI for selecting cards from your collection
-- Enforce deck rules: 30 cards max, 3 copies per card, single faction
+**Deck Builder UI:**
+- Web UI for selecting cards from collection
+- Filter by faction, cost, type, keyword
 - Save/load deck configurations as JSON
-- Mulligan system (redraw starting hand)
+- Deck naming and sharing
 
 **Online Play:**
 - WebSocket-based real-time multiplayer (replaces REST polling)
 - Game lobby: create/join rooms, faction selection
-- Matchmaking queue (random opponent)
+- Matchmaking queue (random opponent by faction preference)
 - Spectator mode (watch ongoing games)
 - Chat between players
 - Reconnection handling (resume dropped games)
 - Game history and replay viewer
 
 **Backend changes:**
-- `server/websocket.py` — WebSocket endpoint for real-time game state broadcast
-- `server/lobby.py` — room management, matchmaking queue, player sessions
+- server/websocket.py -- WebSocket endpoint for real-time game state broadcast
+- server/lobby.py -- room management, matchmaking queue, player sessions
 - Database layer (SQLite) for persistent decks, game history, player profiles
 - Authentication (simple token-based) for player accounts
 
 ---
 
-## Phase 8: Content Expansion & Polish [PENDING]
+## Phase 9: Polish & Visual Improvements [PENDING]
 Goal: Make the game feel complete and replayable.
-
-**More Cards:**
-- 12-15 more cards per faction (40+ total per faction, 120+ overall)
-- New card mechanics: Charge (can attack same turn), Deathrattle, Secrets, Combo
-- Legendary cards (1 per faction, powerful unique effects)
-- Neutral cards usable by any faction
 
 **AI Improvements:**
 - Multiple AI difficulty levels (Easy, Medium, Hard)
@@ -143,17 +144,17 @@ Goal: Make the game feel complete and replayable.
 - Damage animations, play effects, turn transitions
 - Sound effects (optional, browser-based)
 - Responsive mobile-friendly layout
-- Keyboard shortcuts for CLI mode
 
 **Quality of Life:**
+- Keyboard shortcuts
 - Undo last action (single-player only)
 - Game speed settings
-- Export/import game state for debugging
 - Comprehensive help/tutorial page
 - Card collection browser with search/filter
+- Export/import game state for debugging
 
 ---
 
-*Total tests: 127 (as of Phase 5 completion)*
-*Total cards: 27*
-*Total code files: 27 Python + 3 frontend*
+*Total tests: 166 (as of Phase 6 completion)*
+*Total cards: 27 (to be expanded in Phase 7)*
+*Total code files: 29 Python + 3 frontend*

@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import random
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 
 from engine.models import load_cards
@@ -28,7 +28,7 @@ from server.session import (
 # App setup
 # ---------------------------------------------------------------------------
 
-app = FastAPI(title="Conspiracy TCG", version="0.5.0")
+app = FastAPI(title="Conspiracy TCG", version="0.6.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,6 +45,7 @@ if static_dir.exists():
 # ---------------------------------------------------------------------------
 # Card data endpoint (for frontend card display)
 # ---------------------------------------------------------------------------
+
 
 @app.get("/api/cards")
 def get_cards() -> list[dict[str, Any]]:
@@ -66,9 +67,7 @@ def get_cards() -> list[dict[str, Any]]:
             d["attack"] = card.attack  # type: ignore
             d["health"] = card.health  # type: ignore
             d["ability"] = card.ability  # type: ignore
-        elif ctype == "Spell":
-            d["effect"] = card.effect  # type: ignore
-        elif ctype == "Location":
+        elif ctype == "Spell" or ctype == "Location":
             d["effect"] = card.effect  # type: ignore
         result.append(d)
     return result
@@ -78,12 +77,13 @@ def get_cards() -> list[dict[str, Any]]:
 # Game session endpoints
 # ---------------------------------------------------------------------------
 
+
 @app.post("/api/game/new")
 def new_game(
     player_name: str = "Player",
     player_faction: str = "illuminati",
     ai_faction: str = "templars",
-    ai_name: Optional[str] = None,
+    ai_name: str | None = None,
 ) -> dict[str, Any]:
     """Create a new game session."""
     if player_faction == ai_faction:
@@ -130,12 +130,14 @@ def start_turn(session_id: str) -> dict[str, Any]:
 
 
 @app.post("/api/game/{session_id}/play")
-def play_card(session_id: str, card_index: int) -> dict[str, Any]:
+def play_card(
+    session_id: str, card_index: int, spell_target_index: int | None = None
+) -> dict[str, Any]:
     """Play a card from hand."""
     game = get_session(session_id)
     if game is None:
         raise HTTPException(status_code=404, detail="Session not found")
-    result = game.play_card(card_index)
+    result = game.play_card(card_index, spell_target_index=spell_target_index)
     return {"action_result": result, "state": game.get_state()}
 
 
@@ -143,7 +145,7 @@ def play_card(session_id: str, card_index: int) -> dict[str, Any]:
 def attack(
     session_id: str,
     attacker_index: int,
-    target_index: Optional[int] = None,
+    target_index: int | None = None,
 ) -> dict[str, Any]:
     """Declare an attack."""
     game = get_session(session_id)
@@ -179,6 +181,7 @@ def get_sessions() -> list[str]:
 # ---------------------------------------------------------------------------
 # Frontend serving
 # ---------------------------------------------------------------------------
+
 
 @app.get("/", response_class=HTMLResponse)
 def root() -> str:

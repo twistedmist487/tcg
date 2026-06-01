@@ -17,9 +17,16 @@ import random
 from typing import Any
 
 from engine.card import CardInstance
-from engine.combat import CombatResult, resolve_attack
+from engine.combat import resolve_attack
+from engine.effects import (
+    resolve_aura_effects,
+    resolve_end_of_turn_locations,
+    resolve_on_play_ability,
+    resolve_spell_effect,
+    resolve_start_of_turn_locations,
+)
 from engine.keywords import clear_all_exhaustion
-from engine.models import Card, load_cards
+from engine.models import Card
 from engine.player import Player
 
 
@@ -109,6 +116,8 @@ class Game:
         2. Increase max energy by 1 and refresh to full.
         3. Draw a card (except first player's first turn).
         4. Clear exhaustion from all characters.
+        5. Resolve start-of-turn location effects.
+        6. Resolve aura/ongoing effects.
 
         Returns:
             Turn-start status dict.
@@ -128,23 +137,34 @@ class Game:
         # Clear exhaustion on all characters
         clear_all_exhaustion(self, player)
 
+        # Start-of-turn location effects (healing, etc.)
+        loc_results = resolve_start_of_turn_locations(self, player)
+
+        # Aura/ongoing effects from locations and characters
+        aura_results = resolve_aura_effects(self, player)
+
         result = {
             "turn": self.turn_number,
             "player": player.name,
             "drew": drew_card.name if drew_card else None,
             "energy": player.energy,
             "max_energy": player.max_energy,
+            "location_effects": [r.to_dict() for r in loc_results],
+            "aura_effects": [r.to_dict() for r in aura_results],
         }
 
         self._log_action("turn_start", result)
         return result
 
-    def play_card(self, card_index: int) -> dict[str, Any]:
+    def play_card(self, card_index: int, spell_target_index: int | None = None) -> dict[str, Any]:
         """
         Play a card from the active player's hand.
 
         Args:
             card_index: Index into the active player's hand.
+            spell_target_index: Index into the opponent's board for targeted
+                                spells (damage, debuff, mind control, etc.).
+                                None for non-targeted spells (AOE, draw, etc.).
 
         Returns:
             Result dict with outcome info.
@@ -180,23 +200,39 @@ class Game:
                 "card": card.name,
                 "instance_id": instance.instance_id,
             }
+
+            # Resolve on-play abilities for characters
+            if card_type == "Character":
+                effect_result = resolve_on_play_ability(self, player.name, instance)
+                if effect_result is not None:
+                    result["effect"] = effect_result.to_dict()
+
         else:
-            # Spells: spend energy, remove from hand, return for effect resolution
-            # TODO: resolve spell effects in Phase 2.5
+            # Spells: spend energy, remove from hand, resolve effect
             player.hand.pop(card_index)
             player.spend_energy(card.cost)
+
+            # Resolve target instance from opponent's board if provided
+            target_instance = None
+            if spell_target_index is not None:
+                opponent = self.inactive_player
+                if 0 <= spell_target_index < len(opponent.board):
+                    target_instance = opponent.board[spell_target_index]
+
+            spell_result = resolve_spell_effect(
+                self, player.name, card, target_instance=target_instance
+            )
             result = {
-                "success": True,
+                "success": spell_result.success,
                 "action": "play_spell",
                 "card": card.name,
+                "effect": spell_result.to_dict(),
             }
 
         self._log_action("play_card", result)
         return result
 
-    def attack(
-        self, attacker_index: int, target_index: int | None = None
-    ) -> dict[str, Any]:
+    def attack(self, attacker_index: int, target_index: int | None = None) -> dict[str, Any]:
         """
         Declare an attack with one of the active player's characters.
 
@@ -284,23 +320,23 @@ class Game:
 
         self._log_action("end_turn", end_result)
 
+        # End-of-turn location effects (card draw, etc.)
+        loc_results = resolve_end_of_turn_locations(self, player)
+
         # End-of-turn cleanup (temp buffs, silence timers)
         player.end_turn_cleanup()
 
         # Switch active player
         self.active_player_index = 1 - self.active_player_index
 
+        end_result["location_effects"] = [r.to_dict() for r in loc_results]
         return end_result
 
     def _check_win_condition(self) -> None:
         """Check if either player has lost."""
         for player in self.players:
             if player.is_dead:
-                other = (
-                    self.inactive_player
-                    if player == self.active_player
-                    else self.active_player
-                )
+                other = self.inactive_player if player == self.active_player else self.active_player
                 self.winner = other.name
                 return
 
@@ -336,7 +372,7 @@ class Game:
                         {
                             "name": c.name,
                             "cost": c.cost,
-                            "faction": c.card.faction.value if hasattr(c.card, 'faction') else '',
+                            "faction": c.card.faction.value if hasattr(c.card, "faction") else "",
                             "attack": c.current_attack,
                             "health": c.current_health,
                             "alive": c.is_alive,
@@ -352,17 +388,23 @@ class Game:
                         {
                             "name": c.name,
                             "cost": c.cost,
-                            "faction": c.faction.value if hasattr(c, 'faction') else '',
-                            "type": c.type.value if hasattr(c, 'type') else '',
+                            "faction": c.faction.value if hasattr(c, "faction") else "",
+                            "type": c.type.value if hasattr(c, "type") else "",
                             "lore": c.lore,
-                            **({"attack": c.attack, "health": c.health, "ability": c.ability} if c.type.value == "Character" else {}),
-                            **({"effect": c.effect} if c.type.value in ("Spell", "Location") else {}),
+                            **(
+                                {"attack": c.attack, "health": c.health, "ability": c.ability}
+                                if c.type.value == "Character"
+                                else {}
+                            ),
+                            **(
+                                {"effect": c.effect}
+                                if c.type.value in ("Spell", "Location")
+                                else {}
+                            ),
                         }
                         for c in p.hand
                     ],
-                    "location": (
-                        None if p.location is None else {"name": p.location.name}
-                    ),
+                    "location": (None if p.location is None else {"name": p.location.name}),
                 }
                 for p in self.players
             ],
