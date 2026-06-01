@@ -47,6 +47,7 @@ class Game:
         turn_number: Current turn count (starts at 1).
         winner: Name of the winner, or None if ongoing.
         history: Log of actions taken (for replay/debugging).
+        mulligan_done: Set of player names who have completed mulligan.
     """
 
     def __init__(self, players: list[Player], first_player_index: int = 0) -> None:
@@ -55,6 +56,7 @@ class Game:
         self.turn_number: int = 0
         self.winner: str | None = None
         self.history: list[dict[str, Any]] = []
+        self.mulligan_done: set[str] = set()
 
     @classmethod
     def setup(
@@ -91,21 +93,72 @@ class Game:
 
         return game
 
-    @property
-    def active_player(self) -> Player:
-        """The player whose turn it is."""
-        return self.players[self.active_player_index]
+    def mulligan(self, player_name: str, card_indices: list[int]) -> dict[str, Any]:
+        """
+        Perform mulligan for a player: return selected cards to the deck
+        and draw replacement cards. Can only be done once per player before
+        the first turn starts.
+
+        Args:
+            player_name: Name of the player performing mulligan.
+            card_indices: Indices of cards in hand to mulligan back.
+                          Can be empty to keep the whole hand.
+
+        Returns:
+            Result dict with cards mulliganed and drawn.
+        """
+        if self.turn_number > 0:
+            return {"success": False, "error": "Mulligan is only available before the first turn"}
+
+        if player_name in self.mulligan_done:
+            return {"success": False, "error": f"{player_name} has already mulliganed"}
+
+        # Find the player
+        player = None
+        for p in self.players:
+            if p.name == player_name:
+                player = p
+                break
+        if player is None:
+            return {"success": False, "error": f"Player '{player_name}' not found"}
+
+        # Validate indices
+        if any(idx < 0 or idx >= len(player.hand) for idx in card_indices):
+            return {"success": False, "error": "Invalid hand index"}
+
+        # Remove selected cards from hand (in reverse order to preserve indices)
+        mulliganed_cards = []
+        for idx in sorted(set(card_indices), reverse=True):
+            mulliganed_cards.append(player.hand.pop(idx))
+
+        # Shuffle the returned cards back into the deck
+        player.deck.extend(mulliganed_cards)
+        player.shuffle_deck()
+
+        # Draw replacement cards
+        drawn_cards = []
+        for _ in range(len(mulliganed_cards)):
+            card = player.draw_card()
+            if card:
+                drawn_cards.append(card.name)
+
+        # Mark mulligan as done
+        self.mulligan_done.add(player_name)
+
+        result = {
+            "success": True,
+            "mulliganed": [c.name for c in mulliganed_cards],
+            "drawn": drawn_cards,
+            "player": player_name,
+            "hand_size": len(player.hand),
+        }
+        self._log_action("mulligan", result)
+        return result
 
     @property
-    def inactive_player(self) -> Player:
-        """The opponent of the active player."""
-        idx = 1 - self.active_player_index
-        return self.players[idx]
-
-    @property
-    def is_over(self) -> bool:
-        """True if the game is over (a player has died)."""
-        return self.winner is not None
+    def both_players_mulliganed(self) -> bool:
+        """True if both players have completed mulligan."""
+        return len(self.mulligan_done) >= 2
 
     def start_turn(self) -> dict[str, Any]:
         """
@@ -155,6 +208,22 @@ class Game:
 
         self._log_action("turn_start", result)
         return result
+
+    @property
+    def active_player(self) -> Player:
+        """The player whose turn it is."""
+        return self.players[self.active_player_index]
+
+    @property
+    def inactive_player(self) -> Player:
+        """The opponent of the active player."""
+        idx = 1 - self.active_player_index
+        return self.players[idx]
+
+    @property
+    def is_over(self) -> bool:
+        """True if the game is over (a player has died)."""
+        return self.winner is not None
 
     def play_card(self, card_index: int, spell_target_index: int | None = None) -> dict[str, Any]:
         """

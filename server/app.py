@@ -110,6 +110,21 @@ def new_game(
     }
 
 
+@app.post("/api/game/{session_id}/mulligan")
+def mulligan(
+    session_id: str, player_name: str, card_indices: list[int] | None = None
+) -> dict[str, Any]:
+    """Perform mulligan: return selected cards to deck and draw replacements."""
+    game = get_session(session_id)
+    if game is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    indices = card_indices or []
+    result = game.mulligan(player_name, indices)
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Mulligan failed"))
+    return {"mulligan_result": result, "state": game.get_state()}
+
+
 @app.get("/api/game/{session_id}/state")
 def get_state(session_id: str) -> dict[str, Any]:
     """Get the current game state."""
