@@ -28,7 +28,7 @@ UI dependencies -- CLI, web UI, and AI all wrap around the same engine.
 || 7 | Deck builder + WebSocket online multiplayer | PENDING |
 || 8 | Content expansion (120+ cards) & polish | PENDING |
 
-**Stats:** 166 tests, 63 cards (21 per faction), 29 Python source files, 3 frontend files
+**Stats:** 197 tests, 90 cards (30 per faction), 30 Python source files, 3 frontend files
 
 ## Directory Layout
 

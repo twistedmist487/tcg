@@ -217,7 +217,7 @@
     "cost": 5,
     "energy_type": "Faith",
     "effect": "Silence and deal 3 damage to an enemy character.",
-    "lore": "Truth is a blade — it cuts both ways."
+    "lore": "Truth is a blade \u2014 it cuts both ways."
   },
   {
     "id": "templars_spell_003",
@@ -237,7 +237,7 @@
     "cost": 5,
     "energy_type": "Faith",
     "effect": "At the start of your turn, if you have a damaged character, restore 2 Health to it.",
-    "lore": "The cup that grants eternity — to those pure enough to drink."
+    "lore": "The cup that grants eternity \u2014 to those pure enough to drink."
   },
   {
     "id": "reptilians_char_003",
@@ -271,7 +271,7 @@
     "cost": 3,
     "energy_type": "Psionics",
     "effect": "Deal 2 damage to all enemy characters. Draw a card.",
-    "lore": "The constellation that should not exist — points the way home."
+    "lore": "The constellation that should not exist \u2014 points the way home."
   },
   {
     "id": "reptilians_spell_003",
@@ -291,7 +291,7 @@
     "cost": 5,
     "energy_type": "Psionics",
     "effect": "Your Reptilian characters gain +1 Attack. When one of your characters dies, draw a card.",
-    "lore": "Beneath the bedrock, the hive mind stirs — patient, ancient, hungry."
+    "lore": "Beneath the bedrock, the hive mind stirs \u2014 patient, ancient, hungry."
   },
   {
     "id": "illuminati_char_005",
@@ -315,7 +315,7 @@
     "attack": 1,
     "health": 1,
     "ability": "When played, draw 2 cards. At the end of your turn, discard 1 card.",
-    "lore": "The truth is dangerous. She carries it anyway — for now."
+    "lore": "The truth is dangerous. She carries it anyway \u2014 for now."
   },
   {
     "id": "illuminati_char_007",
@@ -423,7 +423,7 @@
     "cost": 7,
     "energy_type": "Influence",
     "effect": "Your characters gain +1 Attack. At the end of your turn, draw a card.",
-    "lore": "Below the generals, below the politicians, below the flag — the real war is planned."
+    "lore": "Below the generals, below the politicians, below the flag \u2014 the real war is planned."
   },
   {
     "id": "templars_char_005",
@@ -495,7 +495,7 @@
     "attack": 7,
     "health": 8,
     "ability": "Taunt. Holy. At the start of your turn, restore 3 Health to all your characters.",
-    "lore": "He didn't seek the title. The title sought him — through fire, war, and revelation."
+    "lore": "He didn't seek the title. The title sought him \u2014 through fire, war, and revelation."
   },
   {
     "id": "templars_spell_004",
@@ -515,7 +515,7 @@
     "cost": 2,
     "energy_type": "Faith",
     "effect": "Give all your characters +2 Health until end of turn.",
-    "lore": "Stand together or fall alone — the Templar way since 1119."
+    "lore": "Stand together or fall alone \u2014 the Templar way since 1119."
   },
   {
     "id": "templars_spell_006",
@@ -688,5 +688,299 @@
     "energy_type": "Psionics",
     "effect": "Your Reptilian characters gain Stealth. At the end of your turn, draw a card.",
     "lore": "The signal penetrates every shield, every wall, every mind."
+  },
+  {
+    "id": "illuminati_char_011",
+    "name": "Rogue Agent",
+    "type": "Character",
+    "faction": "illuminati",
+    "cost": 3,
+    "energy_type": "Influence",
+    "attack": 3,
+    "health": 2,
+    "ability": "Stealth. When this character destroys an enemy character, gain 1 Influence.",
+    "lore": "He answers to no flag. Only to the envelope of unmarked bills."
+  },
+  {
+    "id": "illuminati_char_012",
+    "name": "Propaganda Minister",
+    "type": "Character",
+    "faction": "illuminati",
+    "cost": 4,
+    "energy_type": "Influence",
+    "attack": 3,
+    "health": 5,
+    "ability": "At the end of your turn, silence a random enemy character.",
+    "lore": "The pen is mightier than the sword. The broadcast tower is mightier than both."
+  },
+  {
+    "id": "illuminati_char_013",
+    "name": "Assassin",
+    "type": "Character",
+    "faction": "illuminati",
+    "cost": 6,
+    "energy_type": "Influence",
+    "attack": 5,
+    "health": 3,
+    "ability": "Stealth. When this character attacks an enemy character, destroy it immediately.",
+    "lore": "The cleanest kills look like accidents. The best ones look like nothing happened at all."
+  },
+  {
+    "id": "illuminati_char_014",
+    "name": "Inside Man",
+    "type": "Character",
+    "faction": "illuminati",
+    "cost": 4,
+    "energy_type": "Influence",
+    "attack": 3,
+    "health": 4,
+    "ability": "When played, force opponent to discard a random card from their hand.",
+    "lore": "He's been on the inside for twelve years. He doesn't remember which side he started on."
+  },
+  {
+    "id": "illuminati_spell_008",
+    "name": "Wiretap",
+    "type": "Spell",
+    "faction": "illuminati",
+    "cost": 1,
+    "energy_type": "Influence",
+    "effect": "Look at opponent's hand. Give a card in their hand +2 cost until end of turn.",
+    "lore": "Every phone is a microphone. Every microphone is an opportunity."
+  },
+  {
+    "id": "illuminati_spell_009",
+    "name": "Bailout",
+    "type": "Spell",
+    "faction": "illuminati",
+    "cost": 2,
+    "energy_type": "Influence",
+    "effect": "Restore 3 Health to your hero. Draw a card.",
+    "lore": "The banks get bailouts. The people get breadcrumbs. The Illuminati get both."
+  },
+  {
+    "id": "illuminati_spell_010",
+    "name": "Oath of Silence",
+    "type": "Spell",
+    "faction": "illuminati",
+    "cost": 5,
+    "energy_type": "Influence",
+    "effect": "Silence two enemy characters. Draw a card.",
+    "lore": "The most dangerous secrets are the ones everyone knows but no one speaks."
+  },
+  {
+    "id": "illuminati_loc_005",
+    "name": "Embassy Safehouse",
+    "type": "Location",
+    "faction": "illuminati",
+    "cost": 6,
+    "energy_type": "Influence",
+    "effect": "Your characters gain Stealth until end of turn.",
+    "lore": "Diplomatic immunity extends further than you think."
+  },
+  {
+    "id": "illuminati_loc_006",
+    "name": "Federal Reserve Vault",
+    "type": "Location",
+    "faction": "illuminati",
+    "cost": 2,
+    "energy_type": "Influence",
+    "effect": "At the end of your turn, gain 1 Influence if you control more characters.",
+    "lore": "The real vault isn't underground. It's in the books."
+  },
+  {
+    "id": "templars_char_011",
+    "name": "Healing Seraph",
+    "type": "Character",
+    "faction": "templars",
+    "cost": 5,
+    "energy_type": "Faith",
+    "attack": 3,
+    "health": 4,
+    "ability": "At the end of your turn, restore 2 Health to all friendly characters.",
+    "lore": "Its wings don't cast light. They cast medicine."
+  },
+  {
+    "id": "templars_char_012",
+    "name": "Zealot",
+    "type": "Character",
+    "faction": "templars",
+    "cost": 3,
+    "energy_type": "Faith",
+    "attack": 4,
+    "health": 2,
+    "ability": "Charge. When this character dies, deal 2 damage to the enemy hero.",
+    "lore": "Faith and fury are the same thing, properly aimed."
+  },
+  {
+    "id": "templars_char_013",
+    "name": "Archivist",
+    "type": "Character",
+    "faction": "templars",
+    "cost": 2,
+    "energy_type": "Faith",
+    "attack": 1,
+    "health": 4,
+    "ability": "When played, draw a card. When this character dies, draw a card.",
+    "lore": "Every page turned is a battle won against the dark."
+  },
+  {
+    "id": "templars_char_014",
+    "name": "Temple Sentinel",
+    "type": "Character",
+    "faction": "templars",
+    "cost": 6,
+    "energy_type": "Faith",
+    "attack": 4,
+    "health": 7,
+    "ability": "Taunt. When this character is damaged, deal 2 damage to a random enemy character.",
+    "lore": "The gates of heaven have a bouncer. He doesn't check IDs. He checks conviction."
+  },
+  {
+    "id": "templars_spell_008",
+    "name": "Divine Favor",
+    "type": "Spell",
+    "faction": "templars",
+    "cost": 4,
+    "energy_type": "Faith",
+    "effect": "Give a friendly character +3 Attack and 'Can't be targeted by enemy abilities' until end of turn.",
+    "lore": "The blessing of heaven strikes with the force of conviction."
+  },
+  {
+    "id": "templars_spell_009",
+    "name": "Holy Ground",
+    "type": "Spell",
+    "faction": "templars",
+    "cost": 3,
+    "energy_type": "Faith",
+    "effect": "All your characters gain Taunt until end of turn. Restore 2 Health to your hero.",
+    "lore": "On sacred ground, retreat is not an option."
+  },
+  {
+    "id": "templars_spell_010",
+    "name": "Wrath of God",
+    "type": "Spell",
+    "faction": "templars",
+    "cost": 7,
+    "energy_type": "Faith",
+    "effect": "Deal 2 damage to all enemy characters. Restore 2 Health to all friendly characters.",
+    "lore": "The heavens don't negotiate. They issue verdicts."
+  },
+  {
+    "id": "templars_loc_005",
+    "name": "Blessed Armory",
+    "type": "Location",
+    "faction": "templars",
+    "cost": 4,
+    "energy_type": "Faith",
+    "effect": "Your characters gain +1 Attack when they attack.",
+    "lore": "Every blade is consecrated. Every strike is scripture."
+  },
+  {
+    "id": "templars_loc_006",
+    "name": "Cathedral Spire",
+    "type": "Location",
+    "faction": "templars",
+    "cost": 7,
+    "energy_type": "Faith",
+    "effect": "At the start of your turn, restore 1 Health to all friendly characters and draw 1 card.",
+    "lore": "The highest point in any Templar city. Visible from any battlefield."
+  },
+  {
+    "id": "reptilians_char_011",
+    "name": "Skin Walker",
+    "type": "Character",
+    "faction": "reptilians",
+    "cost": 5,
+    "energy_type": "Psionics",
+    "attack": 4,
+    "health": 4,
+    "ability": "Stealth. When this character attacks, give your other characters +1 Attack this turn.",
+    "lore": "It wore the president's face for six months. He never knew."
+  },
+  {
+    "id": "reptilians_char_012",
+    "name": "Brood Mother",
+    "type": "Character",
+    "faction": "reptilians",
+    "cost": 6,
+    "energy_type": "Psionics",
+    "attack": 3,
+    "health": 5,
+    "ability": "At the end of your turn, summon a 2/1 Raptor with Charge.",
+    "lore": "The hive doesn't mourn the fallen. It replaces them."
+  },
+  {
+    "id": "reptilians_char_013",
+    "name": "Psionic Wraith",
+    "type": "Character",
+    "faction": "reptilians",
+    "cost": 7,
+    "energy_type": "Psionics",
+    "attack": 5,
+    "health": 3,
+    "ability": "Stealth. When this character attacks the enemy hero, deal 3 damage and restore 3 Health to your hero.",
+    "lore": "It doesn't kill the body first. It kills the will to fight."
+  },
+  {
+    "id": "reptilians_char_014",
+    "name": "Alpha Predator",
+    "type": "Character",
+    "faction": "reptilians",
+    "cost": 8,
+    "energy_type": "Psionics",
+    "attack": 6,
+    "health": 5,
+    "ability": "Charge. Stealth. When this character attacks the enemy hero, deal double damage.",
+    "lore": "At the top of the food chain, there is no fear. Only hunger."
+  },
+  {
+    "id": "reptilians_spell_008",
+    "name": "Mind Shatter",
+    "type": "Spell",
+    "faction": "reptilians",
+    "cost": 4,
+    "energy_type": "Psionics",
+    "effect": "Give an enemy character -4 Attack until end of turn. Draw a card.",
+    "lore": "Don't fight the body. Fight the signal telling it to fight."
+  },
+  {
+    "id": "reptilians_spell_009",
+    "name": "Venom Spit",
+    "type": "Spell",
+    "faction": "reptilians",
+    "cost": 2,
+    "energy_type": "Psionics",
+    "effect": "Deal 3 damage to an enemy character. If it dies, draw a card.",
+    "lore": "It takes three seconds to paralyze. Three days to forget it ever happened."
+  },
+  {
+    "id": "reptilians_spell_010",
+    "name": "Mass Hysteria",
+    "type": "Spell",
+    "faction": "reptilians",
+    "cost": 8,
+    "energy_type": "Psionics",
+    "effect": "All enemy characters attack each other. Draw 2 cards.",
+    "lore": "Turn the army against itself. The war ends before it starts."
+  },
+  {
+    "id": "reptilians_loc_005",
+    "name": "Nesting Pit",
+    "type": "Location",
+    "faction": "reptilians",
+    "cost": 5,
+    "energy_type": "Psionics",
+    "effect": "When one of your characters deals combat damage, draw a card.",
+    "lore": "The pit grows deeper every season. So does what lives in it."
+  },
+  {
+    "id": "reptilians_loc_006",
+    "name": "Crash Site",
+    "type": "Location",
+    "faction": "reptilians",
+    "cost": 4,
+    "energy_type": "Psionics",
+    "effect": "Your Reptilian characters gain +1 Attack and +1 Health.",
+    "lore": "The government says it was a weather balloon. The reptilian pilot was recovered alive."
   }
 ]
