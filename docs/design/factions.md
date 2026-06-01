@@ -25,10 +25,24 @@ This document details the three primary factions in the Conspiracy TCG, outlinin
     *   **Spell: Manchurian Protocol** (Cost: 6 Influence, Effect: "Take control of an enemy character with 3 or less Attack. It gains +2 Attack.")
     *   **Location: Secret Society Lodge** (Cost: 5 Influence, Effect: "All your Illuminati characters gain +1 Attack.")
     *   **Location: Bilderberg Estate** (Cost: 6 Influence, Effect: "At end of your turn, if you control more characters than your opponent, draw a card.")
+*   **Additional Cards:**
+    *   **Character: Puppet Master** (Cost: 7, Stats: 5/6, Ability: "When played, steal enemy with <=3 ATK. Draw a card.")
+    *   **Character: Whistleblower** (Cost: 1, Stats: 1/1, Ability: "Draw 2, discard 1 at end of turn.")
+    *   **Character: Banking Cartel** (Cost: 6, Stats: 4/6, Ability: "Gain 1 Influence each turn. Enemy spells cost +1.")
+    *   **Character: Surveillance Expert** (Cost: 3, Stats: 2/4, Ability: "Look at hand. Enemy cards cost +1 this turn.")
+    *   **Character: Lobbyist** (Cost: 1, Stats: 1/2, Ability: "Taunt. Draw a card on death.")
+    *   **Character: Director Shepherd** (Cost: 8, Stats: 6/8, Ability: "Discard hand, draw 4, gain 2 Influence.")
+    *   **Spell: Disinformation Campaign** (Cost: 2, Effect: "Enemy char -3 ATK this turn.")
+    *   **Spell: Shell Company** (Cost: 5, Effect: "Draw 3, discard 1.")
+    *   **Spell: False Flag** (Cost: 4, Effect: "Deal 2 to all enemies. Draw a card.")
+    *   **Spell: Deep State Purge** (Cost: 8, Effect: "Silence all enemies. Draw 2.")
+    *   **Location: Swiss Vault** (Cost: 3, Effect: "Draw a card each turn.")
+    *   **Location: Pentagon Sublevel** (Cost: 7, Effect: "+1 ATK to all. Draw a card each turn.")
 *   **Expanded Themes:**
     *   **Corporate Control:** Cards like Corporate Gauntlet and PR Operative represent the Illuminati's stranglehold on industry, media, and public perception.
     *   **Human Weapons:** The Manchurian Protocol reveals their darkest tool — brainwashed operatives who don't even know they serve.
     *   **Government Programs:** Black Budget and Bilderberg Estate expose the shadowy funding and secret meetings that shape world events.
+    *   **Global Conspiracy:** Director Shepherd and Pentagon Sublevel reveal the full scope — this isn't a conspiracy, it's the government.
 
 ---
 
@@ -53,10 +67,24 @@ This document details the three primary factions in the Conspiracy TCG, outlinin
     *   **Spell: Absolution** (Cost: 1 Faith, Effect: "Restore 5 Health to your hero or a character. Draw a card.")
     *   **Location: Sacred Chapel** (Cost: 4 Faith, Effect: "At the start of your turn, heal 1 damage from all your characters.")
     *   **Location: Holy Grail Sanctum** (Cost: 5 Faith, Effect: "At the start of your turn, if you have a damaged character, restore 2 Health to it.")
+*   **Additional Cards:**
+    *   **Character: Crusader** (Cost: 5, Stats: 4/4, Ability: "Charge.")
+    *   **Character: Battle Chaplain** (Cost: 2, Stats: 2/2, Ability: "Restore 3 Health to hero on play.")
+    *   **Character: Warden of Secrets** (Cost: 4, Stats: 2/6, Ability: "Taunt. Draw 2 on death.")
+    *   **Character: Paladin Champion** (Cost: 6, Stats: 5/5, Ability: "Other Templars gain +1 ATK.")
+    *   **Character: Squire** (Cost: 1, Stats: 1/3, Ability: "Taunt.")
+    *   **Character: Grand Master Aldric** (Cost: 9, Stats: 7/8, Ability: "Taunt. Heal all for 3 each turn.")
+    *   **Spell: Consecration** (Cost: 3, Effect: "Deal 1 to all enemies.")
+    *   **Spell: Shield Wall** (Cost: 2, Effect: "All your chars +2 Health this turn.")
+    *   **Spell: Judgment** (Cost: 6, Effect: "Deal 5 to enemy. Restore 5 Health to hero.")
+    *   **Spell: Martyr's Blessing** (Cost: 4, Effect: "Destroy friendly char. Draw 3. Restore 5 Health.")
+    *   **Location: Monastery Archives** (Cost: 3, Effect: "Draw if behind on cards.")
+    *   **Location: Fortress Citadel** (Cost: 6, Effect: "+1 Health to all. Heal hero 1 each turn.")
 *   **Expanded Themes:**
     *   **Esoteric Warfare:** Exorcist and Holy Inquisition represent the Templars' battle against supernatural corruption — not just physical threats.
     *   **Sacred Artifacts:** Relic Keeper and Holy Grail Sanctum embody the Templars' role as guardians of powerful religious relics.
     *   **Divine Intervention:** Absolution shows their access to healing powers beyond mortal means — divine grace channeled through faith.
+    *   **Military Orders:** Crusader and Grand Master Aldric represent the Templars' martial tradition — holy warriors who fight as one.
 
 ---
 
@@ -82,7 +110,21 @@ This document details the three primary factions in the Conspiracy TCG, outlinin
     *   **Spell: Orbital Strike** (Cost: 7 Psionics, Effect: "Deal 6 damage to an enemy character. Deal 3 damage to all other enemy characters.")
     *   **Location: Hidden Hive** (Cost: 4 Psionics, Effect: "Your Reptilian characters gain 'When this character attacks, draw a card.'")
     *   **Location: Underground Ant Colony** (Cost: 5 Psionics, Effect: "Your Reptilian characters gain +1 Attack. When one of your characters dies, draw a card.")
+*   **Additional Cards:**
+    *   **Character: Raptor Swarm** (Cost: 2, Stats: 3/1, Ability: "Charge. Deal 1 to enemy hero on death.")
+    *   **Character: Mimic** (Cost: 4, Stats: 2/2, Ability: "Stealth. On play gain +2/+2.")
+    *   **Character: Hatchling Brood** (Cost: 1, Stats: 1/1, Ability: "Summon a 2/1 Raptor on death.")
+    *   **Character: Psionic Leech** (Cost: 3, Stats: 2/3, Ability: "Steal 1 Psionics when attacking hero.")
+    *   **Character: Chameleon Operative** (Cost: 2, Stats: 1/3, Ability: "Stealth. Gains +2 ATK on attack.")
+    *   **Character: Overlord Sskrath** (Cost: 10, Stats: 8/8, Ability: "Deal 3 to all enemies. All Reptilians gain Stealth.")
+    *   **Spell: Mind Probe** (Cost: 1, Effect: "Look at opponent's hand. Draw a card.")
+    *   **Spell: Genetic Splicer** (Cost: 5, Effect: "All your chars +2/+2 this turn.")
+    *   **Spell: Abduction Beam** (Cost: 3, Effect: "Return enemy with <=3 ATK to hand.")
+    *   **Spell: Hive Signal** (Cost: 6, Effect: "Deal 3 to all enemies. All yours gain +1 ATK.")
+    *   **Location: Genesis Chamber** (Cost: 3, Effect: "Your chars gain +1 ATK on attack.")
+    *   **Location: Psi Relay Tower** (Cost: 6, Effect: "Reptilians gain Stealth. Draw a card each turn.")
 *   **Expanded Themes:**
     *   **Space & Orbital Weapons:** Orbital Strike and Ancient Star Map reveal the Reptilians' extraterrestrial technology — weapons and knowledge from beyond Earth.
     *   **Ancient Alien Heritage:** Xenomorph Drone hints at their true biological nature and connection to ancient, brutal alien species.
     *   **Technological Subversion:** Abduction Specialist and Underground Ant Colony represent their infiltration network and the hive-mind structure of their hidden society.
+    *   **Hive Biology:** Hatchling Brood and Raptor Swarm reveal the Reptilian reproductive horror — they breed fast, die fast, and overwhelm through numbers.
