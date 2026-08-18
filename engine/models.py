@@ -35,12 +35,14 @@ class FactionName(StrEnum):
     ILLUMINATI = "illuminati"
     TEMPLARS = "templars"
     REPTILIANS = "reptilians"
+    NEUTRAL = "neutral"
 
 
 class EnergyType(StrEnum):
     INFLUENCE = "Influence"
     FAITH = "Faith"
     PSIONICS = "Psionics"
+    CONSPIRACY = "Conspiracy"
 
 
 # Each faction maps to exactly one energy type
@@ -48,7 +50,15 @@ FACTION_ENERGY: dict[FactionName, EnergyType] = {
     FactionName.ILLUMINATI: EnergyType.INFLUENCE,
     FactionName.TEMPLARS: EnergyType.FAITH,
     FactionName.REPTILIANS: EnergyType.PSIONICS,
+    FactionName.NEUTRAL: EnergyType.CONSPIRACY,
 }
+
+# Starting identities. Neutral is a shared card pool, not a playable faction.
+PLAYABLE_FACTIONS: tuple[FactionName, ...] = (
+    FactionName.ILLUMINATI,
+    FactionName.TEMPLARS,
+    FactionName.REPTILIANS,
+)
 
 
 # ---------------------------------------------------------------------------

@@ -20,7 +20,7 @@ class TestPlayer:
         assert p.name == "Alice"
         assert p.life == 30
         assert p.energy == 0
-        assert p.max_energy == 1
+        assert p.max_energy == 0
 
     def test_shuffle_deck(self):
         cards = [_char(f"C{i}") for i in range(10)]
@@ -77,7 +77,7 @@ class TestPlayer:
         p = Player("Test", [])
         for i in range(25):
             p.increase_max_energy(1)
-        assert p.max_energy == 20  # capped
+        assert p.max_energy == 10  # capped
 
     def test_refresh_energy(self):
         p = Player("Test", [])

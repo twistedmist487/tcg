@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Conspiracy Table — Play Area Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gold: #c8a84e;
+      --ink: #e8e0d0;
+      --muted: #9a917f;
+      --illuminati: #8e44ad;
+      --templars: #f39c12;
+      --reptilians: #1abc9c;
+      --life: #c0392b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    body {
+      background: #07070a;
+      color: var(--ink);
+      font-family: "Source Sans 3", system-ui, sans-serif;
+    }
+    h1, h2, h3, .serif { font-family: Cinzel, serif; letter-spacing: 0.08em; }
+
+    .stage {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 240px 1fr 220px;
+      grid-template-rows: 1fr 176px;
+      gap: 10px;
+      padding: 28px 12px 8px;
+    }
+
+    .rail {
+      background: url("chrome/panel-rail.jpg") center / 100% 100% no-repeat;
+      padding: 52px 32px 36px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      gap: 8px;
+    }
+    .rail h3 {
+      color: var(--gold);
+      font-size: 0.72rem;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+    .rail-history { flex: 0 0 auto; }
+    .log {
+      font-size: 0.68rem;
+      line-height: 1.3;
+      color: #cfc6b4;
+      overflow: hidden;
+    }
+    .log p { margin-bottom: 0.28rem; }
+    .log .who { color: var(--gold); }
+
+    .dossier {
+      flex: 1 1 auto;
+      min-height: 0;
+      border-top: 1px solid rgba(200,168,78,0.2);
+      padding-top: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .dossier-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.7rem;
+      padding: 8px;
+    }
+    .dossier-empty[hidden],
+    .dossier-body[hidden] { display: none !important; }
+    .dossier-body {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .dossier-art {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      max-height: 92px;
+      object-fit: cover;
+      object-position: center 12%;
+      border-radius: 4px;
+      border: 1px solid #3a3224;
+    }
+    .dossier-name { font-family: Cinzel, serif; font-size: 0.78rem; color: #f3e6c4; }
+    .dossier-type { font-size: 0.6rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; }
+    .dossier-effect { font-size: 0.68rem; line-height: 1.35; }
+    .dossier-lore { font-size: 0.64rem; font-style: italic; color: var(--muted); line-height: 1.35; }
+    .dossier-stats { font-size: 0.7rem; color: var(--gold); }
+
+    .locations { display: flex; flex-direction: column; gap: 6px; border-top: 1px solid rgba(200,168,78,0.2); padding-top: 6px; }
+    .loc {
+      background: url("chrome/location-slot.jpg") center / 140% 160% no-repeat;
+      min-height: 58px;
+      padding: 10px 22px 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .loc .name { font-family: Cinzel, serif; font-size: 0.72rem; color: var(--gold); }
+    .loc .sub { font-size: 0.62rem; color: var(--muted); }
+    .loc .fx { font-size: 0.68rem; margin-top: 4px; }
+
+    .field {
+      background: url("chrome/table-surface.jpg") center / cover no-repeat;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14px 48px 10px;
+      min-height: 0;
+    }
+
+    .nameplate {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14% 0 7%;
+      align-self: center;
+      width: min(620px, 78%);
+    }
+    .nameplate.illuminati { background: url("chrome/nameplate-illuminati.jpg") center / 100% 100% no-repeat; }
+    .nameplate.templars { background: url("chrome/nameplate-templars.jpg") center / 100% 100% no-repeat; }
+    .emblem {
+      width: 36px; height: 36px; flex-shrink: 0;
+      border-radius: 50%;
+      display: grid; place-items: center;
+    }
+    .nameplate .who { font-family: Cinzel, serif; font-size: 0.78rem; color: #f3e6c4; }
+    .nameplate .pips { color: var(--gold); letter-spacing: 2px; font-size: 0.7rem; }
+    .nameplate .id { flex: 1; min-width: 0; }
+    .life {
+      font-family: Cinzel, serif;
+      font-size: 1.35rem;
+      color: #f0d9a0;
+      margin-left: auto;
+    }
+
+    .board {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      min-height: 132px;
+    }
+
+    .card {
+      width: 92px;
+      height: 132px;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.55);
+      border: 1px solid #3a3224;
+      background: #111;
+      color: #f2ead8;
+      flex-shrink: 0;
+    }
+    .card img {
+      width: 100%;
+      height: 68%;
+      object-fit: cover;
+      object-position: center 8%;
+      display: block;
+    }
+    .card .meta {
+      position: absolute; inset: auto 0 0 0;
+      background: linear-gradient(transparent, #0b0b0e 28%);
+      padding: 18px 6px 6px;
+    }
+    .card .cname { font-size: 0.58rem; font-weight: 700; line-height: 1.15; }
+    .card .ctype { font-size: 0.5rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.06em; }
+    .badge {
+      position: absolute; top: 4px; left: 4px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #1a140c; border: 1px solid var(--gold);
+      font-size: 0.62rem; font-weight: 700; display: grid; place-items: center;
+    }
+    .stats {
+      position: absolute; right: 4px; bottom: 4px;
+      font-size: 0.58rem; color: #f0d9a0;
+    }
+    .card.illu { box-shadow: 0 0 0 1px #6c3483, 0 6px 16px rgba(0,0,0,0.55); }
+    .card.temp { box-shadow: 0 0 0 1px #b7950b, 0 6px 16px rgba(0,0,0,0.55); }
+    .card.net { box-shadow: 0 0 0 1px #7f8c8d, 0 6px 16px rgba(0,0,0,0.55); }
+    .card.selected {
+      transform: translateY(-10px) scale(1.08);
+      box-shadow: 0 0 0 2px var(--gold), 0 0 22px rgba(200,168,78,0.55);
+      z-index: 4;
+    }
+
+    .controls { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+    .energy-box, .avail-box {
+      text-align: center;
+    }
+    .crystals {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      margin: 6px -4px 4px;
+    }
+    .crystals img { width: 100%; height: auto; display: block; }
+    .crystals img.locked { opacity: 0.28; filter: grayscale(0.6); }
+    .count {
+      font-family: Cinzel, serif;
+      font-size: 1.4rem;
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .end-wrap { text-align: center; }
+    .end-turn {
+      border: 0;
+      background: url("buttons/end-turn-normal.jpg") center / 112% 150% no-repeat;
+      height: 56px;
+      width: 100%;
+      color: transparent;
+      cursor: pointer;
+    }
+    .end-turn:hover { background-image: url("buttons/end-turn-hover.jpg"); }
+    .end-turn:active { background-image: url("buttons/end-turn-pressed.jpg"); }
+    .end-wrap span {
+      display: block;
+      margin-top: 4px;
+      font-family: Cinzel, serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    .deck {
+      margin-top: auto;
+      text-align: center;
+    }
+    .deck img {
+      width: 78px;
+      height: 118px;
+      object-fit: cover;
+      border-radius: 6px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+      border: 1px solid #3a3224;
+    }
+    .deck .n { font-family: Cinzel, serif; color: var(--gold); font-size: 0.9rem; }
+
+    .hand-strip {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0 20px 4px;
+      background: linear-gradient(transparent, #050508 40%);
+    }
+    .hand {
+      display: flex;
+      align-items: flex-end;
+    }
+    .hand .card {
+      width: 110px;
+      height: 158px;
+      margin-left: -36px;
+      transition: transform 0.15s ease;
+    }
+    .hand .card:first-child { margin-left: 0; }
+    .hand .card:hover, .hand .card.raised {
+      transform: translateY(-28px);
+      z-index: 6;
+    }
+    .hand .card img { height: 62%; }
+
+    .caption {
+      display: none;
+    }
+
+    @media (max-width: 900px) {
+      body { overflow: auto; }
+      .stage {
+        height: auto;
+        min-height: 100vh;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+      }
+      .rail { min-height: 220px; padding: 48px 40px 36px; }
+      .field { min-height: 720px; padding: 12px 16px; }
+      .hand-strip { min-height: 180px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="caption">Conspiracy Table · design mock · labels are HTML, chrome is generated art</div>
+  <div class="stage">
+    <aside class="rail">
+      <div class="rail-history">
+        <h3>History</h3>
+        <div class="log">
+          <p>Turn 5 You select Black Budget.</p>
+          <p>Turn 4 You play Surveillance Expert.</p>
+          <p>Turn 3 You play Shadow Broker.</p>
+          <p>Turn 3 <span class="who">Templar Host</span> plays Templar Guardian.</p>
+          <p>Turn 2 You play Swiss Vault.</p>
+        </div>
+      </div>
+      <section class="dossier" id="dossier">
+        <h3>Dossier</h3>
+        <div class="dossier-empty" id="dossier-empty">Hover or select a card</div>
+        <div class="dossier-body" id="dossier-body" hidden>
+          <img class="dossier-art" id="dossier-art" alt="">
+          <div class="dossier-name" id="dossier-name"></div>
+          <div class="dossier-type" id="dossier-type"></div>
+          <div class="dossier-stats" id="dossier-stats"></div>
+          <p class="dossier-effect" id="dossier-effect"></p>
+          <p class="dossier-lore" id="dossier-lore"></p>
+        </div>
+      </section>
+      <div class="locations">
+        <h3>Locations</h3>
+        <div class="loc" data-card="swiss-vault">
+          <div class="name">Swiss Vault</div>
+          <div class="sub">Location · Illuminati</div>
+          <div class="fx">At the start of your turn, draw a card.</div>
+        </div>
+        <div class="loc" data-card="sacred-chapel">
+          <div class="name">Sacred Chapel</div>
+          <div class="sub">Location · Templars</div>
+          <div class="fx">Heal 1 from your characters at turn start.</div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="field">
+      <div class="nameplate templars">
+        <div class="emblem" aria-hidden="true">
+          <svg width="28" height="28" viewBox="0 0 28 28"><path fill="#f39c12" d="M13 3h2v22h-2z"/><path fill="#f39c12" d="M4 13h20v2H4z"/></svg>
+        </div>
+        <div class="id">
+          <div class="who">Templar Host</div>
+          <div class="pips">◆ ◆ ◆ ◆ ◇ ◇ ◇ ◇ ◇ ◇</div>
+        </div>
+        <div class="life">24</div>
+      </div>
+
+      <div class="board" aria-label="Enemy board">
+        <article class="card temp" data-card="squire">
+          <span class="badge">1</span>
+          <img src="../card-templates/fronts/templars-front.jpg" alt="">
+          <div class="meta"><div class="cname">Squire</div><div class="ctype">Taunt</div></div>
+          <div class="stats">1 / 3</div>
+        </article>
+        <article class="card temp" data-card="templar-guardian">
+          <span class="badge">2</span>
+          <img src="../card-templates/fronts/templars-front.jpg" alt="">
+          <div class="meta"><div class="cname">Templar Guardian</div><div class="ctype">Taunt</div></div>
+          <div class="stats">1 / 4</div>
+        </article>
+        <article class="card temp" data-card="knight-commander">
+          <span class="badge">4</span>
+          <img src="../card-templates/fronts/templars-front.jpg" alt="">
+          <div class="meta"><div class="cname">Knight Commander</div><div class="ctype">Aura</div></div>
+          <div class="stats">3 / 5</div>
+        </article>
+      </div>
+
+      <div class="board" aria-label="Your board">
+        <article class="card illu" data-card="lobbyist">
+          <span class="badge">1</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Lobbyist</div><div class="ctype">Taunt</div></div>
+          <div class="stats">1 / 2</div>
+        </article>
+        <article class="card illu" data-card="shadow-broker">
+          <span class="badge">3</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Shadow Broker</div><div class="ctype">Assault</div></div>
+          <div class="stats">2 / 3</div>
+        </article>
+        <article class="card illu" data-card="surveillance-expert">
+          <span class="badge">3</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Surveillance Expert</div><div class="ctype">Control</div></div>
+          <div class="stats">2 / 4</div>
+        </article>
+        <article class="card illu" data-card="pr-operative">
+          <span class="badge">2</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">PR Operative</div><div class="ctype">Attack: +1</div></div>
+          <div class="stats">2 / 2</div>
+        </article>
+      </div>
+
+      <div class="nameplate illuminati">
+        <div class="emblem">
+          <svg width="28" height="28" viewBox="0 0 28 28">
+            <polygon points="14,5 24,23 4,23" fill="none" stroke="#c8a84e" stroke-width="1.4"/>
+            <circle cx="14" cy="17" r="2.2" fill="#c8a84e"/>
+          </svg>
+        </div>
+        <div class="id">
+          <div class="who">Your Conspiracy</div>
+          <div class="pips">◆ ◆ ◆ ◆ ◆ ◇ ◇ ◇ ◇ ◇</div>
+        </div>
+        <div class="life">28</div>
+      </div>
+    </main>
+
+    <aside class="rail controls">
+      <div class="energy-box">
+        <h3>Influence</h3>
+        <div class="crystals" aria-label="Energy sockets">
+          <img src="energy/influence.jpg" alt="lit">
+          <img src="energy/influence.jpg" alt="lit">
+          <img src="energy/influence.jpg" alt="lit">
+          <img src="energy/empty.jpg" alt="spent">
+          <img src="energy/empty.jpg" alt="spent">
+          <img class="locked" src="energy/empty.jpg" alt="locked">
+          <img class="locked" src="energy/empty.jpg" alt="locked">
+          <img class="locked" src="energy/empty.jpg" alt="locked">
+          <img class="locked" src="energy/empty.jpg" alt="locked">
+          <img class="locked" src="energy/empty.jpg" alt="locked">
+        </div>
+        <div class="count">3 / 5</div>
+      </div>
+      <div class="end-wrap">
+        <button class="end-turn" type="button" aria-label="End Turn"></button>
+        <span>End Turn</span>
+      </div>
+      <div class="deck">
+        <h3>Deck</h3>
+        <img src="../card-templates/backs/illuminati-back.jpg" alt="Deck">
+        <div class="n">18</div>
+      </div>
+    </aside>
+
+    <footer class="hand-strip">
+      <div class="hand">
+        <article class="card illu" data-card="media-blackout">
+          <span class="badge">4</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Media Blackout</div><div class="ctype">Spell</div></div>
+        </article>
+        <article class="card illu raised" data-card="black-budget">
+          <span class="badge">3</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Black Budget</div><div class="ctype">Spell</div></div>
+        </article>
+        <article class="card illu" data-card="disinformation">
+          <span class="badge">2</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Disinformation Campaign</div><div class="ctype">Spell</div></div>
+        </article>
+        <article class="card illu" data-card="whistleblower">
+          <span class="badge">1</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Whistleblower</div><div class="ctype">Character</div></div>
+        </article>
+        <article class="card illu" data-card="wiretap">
+          <span class="badge">1</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Wiretap</div><div class="ctype">Spell</div></div>
+        </article>
+        <article class="card illu" data-card="shell-company">
+          <span class="badge">5</span>
+          <img src="../card-templates/fronts/illuminati-front.jpg" alt="">
+          <div class="meta"><div class="cname">Shell Company</div><div class="ctype">Spell</div></div>
+        </article>
+      </div>
+    </footer>
+  </div>
+  <script>
+    const CARDS = {
+      "squire": { name: "Squire", type: "Character · Templars", stats: "1 / 3", art: "../card-templates/fronts/templars-front.jpg", effect: "Taunt.", lore: "Every legend started as someone willing to take the first hit." },
+      "templar-guardian": { name: "Templar Guardian", type: "Character · Templars", stats: "1 / 4", art: "../card-templates/fronts/templars-front.jpg", effect: "Taunt. Enemy characters must attack this character if able.", lore: "Stands as an impenetrable wall against the forces of chaos." },
+      "knight-commander": { name: "Knight Commander", type: "Character · Templars", stats: "3 / 5", art: "../card-templates/fronts/templars-front.jpg", effect: "Other Templar characters you control gain +1 Health.", lore: "A beacon of unwavering resolve on the battlefield." },
+      "lobbyist": { name: "Lobbyist", type: "Character · Illuminati", stats: "1 / 2", art: "../card-templates/fronts/illuminati-front.jpg", effect: "Taunt. When this character dies, draw a card.", lore: "Democracy costs extra. He always pays in full." },
+      "shadow-broker": { name: "Shadow Broker", type: "Character · Illuminati", stats: "2 / 3", art: "../card-templates/fronts/illuminati-front.jpg", effect: "When played, look at opponent's hand and discard one card.", lore: "A master of secrets, always trading in whispers and shadows." },
+      "surveillance-expert": { name: "Surveillance Expert", type: "Character · Illuminati", stats: "2 / 4", art: "../card-templates/fronts/illuminati-front.jpg", effect: "When played, look at opponent's hand. Your opponent's cards cost (1) more this turn.", lore: "Privacy is an illusion they sold you decades ago." },
+      "pr-operative": { name: "PR Operative", type: "Character · Illuminati", stats: "2 / 2", art: "../card-templates/fronts/illuminati-front.jpg", effect: "When this character attacks, gain 1 Influence.", lore: "A smile that conceals a dagger, a pen that signs away nations." },
+      "media-blackout": { name: "Media Blackout", type: "Spell · Illuminati", stats: "", art: "../card-templates/fronts/illuminati-front.jpg", effect: "Silence all enemy characters until end of turn.", lore: "Control the narrative, control the masses." },
+      "black-budget": { name: "Black Budget", type: "Spell · Illuminati", stats: "", art: "../card-templates/fronts/illuminati-front.jpg", effect: "Draw 2 cards. Each player discards 1 card.", lore: "Where the money flows, the truth drowns." },
+      "disinformation": { name: "Disinformation Campaign", type: "Spell · Illuminati", stats: "", art: "../card-templates/fronts/illuminati-front.jpg", effect: "Give an enemy character -3 Attack until end of turn.", lore: "Repeat a lie often enough and the truth becomes the conspiracy." },
+      "whistleblower": { name: "Whistleblower", type: "Character · Illuminati", stats: "1 / 1", art: "../card-templates/fronts/illuminati-front.jpg", effect: "When played, draw 2 cards. At the end of your turn, discard 1 card.", lore: "The truth is dangerous. She carries it anyway — for now." },
+      "wiretap": { name: "Wiretap", type: "Spell · Illuminati", stats: "", art: "../card-templates/fronts/illuminati-front.jpg", effect: "Look at opponent's hand. Give a card in their hand +2 cost until end of turn.", lore: "Every phone is a microphone. Every microphone is an opportunity." },
+      "shell-company": { name: "Shell Company", type: "Spell · Illuminati", stats: "", art: "../card-templates/fronts/illuminati-front.jpg", effect: "Draw 3 cards. Discard 1 card.", lore: "The money flows through seventeen countries before it reaches the truth." },
+      "swiss-vault": { name: "Swiss Vault", type: "Location · Illuminati", stats: "", art: "../card-templates/fronts/illuminati-front.jpg", effect: "At the start of your turn, draw a card.", lore: "The oldest secrets are kept in the oldest banks." },
+      "sacred-chapel": { name: "Sacred Chapel", type: "Location · Templars", stats: "", art: "../card-templates/fronts/templars-front.jpg", effect: "At the start of your turn, heal 1 damage from all your characters.", lore: "A place of solace and restoration." },
+    };
+
+    const empty = document.getElementById("dossier-empty");
+    const body = document.getElementById("dossier-body");
+    let pinned = "black-budget";
+
+    function show(key) {
+      const card = CARDS[key];
+      if (!card) {
+        empty.hidden = false;
+        body.hidden = true;
+        return;
+      }
+      empty.hidden = true;
+      body.hidden = false;
+      document.getElementById("dossier-art").src = card.art;
+      document.getElementById("dossier-name").textContent = card.name;
+      document.getElementById("dossier-type").textContent = card.type;
+      document.getElementById("dossier-stats").textContent = card.stats;
+      document.getElementById("dossier-effect").textContent = card.effect;
+      document.getElementById("dossier-lore").textContent = card.lore ? `“${card.lore}”` : "";
+      document.querySelectorAll("[data-card]").forEach((el) => {
+        el.classList.toggle("selected", el.dataset.card === pinned);
+      });
+    }
+
+    document.addEventListener("pointerover", (e) => {
+      const el = e.target.closest("[data-card]");
+      if (el) show(el.dataset.card);
+    });
+    document.addEventListener("pointerout", (e) => {
+      const el = e.target.closest("[data-card]");
+      if (el && !el.contains(e.relatedTarget)) show(pinned);
+    });
+    document.addEventListener("click", (e) => {
+      const el = e.target.closest("[data-card]");
+      if (!el) return;
+      pinned = el.dataset.card;
+      show(pinned);
+    });
+    show(pinned);
+  </script>
+</body>
+</html>

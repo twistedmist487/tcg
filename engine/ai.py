@@ -15,13 +15,19 @@ Key design principles:
 from __future__ import annotations
 
 import math
+import random
 from typing import Any
 
 from engine.card import CardInstance
 from engine.game import Game
-from engine.keywords import has_taunt
+from engine.keywords import get_valid_attack_targets, has_taunt
 from engine.models import Card
 from engine.player import Player
+
+DIFFICULTY_PRESETS: dict[str, dict[str, float]] = {
+    "easy": {"aggression": 0.2, "mistake_chance": 0.4, "skip_attack_chance": 0.3},
+    "medium": {"aggression": 0.5, "mistake_chance": 0.0, "skip_attack_chance": 0.0},
+}
 
 # ---------------------------------------------------------------------------
 # Faction weight presets
@@ -71,6 +77,8 @@ class AIPlayer:
         name: Display name.
         faction: Faction name (illuminati, templars, reptilians).
         aggression: 0.0 (defensive) to 1.0 (aggressive).
+        difficulty: "easy" or "medium". Easy plays more conservatively
+            and occasionally takes a weaker action (tutorial opponent).
         weights: Scoring weight dict for board evaluation.
     """
 
@@ -78,17 +86,22 @@ class AIPlayer:
         self,
         name: str = "AI",
         faction: str = "illuminati",
-        aggression: float = 0.5,
+        aggression: float | None = None,
+        difficulty: str = "medium",
     ) -> None:
         self.name = name
         self.faction = faction
-        self.aggression = max(0.0, min(1.0, aggression))
+        self.difficulty = difficulty if difficulty in DIFFICULTY_PRESETS else "medium"
+        preset = DIFFICULTY_PRESETS[self.difficulty]
+        self.aggression = max(0.0, min(1.0, preset["aggression"] if aggression is None else aggression))
+        self.mistake_chance = float(preset["mistake_chance"])
+        self.skip_attack_chance = float(preset["skip_attack_chance"])
         self.weights: dict[str, float] = dict(
             FACTION_WEIGHTS.get(faction, FACTION_WEIGHTS["illuminati"])
         )
         # Adjust weights based on aggression
-        self.weights["face_damage"] *= 0.5 + aggression
-        self.weights["taunt_value"] *= 1.5 - aggression
+        self.weights["face_damage"] *= 0.5 + self.aggression
+        self.weights["taunt_value"] *= 1.5 - self.aggression
 
 
 # ---------------------------------------------------------------------------
@@ -96,57 +109,66 @@ class AIPlayer:
 # ---------------------------------------------------------------------------
 
 
-def choose_action(game: Game) -> dict[str, Any]:
+def choose_action(game: Game, ai: AIPlayer | None = None) -> dict[str, Any]:
     """
     Pick the best action for the AI's current turn.
 
     Returns:
         Action dict: {"action": "play", "card_index": N}
-                     {"action": "attack", "attacker_index": N, "target_index": N|Mone}
+                     {"action": "attack", "attacker_index": N, "target_index": N|None}
                      {"action": "end_turn"}
     """
     player = game.active_player
     opponent = game.inactive_player
 
-    best_action: dict[str, Any] = {"action": "end_turn"}
-    best_score: float = score_action(game, best_action)
+    candidates: list[tuple[float, dict[str, Any]]] = []
+
+    end_action: dict[str, Any] = {"action": "end_turn"}
+    candidates.append((score_action(game, end_action), end_action))
 
     # Score all possible card plays
     for i, _card in enumerate(player.hand):
         action = {"action": "play", "card_index": i}
         score = score_action(game, action)
-        if score > best_score:
-            best_score = score
-            best_action = action
+        if score > -math.inf:
+            candidates.append((score, action))
+
+    skip_attacks = bool(ai and random.random() < ai.skip_attack_chance)
 
     # Score all possible attacks
-    for attacker_idx, attacker in enumerate(player.board):
-        if not attacker.can_attack:
-            continue
+    if not skip_attacks:
+        for attacker_idx, attacker in enumerate(player.board):
+            if not attacker.can_attack:
+                continue
 
-        # Score attacking each valid target
-        for target_idx in range(len(opponent.board)):
-            action = {
-                "action": "attack",
-                "attacker_index": attacker_idx,
-                "target_index": target_idx,
-            }
-            score = score_action(game, action)
-            if score > best_score:
-                best_score = score
-                best_action = action
+            # Score attacking each valid target
+            for target_idx in range(len(opponent.board)):
+                action = {
+                    "action": "attack",
+                    "attacker_index": attacker_idx,
+                    "target_index": target_idx,
+                }
+                score = score_action(game, action)
+                if score > -math.inf:
+                    candidates.append((score, action))
 
-        # Score attacking face directly (only valid if no enemy board)
-        if len(opponent.board) == 0:
-            action = {
-                "action": "attack",
-                "attacker_index": attacker_idx,
-                "target_index": None,
-            }
-            score = score_action(game, action)
-            if score > best_score:
-                best_score = score
-                best_action = action
+            # Score attacking face (Charge / normal). Rush cannot hit the hero this turn.
+            if not getattr(attacker, "rush_locked", False) and len(opponent.board) == 0:
+                action = {
+                    "action": "attack",
+                    "attacker_index": attacker_idx,
+                    "target_index": None,
+                }
+                score = score_action(game, action)
+                if score > -math.inf:
+                    candidates.append((score, action))
+
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    best_action = candidates[0][1]
+
+    if ai and ai.mistake_chance > 0 and len(candidates) > 1 and random.random() < ai.mistake_chance:
+        # Easy AI: sometimes take the second-best legal action
+        best_action = candidates[1][1]
 
     return best_action
 
@@ -169,14 +191,42 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
         if game.is_over:
             break
 
-        action = choose_action(game)
+        action = choose_action(game, ai)
+
+        if getattr(game, "pending_discovery", None):
+            options = game.pending_discovery["cards"]
+            pick = max(range(len(options)), key=lambda i: options[i].cost)
+            result = game.choose_discovery(pick)
+            results.append({"action": "discover", "result": result})
+            continue
+
+        if getattr(game, "pending_split", None):
+            options = game.pending_split["options"]
+            pick = 0
+            target = 0 if game.inactive_player.board else None
+            result = game.choose_split(pick, target_index=target)
+            results.append({"action": "split", "result": result})
+            continue
 
         if action["action"] == "end_turn":
             result = game.end_turn()
             results.append({"action": "end_turn", "result": result})
             break
         elif action["action"] == "play":
-            result = game.play_card(action["card_index"])
+            card = game.active_player.hand[action["card_index"]]
+            text = f"{getattr(card, 'ability', '')} {getattr(card, 'effect', '')}".lower()
+            if "friendly" in text:
+                target = 0 if game.active_player.board else None
+                result = game.play_card(
+                    action["card_index"],
+                    spell_target_index=target,
+                    target_side="ally",
+                )
+            else:
+                target = action.get("target_index")
+                if target is None and game.inactive_player.board:
+                    target = 0
+                result = game.play_card(action["card_index"], spell_target_index=target)
             results.append({"action": "play", "result": result})
             if not result.get("success"):
                 # If play failed, end turn rather than breaking silently
@@ -190,6 +240,8 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
             )
             results.append({"action": "attack", "result": result})
             if not result.get("success"):
+                result = game.end_turn()
+                results.append({"action": "end_turn", "result": result})
                 break
 
         if game.is_over:
@@ -264,6 +316,14 @@ def _score_play_card(game: Game, card_index: int) -> float:
 
     # Base score: cost efficiency (playing cards is generally good)
     score += card.cost * 0.5
+
+    from engine.effects import effect_requires_board_target
+
+    text = getattr(card, "ability", "") or getattr(card, "effect", "") or ""
+    if "friendly" in text.lower() and not player.board:
+        return -math.inf
+    if effect_requires_board_target(text) and "friendly" not in text.lower() and not game.inactive_player.board:
+        return -math.inf
 
     if card_type == "Character":
         score += _score_character_card(game, card)
@@ -367,9 +427,11 @@ def _score_attack(game: Game, attacker_index: int, target_index: int | None) -> 
 
     score = 0.0
 
+    valid_targets = get_valid_attack_targets(player, opponent)
+
     if target_index is None:
-        # Face attack — only valid if enemy has no board
-        if len(opponent.board) > 0:
+        # Face attack — only valid if no legal character targets
+        if valid_targets:
             return -math.inf
 
         score += attacker.current_attack * 1.0  # damage to face is good
@@ -385,6 +447,8 @@ def _score_attack(game: Game, attacker_index: int, target_index: int | None) -> 
             return -math.inf
 
         defender = opponent.board[target_index]
+        if defender not in valid_targets:
+            return -math.inf
 
         score += _score_character_attack(attacker, defender, player, opponent)
 

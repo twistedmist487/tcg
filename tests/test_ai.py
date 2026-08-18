@@ -248,8 +248,9 @@ class TestScoring:
                     scores.append(s)
             # At least some cards should be playable
             assert len(scores) > 0
-            # Scores should be positive for affordable cards
-            assert all(s > 0 for s in scores)
+            # Targeted spells with an empty board score -inf; the rest should be positive
+            assert any(s > 0 for s in scores)
+            assert all(s == float("-inf") or s > 0 for s in scores)
 
 
 # ---------------------------------------------------------------------------

@@ -2,6 +2,12 @@
 
 This document tracks the development plan for Conspiracy TCG.
 
+**Product direction:** Conspiracy TCG is a single-player game. Players learn
+through an interactive tutorial, then play against AI opponents with curated
+or custom decks. Online multiplayer, matchmaking, lobbies, and human-vs-human
+play are out of scope. The existing two-human CLI mode is a leftover test
+harness, not a product feature.
+
 ## Phase 0: Project Scaffolding [COMPLETE]
 Goal: Clean, navigable project structure with tooling wired up.
 
@@ -83,7 +89,7 @@ Goal: Cards that actually do something when played.
 
 ---
 
-## Phase 7: Content Expansion [IN PROGRESS]
+## Phase 7: Content Expansion [COMPLETE]
 Goal: Make decks feel complete and gameplay more varied.
 
 **Completed:**
@@ -93,66 +99,181 @@ Goal: Make decks feel complete and gameplay more varied.
 - [x] New card mechanics: Charge, Deathrattle (on-death summon), Stealth assassins
 - [x] Each faction gets a Legendary character (cost 8-10, powerful unique effect)
 - [x] Curated 30-card faction decks in data/decks.json
-- [x] Deck validation: enforce 30 cards, single faction, max 3 copies
+- [x] Deck validation: enforce 30 cards, single faction, max 2 copies
 - [x] Mulligan system (redraw starting hand before first turn)
 
 **Balancing Pass:**
-- Playtesting with AI to identify overpowered/undercosted cards
-- Adjust stats and costs based on win rates
+- [x] AI vs AI playtests across all six faction matchups (20 games each)
+- [x] Pre-pass: Templars ~71% / Illuminati ~61% / Reptilians ~16%
+- [x] Nerf: Templar early tanks and late walls, Swiss Vault (3 -> 5), economy engines
+- [x] Buff: Reptilian mid/late threats (Shape-Shifter, Brood Mother, Overlord 10 -> 9)
+- [x] Replay after tuning: Illuminati ~61% / Reptilians ~49% / Templars ~38%
+      (was 71 / 16 / 61). All three factions win games; replay via
+      `python tools/playtest_balance.py`
 
 ---
 
-## Phase 8: Deck Builder & Matchmaking [PENDING]
-Goal: Build custom decks and play against other humans online.
+## Phase 8: Tutorial & Single-Player Experience [COMPLETE]
+Goal: Teach new players the game by playing it, then give them a complete
+solo loop: tutorial, AI matches, and a deck builder.
 
-**Deck Builder UI:**
-- Web UI for selecting cards from collection
-- Filter by faction, cost, type, keyword
-- Save/load deck configurations as JSON
-- Deck naming and sharing
+**Interactive Tutorial:**
+- [x] Guided First Contact match against The Recruiter (Easy, skip-able, replayable)
+- [x] Teaches by doing: energy, exhaustion, combat, Taunt, spells, locations
+- [x] Contextual hint panel on the live board
+- [x] Recap screen with a rules cheat sheet after the tutorial
+- [x] How to Play menu entry to replay the tutorial
 
-**Online Play:**
-- WebSocket-based real-time multiplayer (replaces REST polling)
-- Game lobby: create/join rooms, faction selection
-- Matchmaking queue (random opponent by faction preference)
-- Spectator mode (watch ongoing games)
-- Chat between players
-- Reconnection handling (resume dropped games)
-- Game history and replay viewer
+**Browser pass (2026-08-14):** Opening flow worked; combat hint, targeting,
+locations, turn labels, and a stalling 30–30 match were broken. Those
+fixes landed in Phase 9 and were re-checked in Chromium (desktop + 390x844).
 
-**Backend changes:**
-- server/websocket.py -- WebSocket endpoint for real-time game state broadcast
-- server/lobby.py -- room management, matchmaking queue, player sessions
-- Database layer (SQLite) for persistent decks, game history, player profiles
-- Authentication (simple token-based) for player accounts
+**Solo Play:**
+- [x] Main menu: Play vs AI with faction, opponent faction, Easy / Medium
+- [x] Easy AI is conservative (mistakes + skipped attacks); Medium is the heuristic
+- [x] Showcase encounters: Shadow Council, Holy Host, Invasion Force
+- [x] Post-match recap: cards played, damage, lesson if you lost
+- [x] Server-side AI turn (`POST /api/game/{id}/ai-turn`)
+- [x] Mulligan screen before the first turn (skipped in tutorial)
+
+**Deck Builder (solo only):**
+- [x] Web UI for 30-card decks from a faction pool
+- [x] Filter by cost, type, keyword; save/load in localStorage
+- [x] Play a custom deck against AI
+
+**Backend / data:**
+- [x] data/encounters.json (tutorial + 3 showcases)
+- [x] engine/decks.py validation and construction
+- [x] Local deck persistence (browser localStorage)
+- [x] No WebSockets, lobbies, matchmaking, or accounts
 
 ---
 
-## Phase 9: Polish & Visual Improvements [PENDING]
-Goal: Make the game feel complete and replayable.
+## Phase 9: Polish & Replayability [IN PROGRESS]
+Goal: Make the solo game feel complete after the tutorial. Onboarding,
+The Network, and the evergreen keyword wave are in. The 240-card pool and 12-Network hire cap are in. Remaining Phase 9
+work is teaching the new verbs, a balance pass on the new lists, and
+Hard AI.
+
+### Next 3 steps
+
+**Card pool expansion (in progress, after constructed 2-copy / 10 energy):**
+- [x] Network hire cap 8 → 12
+- [x] 40 cards per faction (was 30)
+- [x] Network 50 / 120 (first utility wave)
+- [x] Network to 120 (bodies, interaction, card flow, combat keywords, tempo, locations)
+- [x] Refresh curated 30s and brew presets (Silence Toolbox, Recycle Engine)
+
+1. **Teach what we just built (tutorial + keyword reference).**
+   First Contact still stops at Charge / Taunt / spells / locations. Add a
+   short Deathrattle beat (Hatchling Brood → Raptor) and a skippable
+   “keyword lab” encounter that puts Recycle, Split, Drain, and Ward on
+   the board one at a time. Pair that with a static keyword reference
+   (How to Play is already too long) and keep Easy Recruiter poking face
+   so a stalled  board cannot last forever.
+
+2. **Rebalance the 240-card pool.**
+   Curated lists and brew presets already hire the new identity cards
+   (4 Network in each curated 30). Run `python tools/playtest_balance.py`
+   across the six matchups and the new presets. Tune Flash / Opening /
+   Venom / Amplify / Recur if they dominate.
+
+3. **Hard AI + challenge encounters.**
+   Medium is a greedy heuristic and does not plan around Recur, Ward, or
+   Split. Add a Hard difficulty with 2-ply look-ahead (or a tighter
+   action scorer that values the new keywords), then ship 2–3 challenge
+   encounters that reuse Hard AI plus themed decks (control Network,
+   aggro Rush/Charge, Recur/Deathrattle swarm). This is the replayability
+   beat Phase 9 was always for.
+
+**Play table UI (browser, 2026-08-17):**
+- [x] Conspiracy Table: history (5) + Dossier + locations | oval field | energy / End Turn / deck
+- [x] Generated chrome in `static/ui/` (rails, table, crystals, hourglass, heroes)
+- [x] Dossier: hover/click shows art, effect, lore; board/location state includes lore
+- [x] Hero portraits replace the wide name/life bars
+- [x] Unaffordable hand cards stay opaque; opponent backs are larger
+- See [Wiki: Play table UI](../wiki/entities/conspiracy-tcg-ui.md)
+
+---
+
+**Tutorial fixes (browser pass 2026-08-14, implemented):**
+- [x] Combat hint now says click the highlighted enemy (or Attack Face)
+- [x] Attack Face only appears when face is legal; hidden while a targetable
+      enemy is on the board
+- [x] Face attacks follow Taunt/Stealth (`can_attack_player_directly` matches
+      `Game.attack` — Stealth-only boards no longer block face)
+- [x] Spell damage removes dead characters (`Game.play_card` cleanup)
+- [x] Location slot per player; Sacred Chapel stays visible after play
+- [x] Hint sequencer no longer jumps to "Your move" after the first attack;
+      Spells / Locations / a hold hint come first
+- [x] Tutorial turn label is "Your turn N" (player actions, not AI turns)
+- [x] Recruiter starts at 12 life; opening curve is Hatchling then Taunt;
+      Stealth walls moved late
+- [x] Spell targeting is click-the-enemy (no `window.prompt`)
+- [x] How to Play covers auto draw/energy, exhaustion, locations, mulligan
+- [x] Action bar is sticky so Play / Attack / End Turn stay reachable
+- [x] Menu confirms before leaving a live match
+- [x] Skip tutorial jumps to the rules recap overlay
+- [x] Recap is a full-screen overlay with Play vs AI
+
+**The Network (shared cards, implemented):**
+- [x] Neutral faction + Conspiracy energy; not a starting identity
+- [x] 120 Network cards (62 characters including 1 token, 42 spells, 16 locations)
+- [x] Decks: one starting faction + up to 12 Network cards
+- [x] Faction-conditional text: "If you are Illuminati/Templars/Reptilians"
+- [x] Deck builder shows Faction + Network with a silver border and 12-card cap
+- [x] Curated lists hire their matching specialist plus new identity cards
+      (Double Agent, Relic Courier, Skin-Walker Hireling)
+
+**Keyword systems (implemented):**
+- [x] Shielding — next damage is ignored, then the shield pops (character or hero)
+- [x] Assault — on-play from hand; damage/heal/buff/debuff a target
+- [x] Deathrattle — on death (summon, face damage, draw); Hatchling Brood hatches a Raptor
+- [x] Charge (anyone) and Rush (characters only this turn)
+- [x] Enraged — two attacks per turn, persistent
+- [x] Discovery — pick 1 of 3 faction+Network cards (`POST /api/game/{id}/discover`)
+- [x] Drain, Venom, Recur, Stasis, Amplify, Recycle, Chain, Split, Echo, Excess, Retaliate, Flash, Manifest, Opening, Ward
+- [x] Recycle / Split endpoints (`POST /api/game/{id}/recycle`, `/split`)
+
+**Tutorial follow-up:**
+- [x] Charge is implemented; Zealot / Raptor Swarm can attack the turn they
+      are played. Tutorial has a Charge step.
+- [x] Recruiter Taunt wall is Network Contract Guard (not Templar Guardian)
+- [x] Deathrattle is implemented (Hatchling Brood summons a Raptor)
+- Teach Hatchling Brood's on-death summon in First Contact (engine is ready)
+- Easy Recruiter should still poke life so a stalled board cannot last forever
+- Highlight is in place for Squire / Smite / Chapel / Zealot / ready
+      attackers / targetable enemies; keep tuning if a step still feels
+      easy to miss
+- Keyword lab encounter + static keyword reference (see Next 3 steps)
 
 **AI Improvements:**
-- Multiple AI difficulty levels (Easy, Medium, Hard)
-- Hard AI uses look-ahead (minimax with 2-3 ply search)
-- Aggro/Control/Midrange AI deck preferences
+- Hard AI with look-ahead (minimax, 2-3 ply) that scores new keywords
+- Aggro / Control / Midrange AI deck preferences
+- Optional challenge encounters that reuse Hard AI plus themed decks
+- Easy Recruiter should still poke life so the tutorial cannot stall forever
 
 **Visual Polish:**
 - Card art placeholders with faction-themed icons
 - Damage animations, play effects, turn transitions
 - Sound effects (optional, browser-based)
-- Responsive mobile-friendly layout
+- [x] Responsive mobile-friendly layout (action bar must stay reachable)
+- [x] Visible location slot; targetable-enemy outline used in attack and
+      spell-target mode
 
 **Quality of Life:**
 - Keyboard shortcuts
-- Undo last action (single-player only)
-- Game speed settings
-- Comprehensive help/tutorial page
+- Undo last action
+- Game speed settings (including AI think time)
 - Card collection browser with search/filter
+- Static rules / keyword reference that complements the live tutorial
 - Export/import game state for debugging
+- [x] Confirm before abandoning a live match
 
 ---
 
-*Total tests: 197 (as of Phase 7 content expansion)*
-*Total cards: 90 (30 per faction: 14 chars, 10 spells, 6 locs)*
-*Total code files: 31 Python + 3 frontend*
-*Curated 30-card faction decks in data/decks.json*
+*Total tests: 286*
+*Total cards: 240 (40 per faction + 120 Network, including 1 token)*
+*Constructed: 30-card decks, max 2 copies, energy cap 10, max 12 Network*
+*Curated 30-card faction decks + 10 test/brew presets in data/decks.json*
+*Tutorial + 3 showcase encounters in data/encounters.json*

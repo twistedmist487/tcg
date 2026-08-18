@@ -1,0 +1,165 @@
+{
+  "tutorial": {
+    "id": "tutorial",
+    "name": "First Contact",
+    "description": "A guided first match. Learn energy, characters, combat, Taunt, spells, and locations by playing them.",
+    "mode": "tutorial",
+    "player_goes_first": true,
+    "shuffle": false,
+    "difficulty": "easy",
+    "player_faction": "templars",
+    "ai_faction": "reptilians",
+    "ai_name": "The Recruiter",
+    "player_name": "Recruit",
+    "require_faction": false,
+    "ai_starting_life": 12,
+    "player_deck": [
+      "templars_char_009",
+      "templars_char_006",
+      "templars_spell_001",
+      "templars_loc_001",
+      "templars_char_012",
+      "templars_char_009",
+      "templars_char_006",
+      "templars_char_002",
+      "templars_char_013",
+      "templars_char_004",
+      "templars_spell_001",
+      "templars_spell_005",
+      "templars_char_001",
+      "templars_char_005",
+      "templars_spell_004",
+      "templars_char_007",
+      "templars_spell_003",
+      "templars_loc_003",
+      "templars_char_002",
+      "templars_char_012",
+      "templars_char_013",
+      "templars_char_004",
+      "templars_spell_009",
+      "templars_spell_005",
+      "templars_char_001",
+      "templars_char_005",
+      "templars_loc_001",
+      "templars_spell_004",
+      "templars_char_007",
+      "templars_char_011"
+    ],
+    "ai_deck": [
+      "reptilians_char_007",
+      "reptilians_char_007",
+      "neutral_char_007",
+      "reptilians_char_005",
+      "reptilians_char_009",
+      "reptilians_char_005",
+      "neutral_char_007",
+      "reptilians_char_008",
+      "reptilians_spell_004",
+      "reptilians_char_003",
+      "reptilians_spell_001",
+      "reptilians_loc_001",
+      "reptilians_char_008",
+      "reptilians_char_003",
+      "reptilians_spell_004",
+      "reptilians_spell_009",
+      "reptilians_char_011",
+      "reptilians_loc_003",
+      "reptilians_spell_006",
+      "reptilians_char_001",
+      "reptilians_char_002",
+      "reptilians_spell_009",
+      "reptilians_char_011",
+      "reptilians_loc_003",
+      "reptilians_spell_006",
+      "reptilians_char_012",
+      "reptilians_char_013",
+      "reptilians_char_004",
+      "reptilians_char_001",
+      "reptilians_char_006"
+    ],
+    "steps": [
+      {
+        "id": "welcome",
+        "title": "Energy and your hand",
+        "text": "You start with 1 energy. Cards cost energy to play. Click Squire (cost 1) in your hand, then Play Card."
+      },
+      {
+        "id": "exhaustion",
+        "title": "Exhausted characters",
+        "text": "Most characters cannot attack the turn they are played. Click End Turn and let the Recruiter go. Charge is the exception — those can attack immediately."
+      },
+      {
+        "id": "attack",
+        "title": "Combat",
+        "text": "Your character is ready. Click it on your board, then click the highlighted enemy. If nothing is blocking you, click Attack Face instead."
+      },
+      {
+        "id": "taunt",
+        "title": "Taunt",
+        "text": "That enemy has Taunt — you must attack it first. Click your ready character, then click the outlined Taunt character. You cannot hit face until the wall is gone."
+      },
+      {
+        "id": "spell",
+        "title": "Spells",
+        "text": "Spells are one-shot effects. Click Divine Smite, then click the highlighted enemy you want to damage."
+      },
+      {
+        "id": "location",
+        "title": "Locations",
+        "text": "Locations stay in play (one at a time). Play Sacred Chapel — it appears in your location slot and heals your characters each turn."
+      },
+      {
+        "id": "charge",
+        "title": "Charge",
+        "text": "Zealot has Charge — it can attack the turn you play it. Click Zealot, Play Card, then attack with it immediately."
+      },
+      {
+        "id": "free",
+        "title": "Your move",
+        "text": "You know the loop: spend energy, attack, end turn. Reduce the Recruiter to 0 life."
+      }
+    ]
+  },
+  "showcase_illuminati": {
+    "id": "showcase_illuminati",
+    "name": "Shadow Council",
+    "description": "Play the Illuminati control list against a Templar defense. Deny resources, then close the game.",
+    "mode": "showcase",
+    "player_goes_first": true,
+    "shuffle": true,
+    "difficulty": "medium",
+    "player_faction": "illuminati",
+    "ai_faction": "templars",
+    "ai_name": "Knight-Marshal",
+    "player_deck_faction": "illuminati",
+    "ai_deck_faction": "templars"
+  },
+  "showcase_templars": {
+    "id": "showcase_templars",
+    "name": "Holy Host",
+    "description": "Play the Templar defense list against a Reptilian rush. Taunt, heal, and outlast the swarm.",
+    "mode": "showcase",
+    "player_goes_first": true,
+    "shuffle": true,
+    "difficulty": "medium",
+    "player_faction": "templars",
+    "ai_faction": "reptilians",
+    "ai_name": "Brood Herald",
+    "player_deck_faction": "templars",
+    "ai_deck_faction": "reptilians"
+  },
+  "showcase_reptilians": {
+    "id": "showcase_reptilians",
+    "name": "Invasion Force",
+    "description": "Play the Reptilian aggro list against Illuminati control. Hit hard before they lock the board.",
+    "mode": "showcase",
+    "player_goes_first": true,
+    "shuffle": true,
+    "difficulty": "medium",
+    "player_faction": "reptilians",
+    "ai_faction": "illuminati",
+    "ai_name": "Handler",
+    "player_deck_faction": "reptilians",
+    "ai_deck_faction": "illuminati"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "tcg",
+  "version": "1.0.0",
+  "description": "A single-player strategic card game where three conspiracy-themed factions battle for global dominance through manipulation, ancient power, and otherworldly influence. Inspired by Hearthstone's gameplay with a dark conspiracy theme drawn from Robert Storey's \"Ancient Origins\" series.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "playwright": "^1.62.1"
+  }
+}

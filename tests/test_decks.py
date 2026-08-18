@@ -26,14 +26,18 @@ class TestDecksJson:
     def test_each_deck_has_30_cards(self):
         decks = _load_decks_json()
         for faction, deck in decks.items():
+            if faction == "presets":
+                continue
             total = sum(c["copies"] for c in deck["cards"])
             assert total == 30, f"{faction} deck has {total} cards, expected 30"
 
-    def test_no_card_exceeds_3_copies(self):
+    def test_no_card_exceeds_2_copies(self):
         decks = _load_decks_json()
         for faction, deck in decks.items():
+            if faction == "presets":
+                continue
             for entry in deck["cards"]:
-                assert entry["copies"] <= 3, (
+                assert entry["copies"] <= 2, (
                     f"{faction}: {entry['id']} has {entry['copies']} copies"
                 )
 
@@ -41,20 +45,28 @@ class TestDecksJson:
         cards = {c.id for c in load_cards(DATA_DIR / "cards.json")}
         decks = _load_decks_json()
         for faction, deck in decks.items():
+            if faction == "presets":
+                continue
             for entry in deck["cards"]:
                 assert entry["id"] in cards, (
                     f"{faction}: card {entry['id']} not found in cards.json"
                 )
 
-    def test_only_faction_cards_in_deck(self):
+    def test_only_faction_or_network_cards_in_deck(self):
         all_cards = {c.id: c for c in load_cards(DATA_DIR / "cards.json")}
         decks = _load_decks_json()
         for faction, deck in decks.items():
+            if faction == "presets":
+                continue
+            neutrals = 0
             for entry in deck["cards"]:
                 card = all_cards[entry["id"]]
-                assert card.faction.value == faction, (
+                assert card.faction.value in (faction, "neutral"), (
                     f"{faction} deck contains {entry['id']} (faction: {card.faction.value})"
                 )
+                if card.faction.value == "neutral":
+                    neutrals += entry["copies"]
+            assert neutrals <= 12
 
 
 class TestLoadDeck:
@@ -72,14 +84,14 @@ class TestLoadDeck:
         deck = _load_deck("reptilians")
         assert len(deck) == 30
 
-    def test_deck_has_max_3_copies_per_card(self):
+    def test_deck_has_max_2_copies_per_card(self):
         for faction in ["illuminati", "templars", "reptilians"]:
             deck = _load_deck(faction)
             from collections import Counter
 
             counts = Counter(c.id for c in deck)
             max_count = max(counts.values())
-            assert max_count <= 3, f"{faction} deck has a card with {max_count} copies"
+            assert max_count <= 2, f"{faction} deck has a card with {max_count} copies"
 
     def test_deck_contains_characters(self):
         for faction in ["illuminati", "templars", "reptilians"]:
@@ -132,7 +144,35 @@ class TestCreateSessionWithDecks:
     def test_decks_are_single_faction(self):
         sid = create_session("Test", "illuminati", "reptilians")
         game = get_session(sid)
-        # Player 1 should be Illuminati
+        # Player 1 should be Illuminati (Network cards are allowed)
         p1_cards = [c for p in game.players if p.name == "Test" for c in p.hand]
         for c in p1_cards:
-            assert c.faction.value == "illuminati"
+            assert c.faction.value in ("illuminati", "neutral")
+        p1 = next(p for p in game.players if p.name == "Test")
+        assert p1.faction == "illuminati"
+
+
+class TestPresetDecks:
+    def test_presets_are_legal(self):
+        from engine.decks import load_presets, validate_deck, build_named_deck
+
+        presets = load_presets()
+        assert len(presets) >= 5
+        for preset in presets:
+            result = validate_deck(preset["cards"], faction=preset["faction"])
+            assert result["valid"] is True, f"{preset['id']}: {result['errors']}"
+            deck = build_named_deck(preset["id"])
+            assert len(deck) == 30
+
+    def test_session_can_load_presets(self):
+        sid = create_session(
+            "Test",
+            "templars",
+            "reptilians",
+            player_deck_id="test_templar_aggro",
+            ai_deck_id="test_reptilian_swarm",
+        )
+        game = get_session(sid)
+        assert game is not None
+        for player in game.players:
+            assert player.deck_size + player.hand_size == 30

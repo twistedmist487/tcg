@@ -1,9 +1,10 @@
 """
 Keyword mechanics for Conspiracy TCG.
 
-Implements the four core keywords:
+Implements the core keywords:
   - Taunt: Enemy characters must attack a Taunt character if able.
   - Stealth: Cannot be targeted by enemy attacks or abilities until it attacks.
+  - Charge: Can attack the turn it is played.
   - Silence: Removes all abilities from a character or location.
   - Exhausted: Cannot attack or use abilities the turn it's played/attacks.
 
@@ -18,6 +19,11 @@ from engine.card import CardInstance
 def has_taunt(character: CardInstance) -> bool:
     """Check if a character has the Taunt keyword."""
     return character.has_taunt
+
+
+def has_charge(character: CardInstance) -> bool:
+    """Check if a character has Charge (ready the turn it is played)."""
+    return bool(getattr(character, "has_charge", False))
 
 
 def has_stealth(character: CardInstance) -> bool:
@@ -81,9 +87,11 @@ def apply_exhausted(character: CardInstance) -> None:
 
 
 def clear_all_exhaustion(game: Game, player: Player) -> None:
-    """Clear exhaustion from all of a player's characters at turn start."""
+    """Clear exhaustion and per-turn attack locks at the start of a turn."""
     for character in player.board:
         character.is_exhausted = False
+        character.rush_locked = False
+        character.attacks_this_turn = 0
 
 
 def remove_stealth(character: CardInstance) -> None:

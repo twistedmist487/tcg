@@ -4,7 +4,7 @@
 
 "Conspiracy TCG" is a strategic card game where players command factions vying for global dominance through manipulation, ancient power, and otherworldly influence. The game centers around powerful Character cards that form the core of a player's strategy, supported by Spells and Locations that reshape the battlefield.
 
-Built in Python 3.12 with Pydantic-validated data models and a Hearthstone-inspired game engine. Playable via CLI (2-player or vs AI) or web browser (vs AI with auto-play).
+Built in Python 3.12 with Pydantic-validated data models and a Hearthstone-inspired game engine. Single-player only: learn in a guided tutorial, then play against AI in the browser (CLI vs-AI is available for development).
 
 ## Theme
 
@@ -15,15 +15,15 @@ The game draws from conspiracy theory lore, reimagining shadowy organizations as
 - **Faction-Specific Energy System:** Each faction uses a unique energy type (Influence, Faith, Psionics) that grows identically but creates distinct strategic identities through card design.
 - **Character-Centric Gameplay:** Characters are the stars -- they persist on the board, accumulate damage, gain buffs, and carry keywords like Taunt and Stealth.
 - **Hearthstone-Inspired Clarity:** Simultaneous damage, summoning sickness, growing mana/energy, and intuitive combat make the game easy to learn but strategically deep.
-- **Multiple Play Modes:** CLI for two local players, CLI vs AI, or browser-based play against an AI opponent with a dark-themed responsive UI.
-- **Data-Driven Design:** All 27 cards are defined in JSON, validated by Pydantic, and loaded at runtime. Adding new cards requires zero code changes.
+- **Tutorial-First Solo Play:** New players learn by playing a guided first match. After that, the game is faction-select vs AI, with curated decks and a later deck builder. No accounts, lobbies, or multiplayer. The browser table (history, Dossier, hero frames, energy well) is documented in [docs/wiki/entities/conspiracy-tcg-ui.md](../wiki/entities/conspiracy-tcg-ui.md).
+- **Data-Driven Design:** All 240 cards are defined in JSON, validated by Pydantic, and loaded at runtime. Adding new cards requires zero code changes.
 - **Extensible Engine:** The engine exposes a clean state dict and accepts action dicts. CLI, web UI, AI, and future interfaces all wrap the same core.
 
 ## Core Gameplay Loop
 
 Players take turns:
 
-1. **Start Turn** -- Draw 1 card, gain +1 energy (capped at 20), clear exhaustion from characters
+1. **Start Turn** -- Draw 1 card, gain +1 energy (capped at 10), clear exhaustion from characters
 2. **Main Phase** -- Spend energy to play cards and attack (unlimited actions):
    - **Deploy Characters** -- Place character cards onto the board (max 7)
    - **Cast Spells** -- One-time effects: damage, silence, draw, heal, mind control
@@ -37,10 +37,10 @@ The primary win condition is reducing the opponent's Life Points from 30 to 0. A
 
 | Component | Details |
 |-----------|---------|
-| Deck | 30 cards, single faction, max 3 copies per card |
+| Deck | 30 cards, one starting faction + up to 12 Network, max 2 copies per card |
 | Starting Hand | 4 cards |
 | Starting Life | 30 HP |
-| Energy | Starts at 1, +1 per turn, max 20 |
+| Energy | Starts at 1, +1 per turn, max 10 |
 | Board | Max 7 characters per player |
 | Hand Limit | Max 10 cards (overflow discards) |
 | Locations | Max 1 per player |
@@ -96,4 +96,4 @@ Future improvements planned: multiple difficulty levels, minimax look-ahead for 
 - **Abilities:** Powerful keywords (Taunt, Stealth, card draw) justify +/- 1 stat deviation
 - **Tuning bias:** Slightly undercost is preferred -- slightly overpowered cards are more fun than weak ones
 
-Current balance flags: Corporate Shill (1/4 for cost 2), Knight Commander (3/5 for cost 4), Templar Guardian (1/6 for cost 2) -- all flagged as slightly overcosted but kept for fun factor.
+Phase 7 balance pass (AI vs AI, 20 games per matchup): Templars were winning ~71% and Reptilians ~16%. Tuned Templar tank bodies down, moved Swiss Vault to 5, and gave Reptilians more mid/late impact. Abilities still justify some stat-above-curve cards (legendaries, Charge, Taunt).

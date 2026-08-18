@@ -136,11 +136,11 @@ class TestResolveSilenceAll:
         assert e1.is_silenced is True
         assert e2.is_silenced is True
 
-    def test_no_enemies_returns_no_success(self):
+    def test_no_enemies_still_resolves(self):
         game = _make_game()
         spell = _spell_card(effect="Silence all enemy characters until end of turn.")
         result = resolve_silence_all(game, game.active_player.name, spell)
-        assert result.success is False
+        assert result.success is True
 
 
 # ---------------------------------------------------------------------------
@@ -578,3 +578,128 @@ class TestSpellIntegration:
         result = game.play_card(len(game.active_player.hand) - 1)
         assert "effect" in result
         assert result["effect"]["effect_type"] == "silence_all"
+
+    def test_lethal_spell_removes_dead_character(self):
+        game = _make_game()
+        game.start_turn()
+        _enemy_on_board(game, name="Glass", health=2)
+        spell = _spell_card(effect="Deal 4 damage to a target character.")
+        game.active_player.hand.append(spell)
+        game.active_player.energy = 10
+
+        result = game.play_card(len(game.active_player.hand) - 1, spell_target_index=0)
+        assert result["success"] is True
+        assert game.inactive_player.board == []
+        assert "Glass" in result.get("slain", {}).get("opponent_slain", [])
+
+
+    def test_wiretap_bumps_hand_cost(self):
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        pawn = cards["templars_char_009"]
+        wiretap = cards["illuminati_spell_008"]
+        game = Game.setup([pawn] * 30, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        victim = game.inactive_player.hand[0]
+        before = victim.cost
+        game.active_player.hand.append(wiretap)
+        result = game.play_card(len(game.active_player.hand) - 1)
+        assert result["success"] is True
+        bumped = [c for c in game.inactive_player.hand if game.inactive_player.play_cost(c) > c.cost]
+        assert bumped
+        assert game.inactive_player.play_cost(bumped[0]) == bumped[0].cost + 2
+
+
+class TestTargetedEffects:
+    def test_judgment_damages_and_heals(self):
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        pawn = cards["templars_char_009"]
+        judgment = cards["templars_spell_006"]
+        game = Game.setup([pawn] * 30, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        game.active_player.life = 20
+        dummy = create_card_instance(pawn, "e1", "B")
+        dummy.modify_health(4)
+        game.inactive_player.board = [dummy]
+        game.active_player.hand.append(judgment)
+        result = game.play_card(len(game.active_player.hand) - 1, spell_target_index=0)
+        assert result["success"] is True
+        assert dummy.current_health == pawn.health + 4 - 5
+        assert game.active_player.life == 25
+
+    def test_consecration_hits_all(self):
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        pawn = cards["templars_char_009"]
+        spell = cards["templars_spell_004"]
+        game = Game.setup([pawn] * 30, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        a = create_card_instance(pawn, "e1", "B")
+        b = create_card_instance(pawn, "e2", "B")
+        game.inactive_player.board = [a, b]
+        game.active_player.hand.append(spell)
+        result = game.play_card(len(game.active_player.hand) - 1)
+        assert result["success"] is True
+        assert a.damage_taken == 1
+        assert b.damage_taken == 1
+
+    def test_absolution_defaults_to_hero(self):
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        pawn = cards["templars_char_009"]
+        spell = cards["templars_spell_003"]
+        game = Game.setup([pawn] * 30, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        game.active_player.life = 20
+        game.active_player.hand.append(spell)
+        result = game.play_card(len(game.active_player.hand) - 1, target_side="hero")
+        assert result["success"] is True
+        assert game.active_player.life == 25
+
+    def test_friendly_buff_needs_ally(self):
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        pawn = cards["templars_char_009"]
+        spell = cards["templars_spell_008"]
+        game = Game.setup([pawn] * 30, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        ally = create_card_instance(pawn, "a1", "A")
+        game.active_player.board = [ally]
+        game.active_player.hand.append(spell)
+        result = game.play_card(
+            len(game.active_player.hand) - 1,
+            spell_target_index=0,
+            target_side="ally",
+        )
+        assert result["success"] is True
+        assert ally.current_attack == pawn.attack + 3
+
+    def test_abduction_beam_bounces(self):
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        pawn = cards["templars_char_009"]
+        spell = cards["reptilians_spell_006"]
+        game = Game.setup([pawn] * 30, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        dummy = create_card_instance(pawn, "e1", "B")
+        game.inactive_player.board = [dummy]
+        game.active_player.hand.append(spell)
+        result = game.play_card(len(game.active_player.hand) - 1, spell_target_index=0)
+        assert result["success"] is True
+        assert game.inactive_player.board == []
+        assert any(c.name == pawn.name for c in game.inactive_player.hand)
+
+    def test_assault_uses_clicked_target(self):
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        pawn = cards["templars_char_009"]
+        strike = cards["neutral_char_012"]
+        game = Game.setup([pawn] * 30, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        dummy = create_card_instance(pawn, "e1", "B")
+        game.inactive_player.board = [dummy]
+        game.active_player.hand.append(strike)
+        result = game.play_card(len(game.active_player.hand) - 1, spell_target_index=0)
+        assert result["success"] is True
+        assert dummy.current_health == pawn.health - 2

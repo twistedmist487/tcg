@@ -16,5 +16,11 @@
     "energy_type": "Psionics",
     "lore_summary": "Shape-shifting reptilian beings infiltrating humanity.",
     "key_mechanics": ["Disruption & Debuffs", "Stealth/Evasion", "Transformation/Adaptation", "Mind Control"]
+  },
+  "neutral": {
+    "name": "The Network",
+    "energy_type": "Conspiracy",
+    "lore_summary": "Freelancers, leaks, and black-market relics any faction can hire. Not a starting identity.",
+    "key_mechanics": ["Shared pool", "Flexible tools", "Faction-conditional bonuses"]
   }
 }

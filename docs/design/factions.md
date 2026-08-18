@@ -1,6 +1,6 @@
 # Conspiracy TCG - Factions
 
-This document details the three primary factions in the Conspiracy TCG, outlining their lore, philosophy, key mechanics, and sample card concepts.
+This document details the three primary factions in the Conspiracy TCG, outlining their lore, philosophy, key mechanics, and sample card concepts. A fourth pool, **The Network**, is not a starting identity — any of the three can hire those cards.
 
 ---
 
@@ -128,3 +128,18 @@ This document details the three primary factions in the Conspiracy TCG, outlinin
     *   **Ancient Alien Heritage:** Xenomorph Drone hints at their true biological nature and connection to ancient, brutal alien species.
     *   **Technological Subversion:** Abduction Specialist and Underground Ant Colony represent their infiltration network and the hive-mind structure of their hidden society.
     *   **Hive Biology:** Hatchling Brood and Raptor Swarm reveal the Reptilian reproductive horror — they breed fast, die fast, and overwhelm through numbers.
+
+---
+
+## 4. The Network (shared pool)
+
+*   **Lore:** Freelancers, leaks, and black-market relics. The Network is not a fourth conspiracy — it is the gray market every conspiracy already uses. Operatives work for whoever pays. A few of them still play favorites.
+*   **Rules:** Any starting faction may include Network cards. Max 12 Network cards in a 30-card deck. Energy type is Conspiracy (flavor only; you still spend your faction energy). New Network cards are printed ~15–20% weaker than faction cards and pay that back in utility.
+*   **Faction-conditional cards:**
+    *   **Double Agent** — draws one, or two if you are Illuminati
+    *   **Relic Courier** — Taunt wall; Templars also restore 3 Health
+    *   **Skin-Walker Hireling** — 3/2 that gains Stealth if you are Reptilians
+    *   **Consecrated Tip** — 3 damage; Templars also heal 3
+    *   **The Exchange** — pings the enemy hero; Reptilians ping for 2
+*   **Generic tools:** Freelance Operative, Deep Throat, Black-Budget Merc, Contract Guard (Taunt), Barrier Agent (Shielding), Street Runner (Rush), Berserker Hire (Enraged), Strike Asset (Assault), Open Channel (Discovery), Leaked Dossier, Plausible Deniability, Burn Notice, Neutral Ground, Leech Contact (Drain), Toxin Needle (Venom), Sleeper Cell (Recur), Signal Booster (Amplify), Second Strike (Chain), Walk-In (Manifest), Overpen (Excess), Tripwire (Retaliate), Black Ice (Stasis), Burn Bag (Recycle), Forked Brief (Split), Carbon Copy (Echo), Dead Drop Memo (Flash), Safe House (Ward), Contingency (Opening)
+*   **Token:** Raptor (2/1) — summoned by Deathrattles, not a deck card

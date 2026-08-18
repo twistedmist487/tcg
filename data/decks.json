@@ -1,7 +1,7 @@
 {
   "illuminati": {
     "name": "Illuminati Shadow Council",
-    "description": "A control-focused deck leveraging disruption, hand advantage, infiltration, and resource denial.",
+    "description": "Control: discard, bounce, silence, and hand advantage. Hires Double Agent and cheap Network mute.",
     "cards": [
       {
         "id": "illuminati_char_006",
@@ -12,89 +12,113 @@
         "copies": 2
       },
       {
-        "id": "illuminati_char_002",
+        "id": "illuminati_char_015",
         "copies": 2
       },
       {
-        "id": "illuminati_char_004",
+        "id": "illuminati_spell_011",
         "copies": 2
-      },
-      {
-        "id": "illuminati_char_013",
-        "copies": 1
       },
       {
         "id": "illuminati_spell_008",
         "copies": 2
       },
       {
-        "id": "illuminati_spell_004",
-        "copies": 1
-      },
-      {
-        "id": "illuminati_spell_009",
-        "copies": 1
-      },
-      {
         "id": "illuminati_char_001",
-        "copies": 3
-      },
-      {
-        "id": "illuminati_char_008",
         "copies": 2
       },
       {
-        "id": "illuminati_char_011",
-        "copies": 1
-      },
-      {
-        "id": "illuminati_char_014",
-        "copies": 1
-      },
-      {
-        "id": "illuminati_loc_003",
+        "id": "illuminati_spell_012",
         "copies": 2
       },
       {
-        "id": "illuminati_loc_006",
-        "copies": 1
+        "id": "illuminati_spell_013",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_char_016",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_char_018",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_spell_001",
+        "copies": 2
+      },
+      {
+        "id": "illuminati_loc_007",
+        "copies": 2
+      },
+      {
+        "id": "neutral_char_004",
+        "copies": 2
+      },
+      {
+        "id": "neutral_spell_014",
+        "copies": 2
       },
       {
         "id": "illuminati_spell_002",
         "copies": 2
-      },
-      {
-        "id": "illuminati_spell_006",
-        "copies": 1
-      },
-      {
-        "id": "illuminati_spell_001",
-        "copies": 1
-      },
-      {
-        "id": "illuminati_char_003",
-        "copies": 2
-      },
-      {
-        "id": "illuminati_char_012",
-        "copies": 1
       }
     ]
   },
   "templars": {
     "name": "Templar Holy Host",
-    "description": "A resilient defensive deck built around healing, taunts, divine protection, and board presence.",
+    "description": "Defense: Shielding, Recur walls, heals, and holy removal. Hires Relic Courier.",
     "cards": [
+      {
+        "id": "templars_char_015",
+        "copies": 2
+      },
+      {
+        "id": "templars_char_009",
+        "copies": 2
+      },
+      {
+        "id": "templars_spell_011",
+        "copies": 2
+      },
+      {
+        "id": "templars_char_016",
+        "copies": 2
+      },
       {
         "id": "templars_spell_003",
         "copies": 2
       },
       {
-        "id": "templars_char_009",
-        "copies": 1
+        "id": "templars_char_002",
+        "copies": 2
       },
       {
-        "id": "templars_char_013",
+        "id": "neutral_char_005",
+        "copies": 2
+      },
+      {
+        "id": "templars_char_017",
+        "copies": 2
+      },
+      {
+        "id": "templars_spell_001",
+        "copies": 2
+      },
+      {
+        "id": "templars_spell_012",
+        "copies": 2
+      },
+      {
+        "id": "templars_char_018",
+        "copies": 2
+      },
+      {
+        "id": "templars_loc_007",
+        "copies": 2
+      },
+      {
+        "id": "templars_loc_008",
         "copies": 2
       },
       {
@@ -102,155 +126,769 @@
         "copies": 2
       },
       {
-        "id": "templars_char_002",
-        "copies": 3
-      },
-      {
-        "id": "templars_spell_005",
+        "id": "neutral_spell_017",
         "copies": 2
-      },
-      {
-        "id": "templars_char_012",
-        "copies": 1
-      },
-      {
-        "id": "templars_spell_001",
-        "copies": 2
-      },
-      {
-        "id": "templars_char_004",
-        "copies": 2
-      },
-      {
-        "id": "templars_loc_003",
-        "copies": 3
-      },
-      {
-        "id": "templars_spell_009",
-        "copies": 1
-      },
-      {
-        "id": "templars_char_001",
-        "copies": 2
-      },
-      {
-        "id": "templars_char_007",
-        "copies": 1
-      },
-      {
-        "id": "templars_char_011",
-        "copies": 1
-      },
-      {
-        "id": "templars_char_014",
-        "copies": 1
-      },
-      {
-        "id": "templars_loc_001",
-        "copies": 1
-      },
-      {
-        "id": "templars_spell_008",
-        "copies": 1
-      },
-      {
-        "id": "templars_loc_005",
-        "copies": 1
-      },
-      {
-        "id": "templars_char_010",
-        "copies": 1
       }
     ]
   },
   "reptilians": {
     "name": "Reptilian Invasion Force",
-    "description": "An aggressive swarm deck using stealth, card draw, psychic assault, and psionic disruption.",
+    "description": "Aggro swarm: Rush, Venom, tokens, and face pings. Hires Skin-Walker and cheap Network Rush.",
     "cards": [
+      {
+        "id": "reptilians_char_015",
+        "copies": 2
+      },
       {
         "id": "reptilians_char_007",
         "copies": 2
       },
       {
-        "id": "reptilians_spell_004",
+        "id": "reptilians_char_016",
         "copies": 2
       },
       {
-        "id": "reptilians_char_009",
-        "copies": 1
-      },
-      {
-        "id": "reptilians_spell_009",
-        "copies": 1
-      },
-      {
-        "id": "reptilians_spell_001",
+        "id": "reptilians_spell_011",
         "copies": 2
       },
       {
         "id": "reptilians_char_005",
-        "copies": 3
-      },
-      {
-        "id": "reptilians_char_013",
-        "copies": 1
-      },
-      {
-        "id": "reptilians_char_001",
         "copies": 2
       },
       {
-        "id": "reptilians_char_003",
+        "id": "neutral_char_024",
         "copies": 2
       },
       {
-        "id": "reptilians_char_008",
+        "id": "neutral_char_006",
         "copies": 2
       },
       {
-        "id": "reptilians_char_011",
-        "copies": 1
-      },
-      {
-        "id": "reptilians_char_014",
-        "copies": 1
-      },
-      {
-        "id": "reptilians_loc_003",
+        "id": "reptilians_char_017",
         "copies": 2
       },
       {
-        "id": "reptilians_loc_006",
-        "copies": 1
+        "id": "reptilians_spell_013",
+        "copies": 2
       },
       {
-        "id": "reptilians_spell_002",
-        "copies": 1
+        "id": "reptilians_char_018",
+        "copies": 2
       },
       {
-        "id": "reptilians_spell_006",
-        "copies": 1
+        "id": "reptilians_spell_012",
+        "copies": 2
       },
       {
-        "id": "reptilians_char_006",
-        "copies": 1
+        "id": "reptilians_loc_007",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_loc_008",
+        "copies": 2
+      },
+      {
+        "id": "reptilians_char_009",
+        "copies": 2
       },
       {
         "id": "reptilians_char_012",
-        "copies": 1
-      },
-      {
-        "id": "reptilians_spell_008",
-        "copies": 1
-      },
-      {
-        "id": "reptilians_loc_001",
-        "copies": 1
-      },
-      {
-        "id": "reptilians_spell_003",
-        "copies": 1
+        "copies": 2
       }
     ]
-  }
+  },
+  "presets": [
+    {
+      "id": "test_templar_aggro",
+      "name": "Test: Templar Charge",
+      "faction": "templars",
+      "description": "Low curve, Charge and Rush. For racing the opponent.",
+      "cards": [
+        {
+          "id": "templars_char_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_003",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_002",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_006",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_013",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_010",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_007",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_012",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_004",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_004",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_012",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_005",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_005",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "test_templar_control",
+      "name": "Test: Templar Walls",
+      "faction": "templars",
+      "description": "Taunt, heals, and late bombs. For stalling and outlasting.",
+      "cards": [
+        {
+          "id": "templars_char_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_003",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_002",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_006",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_005",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_004",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_loc_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_007",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_008",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_011",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_006",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_014",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_010",
+          "copies": 1
+        },
+        {
+          "id": "templars_char_008",
+          "copies": 1
+        }
+      ]
+    },
+    {
+      "id": "test_illuminati_control",
+      "name": "Test: Illuminati Denial",
+      "faction": "illuminati",
+      "description": "Draw, discard, silence, steal. For locking the game down.",
+      "cards": [
+        {
+          "id": "illuminati_char_006",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_009",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_008",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_004",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_004",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_009",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_005",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_004",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_001",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_008",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_002",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_006",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_loc_003",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_003",
+          "copies": 1
+        },
+        {
+          "id": "illuminati_char_010",
+          "copies": 1
+        }
+      ]
+    },
+    {
+      "id": "test_reptilian_swarm",
+      "name": "Test: Reptilian Swarm",
+      "faction": "reptilians",
+      "description": "Tokens, Charge, Stealth, Venom. For flooding the board.",
+      "cards": [
+        {
+          "id": "reptilians_char_007",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_004",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_005",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_010",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_014",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_015",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_009",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_009",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_006",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_001",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_003",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_002",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_loc_003",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_012",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "test_network_lab",
+      "name": "Test: Network Lab",
+      "faction": "templars",
+      "description": "Keyword toys (Recycle, Split, Drain, Ward) plus a cheap Templar shell.",
+      "cards": [
+        {
+          "id": "neutral_spell_007",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_008",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_013",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_003",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_002",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_006",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_013",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_012",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_004",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_004",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_005",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_001",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "test_illuminati_locks",
+      "name": "Test: Illuminati Locks",
+      "faction": "illuminati",
+      "description": "New control tools: discard, bounce, silence on play.",
+      "cards": [
+        {
+          "id": "illuminati_char_015",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_006",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_016",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_013",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_001",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_017",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_loc_007",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_018",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_014",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_loc_008",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_014",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_012",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "test_templar_oath",
+      "name": "Test: Templar Oath",
+      "faction": "templars",
+      "description": "New walls: Shielding, Recur, Anoint, Charge mid.",
+      "cards": [
+        {
+          "id": "templars_char_015",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_016",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_003",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_017",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_018",
+          "copies": 2
+        },
+        {
+          "id": "templars_loc_007",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_013",
+          "copies": 2
+        },
+        {
+          "id": "templars_loc_008",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_014",
+          "copies": 1
+        },
+        {
+          "id": "templars_char_010",
+          "copies": 1
+        },
+        {
+          "id": "neutral_char_022",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_017",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_002",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "test_reptilian_brood",
+      "name": "Test: Reptilian Brood",
+      "faction": "reptilians",
+      "description": "New swarm: Rush, Venom, Brood Burst, token location.",
+      "cards": [
+        {
+          "id": "reptilians_char_015",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_007",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_016",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_005",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_017",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_013",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_018",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_loc_007",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_014",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_loc_008",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_024",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_014",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_012",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "test_silence_toolbox",
+      "name": "Test: Silence Toolbox",
+      "faction": "illuminati",
+      "description": "Mute, Blackout, Ombudsman, and Network silence. For locking boards.",
+      "cards": [
+        {
+          "id": "illuminati_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_018",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_002",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_014",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_015",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_008",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_010",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_006",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_019",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_006",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_031",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_loc_007",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_022",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "test_recycle_engine",
+      "name": "Test: Recycle Engine",
+      "faction": "templars",
+      "description": "Burn Bag, memos, Fence, Graymail. Cycle until you find the wall.",
+      "cards": [
+        {
+          "id": "neutral_spell_007",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_020",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_033",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_026",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_030",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_006",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_015",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_003",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_002",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "templars_loc_007",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_016",
+          "copies": 2
+        }
+      ]
+    }
+  ]
 }

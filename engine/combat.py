@@ -81,12 +81,28 @@ def resolve_attack(
         remove_stealth(attacker)
 
     if defender is not None:
-        # Character vs character combat — simultaneous damage
         atk_damage = attacker.current_attack
         def_damage = defender.current_attack
+        def_before = defender.current_health
+        atk_before = attacker.current_health
 
-        defender.take_damage(atk_damage)
-        attacker.take_damage(def_damage)
+        dealt_to_def = defender.take_damage(atk_damage)
+        dealt_to_atk = attacker.take_damage(def_damage)
+
+        if attacker.has_venom and not attacker.is_silenced and dealt_to_def > 0:
+            defender.damage_taken = defender._base_health + defender.health_bonus
+        if defender.has_venom and not defender.is_silenced and dealt_to_atk > 0:
+            attacker.damage_taken = attacker._base_health + attacker.health_bonus
+
+        if attacker.has_drain and not attacker.is_silenced and dealt_to_def > 0:
+            attacker_owner.life = min(Player.STARTING_LIFE, attacker_owner.life + dealt_to_def)
+        if defender.has_drain and not defender.is_silenced and dealt_to_atk > 0:
+            defender_owner.life = min(Player.STARTING_LIFE, defender_owner.life + dealt_to_atk)
+
+        if attacker.has_excess and not attacker.is_silenced and atk_damage > def_before > 0:
+            attacker.buffs.append("excess_ready")
+        if defender.has_excess and not defender.is_silenced and def_damage > atk_before > 0:
+            defender.buffs.append("excess_ready")
 
         attacker_died = not attacker.is_alive
         defender_died = not defender.is_alive
@@ -95,21 +111,22 @@ def resolve_attack(
             attacker=attacker,
             defender=defender,
             target_player=defender_owner,
-            damage_dealt_to_defender=atk_damage,
-            damage_dealt_to_attacker=def_damage,
+            damage_dealt_to_defender=dealt_to_def,
+            damage_dealt_to_attacker=dealt_to_atk,
             attacker_died=attacker_died,
             defender_died=defender_died,
         )
     else:
-        # Direct attack on the player
         atk_damage = attacker.current_attack
-        defender_owner.direct_damage(atk_damage)
+        dealt = defender_owner.direct_damage(atk_damage)
+        if attacker.has_drain and not attacker.is_silenced and dealt > 0:
+            attacker_owner.life = min(Player.STARTING_LIFE, attacker_owner.life + dealt)
 
         result = CombatResult(
             attacker=attacker,
             defender=None,
             target_player=defender_owner,
-            damage_dealt_to_defender=atk_damage,
+            damage_dealt_to_defender=dealt,
             damage_dealt_to_attacker=0,
             attacker_died=False,
             defender_died=False,
@@ -136,7 +153,10 @@ def can_attack_player_directly(
     attacker_owner: Player, defender_owner: Player
 ) -> bool:
     """
-    Check if the attacker can hit the opponent directly (no blocking characters).
-    Returns True only if the defender has no board characters.
+    Check if the attacker can hit the opponent directly.
+
+    Face is legal when there are no targetable enemy characters: empty
+    board, or only Stealth (Stealth cannot be attacked, so it does not
+    block a direct attack). Taunt that is not stealthed still blocks face.
     """
-    return len(defender_owner.board) == 0
+    return len(get_valid_attack_targets(attacker_owner, defender_owner)) == 0

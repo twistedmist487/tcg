@@ -71,6 +71,15 @@ class TestValidateCards:
         errors = validate_cards([card])
         assert any("invalid faction" in e for e in errors)
 
+    def test_valid_network_card(self):
+        card = self._card(
+            id="neutral_char_001",
+            faction="neutral",
+            energy_type="Conspiracy",
+        )
+        errors = validate_cards([card])
+        assert errors == []
+
     def test_wrong_energy_for_faction(self):
         card = self._card(energy_type="Faith")
         errors = validate_cards([card])

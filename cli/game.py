@@ -36,9 +36,9 @@ def build_deck(card_pool: list, faction: str, size: int = 20) -> list:
         for card in faction_cards:
             if len(deck) >= size:
                 break
-            # Max 3 copies per card
+            # Max 2 copies per card
             copies = deck.count(card)
-            if copies < 3:
+            if copies < 2:
                 deck.append(card)
 
     # Trim to exact size

@@ -14,6 +14,7 @@ from typing import Any
 
 from engine.game import Game
 from engine.models import Card, load_cards, load_factions
+from engine.player import Player
 
 
 def serialize_game(game: Game, indent: int | None = 2) -> str:
@@ -34,6 +35,7 @@ def serialize_game(game: Game, indent: int | None = 2) -> str:
     for player in game.players:
         player_state = {
             "name": player.name,
+            "faction": getattr(player, "faction", ""),
             "life": player.life,
             "energy": player.energy,
             "max_energy": player.max_energy,
@@ -75,7 +77,7 @@ def deserialize_game(json_str: str) -> Game:
     for i, ps in enumerate(state["serialized_players"]):
         # Rebuild deck with Card objects
         deck = [dict_to_card(d) for d in ps["deck"]]
-        player = Player(ps["name"], deck)
+        player = Player(ps["name"], deck, faction=ps.get("faction"))
         player.life = ps["life"]
         player.energy = ps["energy"]
         player.max_energy = ps["max_energy"]
@@ -102,6 +104,7 @@ def deserialize_game(json_str: str) -> Game:
     game.turn_number = state.get("turn_number", 0)
     game.winner = state.get("winner")
     game.history = state.get("history", [])
+    game.turn_started = state.get("turn_started", False)
 
     return game
 
@@ -194,7 +197,7 @@ def dict_to_card_instance(
     d: dict[str, Any], owner: str = ""
 ) -> "CardInstance":
     """Convert a plain dict back to a CardInstance."""
-    from engine.card import CardInstance
+    from engine.card import create_card_instance
     from engine.models import CharacterCard, SpellCard, LocationCard
 
     card_dict = d["card"]
@@ -208,15 +211,12 @@ def dict_to_card_instance(
     else:
         card = LocationCard(**raw_card)
 
-    return CardInstance(
-        card=card,
-        instance_id=d["instance_id"],
-        owner=d.get("owner", owner),
-        damage_taken=d.get("damage_taken", 0),
-        is_exhausted=d.get("is_exhausted", False),
-        is_stealth=d.get("is_stealth", False),
-        is_silenced=d.get("is_silenced", False),
-        attack_bonus=d.get("attack_bonus", 0),
-        health_bonus=d.get("health_bonus", 0),
-        buffs=d.get("buffs", []),
-    )
+    inst = create_card_instance(card, d["instance_id"], d.get("owner", owner))
+    inst.damage_taken = d.get("damage_taken", 0)
+    inst.is_exhausted = d.get("is_exhausted", inst.is_exhausted)
+    inst.is_stealth = d.get("is_stealth", inst.is_stealth)
+    inst.is_silenced = d.get("is_silenced", False)
+    inst.attack_bonus = d.get("attack_bonus", 0)
+    inst.health_bonus = d.get("health_bonus", 0)
+    inst.buffs = d.get("buffs", [])
+    return inst

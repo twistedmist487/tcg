@@ -32,15 +32,15 @@ they're played).
 **Required fields:** `id`, `name`, `type`, `faction`, `cost`, `energy_type`,
 `attack`, `health`, `ability`, `lore`
 
-**ID format:** `{faction}_char_{3-digit-number}` (e.g., `illuminati_char_001`)
+**ID format:** `{faction}_char_{3-digit-number}` (e.g., `illuminati_char_001`).
+Network cards use `neutral_char_001` and energy type `Conspiracy`.
 
-**Balance target:** attack + health should roughly equal cost + 1
+**Balance target:** faction characters `attack + health ≈ cost + 1`. New Network characters sit at or under `cost + 1` and pay for keywords by being smaller or adding utility (Recycle, Split, cantrips).
 
 ### Spell Card
 
 Spells are one-time effects. The effect is applied on play, then the card is
-discarded. Currently effects are defined but not auto-resolved (Phase 6 will
-implement the effect engine).
+discarded. Effects are parsed from the printed text in `engine/effects.py`.
 
 ```json
 {
@@ -147,9 +147,13 @@ Returned by `game.get_state()` -- fully JSON-serializable:
       ],
       "board": [
         {
+          "id": "templars_char_002",
           "name": "Templar Guardian",
           "cost": 2,
           "faction": "templars",
+          "type": "Character",
+          "lore": "Stands as an impenetrable wall...",
+          "ability": "Taunt (Enemy characters must attack this character if able).",
           "attack": 1,
           "health": 5,
           "alive": true,
@@ -160,7 +164,15 @@ Returned by `game.get_state()` -- fully JSON-serializable:
           "damage_taken": 1
         }
       ],
-      "location": null
+      "location": {
+        "id": "templars_loc_001",
+        "name": "Sacred Chapel",
+        "cost": 4,
+        "faction": "templars",
+        "type": "Location",
+        "effect": "At the start of your turn, heal 1 damage from all your characters.",
+        "lore": "A place of solace and restoration."
+      }
     }
   ],
   "is_over": false,
@@ -172,9 +184,13 @@ Returned by `game.get_state()` -- fully JSON-serializable:
 
 | Field           | Type    | Description |
 |-----------------|---------|-------------|
+| id              | string  | Card definition id (for the Dossier / catalog merge) |
 | name            | string  | Card display name |
 | cost            | int     | Energy cost to play |
-| faction         | string  | "illuminati", "templars", or "reptilians" |
+| faction         | string  | "illuminati", "templars", "reptilians", or "neutral" |
+| type            | string  | "Character" on board |
+| lore            | string  | Flavor text (Dossier) |
+| ability         | string  | Printed ability (Dossier) |
 | attack          | int     | Current attack (base + buffs - debuffs, min 0) |
 | health          | int     | Current health (base + health_bonus - damage_taken) |
 | alive           | bool    | True if health > 0 |
@@ -245,7 +261,7 @@ player.board          # list[CardInstance] -- characters on board
 player.deck           # list[Card] -- remaining deck
 player.life           # int -- current life (starts 30)
 player.energy         # int -- current available energy
-player.max_energy     # int -- energy cap (grows per turn, max 20)
+player.max_energy     # int -- energy cap (grows per turn, max 10)
 player.location       # CardInstance | None -- active location
 player.hand_size      # int -- len(hand)
 player.deck_size      # int -- len(deck)
@@ -350,3 +366,6 @@ delete_session(sid)
 
 Session IDs are 8-character UUID prefixes. Sessions are ephemeral (lost on
 server restart).
+
+The browser table that consumes this state is documented in
+[Play table UI](../wiki/entities/conspiracy-tcg-ui.md).

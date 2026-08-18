@@ -4,91 +4,322 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Conspiracy TCG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <div id="app">
     <header>
       <h1>CONSPIRACY TCG</h1>
-      <div class="subtitle">Three factions. One world. No mercy.</div>
+      <div class="subtitle">Three factions. One world. Learn in the shadows.</div>
     </header>
 
-    <!-- Landing / setup screen -->
-    <div id="landing">
-      <h2>Choose Your Faction</h2>
-      <div class="faction-select">
-        <div class="faction-btn illuminati" data-faction="illuminati" onclick="selectFaction(this)">
-          <span class="icon">&#9760;</span>
-          <span class="name">Illuminati</span>
-          <span class="energy-type">Influence</span>
-        </div>
-        <div class="faction-btn templars" data-faction="templars" onclick="selectFaction(this)">
-          <span class="icon">&#9770;</span>
-          <span class="name">Templars</span>
-          <span class="energy-type">Faith</span>
-        </div>
-        <div class="faction-btn reptilians" data-faction="reptilians" onclick="selectFaction(this)">
-          <span class="icon">&#9650;</span>
-          <span class="name">Reptilians</span>
-          <span class="energy-type">Psionics</span>
-        </div>
+    <!-- Main menu -->
+    <div id="screen-menu" class="screen">
+      <h2>Single Player</h2>
+      <p class="lede">Learn the rules in a guided match, then take on the AI.</p>
+      <div class="menu-actions">
+        <button class="primary" onclick="startTutorial()">Play Tutorial</button>
+        <button onclick="showScreen('screen-setup')">Play vs AI</button>
+        <button onclick="openEncounters()">Faction Encounters</button>
+        <button onclick="openDeckBuilder()">Deck Builder</button>
+        <button onclick="showScreen('screen-help')">How to Play</button>
       </div>
-      <div style="margin: 12px 0;">
-        <input type="text" id="player-name" placeholder="Your name (optional)"
-               style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border);
-                      background: var(--bg-card); color: var(--text-primary); width: 220px;">
-      </div>
-      <button class="primary" onclick="startGame()" style="font-size: 1em; padding: 12px 32px;">
-        Begin Game
-      </button>
     </div>
 
-    <!-- Game screen (hidden initially) -->
-    <div id="game-screen" style="display:none;">
+    <!-- Play vs AI setup -->
+    <div id="screen-setup" class="screen" hidden>
+      <h2>Play vs AI</h2>
+      <label class="field">Your name
+        <input type="text" id="player-name" placeholder="Player">
+      </label>
+      <h3>Your faction</h3>
+      <div class="faction-select" id="setup-player-factions"></div>
+      <h3>Opponent faction</h3>
+      <div class="faction-select" id="setup-ai-factions"></div>
+      <h3>Difficulty</h3>
+      <div class="choice-row">
+        <button type="button" class="choice selected" data-difficulty="easy" onclick="selectDifficulty(this)">Easy</button>
+        <button type="button" class="choice" data-difficulty="medium" onclick="selectDifficulty(this)">Medium</button>
+      </div>
+      <h3>Your deck</h3>
+      <select id="setup-deck"></select>
+      <h3>AI deck</h3>
+      <select id="setup-ai-deck"></select>
+      <div class="menu-actions">
+        <button class="primary" onclick="startStandardGame()">Begin Match</button>
+        <button onclick="showScreen('screen-menu')">Back</button>
+      </div>
+    </div>
+
+    <!-- Showcase encounters -->
+    <div id="screen-encounters" class="screen" hidden>
+      <h2>Faction Encounters</h2>
+      <p class="lede">Scripted matchups that show how each faction wants to play.</p>
+      <div id="encounter-list" class="card-grid"></div>
+      <div class="menu-actions">
+        <button onclick="showScreen('screen-menu')">Back</button>
+      </div>
+    </div>
+
+    <!-- Deck builder -->
+    <div id="screen-deck" class="screen" hidden>
+      <h2>Deck Builder</h2>
+      <div class="deck-toolbar">
+        <input type="text" id="deck-name" placeholder="Deck name">
+        <div class="faction-select compact" id="deck-factions"></div>
+        <select id="deck-saved"></select>
+        <button onclick="loadSelectedDeck()">Load</button>
+        <button onclick="saveCurrentDeck()">Save</button>
+        <button onclick="playCurrentDeck()">Play this deck</button>
+      </div>
+      <div class="deck-filters">
+        <input type="search" id="deck-search" placeholder="Search name or text" oninput="renderDeckBuilder()">
+        <select id="deck-pool" onchange="renderDeckBuilder()">
+          <option value="">Faction + Network</option>
+          <option value="faction">Faction only</option>
+          <option value="neutral">Network only</option>
+        </select>
+        <select id="deck-type" onchange="renderDeckBuilder()">
+          <option value="">All types</option>
+          <option value="Character">Characters</option>
+          <option value="Spell">Spells</option>
+          <option value="Location">Locations</option>
+        </select>
+        <select id="deck-cost" onchange="renderDeckBuilder()">
+          <option value="">All costs</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5+</option>
+        </select>
+        <select id="deck-keyword" onchange="renderDeckBuilder()">
+          <option value="">All keywords</option>
+          <option value="Taunt">Taunt</option>
+          <option value="Stealth">Stealth</option>
+          <option value="Charge">Charge</option>
+          <option value="Rush">Rush</option>
+          <option value="Shielding">Shielding</option>
+          <option value="Drain">Drain</option>
+          <option value="Venom">Venom</option>
+          <option value="Recur">Recur</option>
+          <option value="Stasis">Stasis</option>
+          <option value="Amplify">Amplify</option>
+          <option value="Recycle">Recycle</option>
+          <option value="Chain">Chain</option>
+          <option value="Split">Split</option>
+          <option value="Echo">Echo</option>
+          <option value="Excess">Excess</option>
+          <option value="Retaliate">Retaliate</option>
+          <option value="Flash">Flash</option>
+          <option value="Manifest">Manifest</option>
+          <option value="Opening">Opening</option>
+          <option value="Ward">Ward</option>
+          <option value="Silence">Silence</option>
+        </select>
+        <span id="deck-count">0 / 30</span>
+      </div>
+      <div class="deck-layout">
+        <div>
+          <h3>Collection</h3>
+          <div id="deck-collection" class="card-grid"></div>
+        </div>
+        <div>
+          <h3>Deck list</h3>
+          <div id="deck-list"></div>
+        </div>
+      </div>
+      <div class="menu-actions">
+        <button onclick="showScreen('screen-menu')">Back</button>
+      </div>
+    </div>
+
+    <!-- Help / rules -->
+    <div id="screen-help" class="screen" hidden>
+      <h2>How to Play</h2>
+      <div class="help-copy">
+        <p>Conspiracy TCG is a single-player card game. You play against an AI opponent.</p>
+        <ul>
+          <li><strong>Each turn</strong> — you draw a card and gain +1 energy (max 10). The first player skips that first draw.</li>
+          <li><strong>Deck</strong> — 30 cards, at most 2 copies of any card, one faction plus up to 12 Network.</li>
+          <li><strong>Play cards</strong> — spend energy on characters, spells, or one location.</li>
+          <li><strong>Exhausted</strong> — characters cannot attack the turn they are played, unless they have Charge.</li>
+          <li><strong>Attack</strong> — click a ready character, then click an enemy or Attack Face.</li>
+          <li><strong>Taunt</strong> — you must attack a Taunt character first.</li>
+          <li><strong>Stealth</strong> — cannot be attacked until that character attacks. You may hit face instead.</li>
+          <li><strong>Locations</strong> — stay in play (one at a time) and keep working each turn.</li>
+          <li><strong>Mulligan</strong> — before a normal match you may redraw any number of cards once.</li>
+          <li><strong>Charge / Rush</strong> — Charge can attack anyone the turn it is played. Rush can only attack characters that turn.</li>
+          <li><strong>Shielding</strong> — ignores the next damage, then pops.</li>
+          <li><strong>Enraged</strong> — can attack twice each turn.</li>
+          <li><strong>Assault / Deathrattle</strong> — Assault when played from hand; Deathrattle when it dies.</li>
+          <li><strong>Discovery</strong> — pick 1 of 3 random faction + Network cards.</li>
+          <li><strong>Drain</strong> — combat damage heals your hero. <strong>Venom</strong> — any damage from this is lethal.</li>
+          <li><strong>Recur</strong> — first death leaves it on the board at 1 Health.</li>
+          <li><strong>Stasis</strong> — that character cannot attack until the end of its controller's next turn.</li>
+          <li><strong>Amplify</strong> — your spells deal +1 damage. <strong>Ward</strong> — ignore all damage until end of turn (does not pop).</li>
+          <li><strong>Recycle</strong> — pay 1 energy to shuffle the card into your deck and draw.</li>
+          <li><strong>Chain</strong> — extra effect if you already played a card this turn. <strong>Split</strong> — choose one option.</li>
+          <li><strong>Echo</strong> — a copy stays in hand until end of turn. <strong>Excess</strong> — extra effect if attack exceeds current Health.</li>
+          <li><strong>Retaliate</strong> — once, when this takes damage and lives. <strong>Flash</strong> — resolves when drawn. <strong>Manifest</strong> — enters the board when drawn.</li>
+          <li><strong>Opening</strong> — fires once on your first turn start.</li>
+          <li><strong>The Network</strong> — shared cards any faction can hire (max 12). They are weaker than faction cards but more flexible. A few get stronger if they match your faction.</li>
+          <li><strong>Win</strong> — reduce the opponent from 30 life to 0, or deck them out.</li>
+        </ul>
+        <p>New here? The tutorial walks through a real match, one idea at a time.</p>
+      </div>
+      <div class="menu-actions">
+        <button class="primary" onclick="startTutorial()">Replay Tutorial</button>
+        <button onclick="showScreen('screen-menu')">Back</button>
+      </div>
+    </div>
+
+    <!-- Mulligan -->
+    <div id="screen-mulligan" class="screen" hidden>
+      <h2>Mulligan</h2>
+      <p class="lede">Click any cards you want to redraw, then confirm. You only get one mulligan.</p>
+      <div id="mulligan-hand" class="hand"></div>
+      <div class="menu-actions">
+        <button class="primary" onclick="confirmMulligan()">Keep / Redraw</button>
+      </div>
+    </div>
+
+    <!-- Game screen -->
+    <div id="screen-game" class="screen" hidden>
+      <div id="tutorial-hint" hidden>
+        <div>
+          <strong id="hint-title"></strong>
+          <p id="hint-text"></p>
+        </div>
+        <div class="hint-actions">
+          <button class="ghost" onclick="skipTutorialHint()">Got it</button>
+          <button class="ghost" onclick="skipTutorial()">Skip tutorial</button>
+        </div>
+      </div>
       <div id="turn-info"></div>
 
-      <div id="game-board">
-        <!-- Opponent section -->
-        <div class="player-section" id="opponent-section">
-          <div class="player-header">
-            <span class="player-name" id="opponent-name"></span>
-            <div class="player-stats" id="opponent-stats"></div>
+      <!-- NEW: Conspiracy Table layout (Option 3) -->
+      <div id="game-board" class="conspiracy-table">
+
+        <!-- LEFT RAIL: History / Dossier / Locations -->
+        <aside id="history-panel">
+          <section class="rail-history">
+            <h3>History</h3>
+            <div id="log"></div>
+          </section>
+          <section id="dossier">
+            <h3>Dossier</h3>
+            <div id="dossier-empty">Hover or select a card</div>
+            <div id="dossier-body" hidden>
+              <div id="dossier-art"></div>
+              <div id="dossier-head">
+                <span id="dossier-cost"></span>
+                <div>
+                  <div id="dossier-name"></div>
+                  <div id="dossier-type"></div>
+                </div>
+                <div id="dossier-stats"></div>
+              </div>
+              <p id="dossier-effect"></p>
+              <p id="dossier-lore"></p>
+            </div>
+          </section>
+          <section class="rail-locations">
+            <h3>Locations</h3>
+            <div class="location-row" id="opponent-location"></div>
+            <div class="location-row" id="player-location"></div>
+          </section>
+        </aside>
+
+        <!-- CENTER: The table surface -->
+        <div id="table-surface">
+          <!-- Opponent zone -->
+          <div class="player-section" id="opponent-section">
+            <div class="player-header hero-frame">
+              <div class="hero-portrait" id="opponent-portrait"></div>
+              <span class="player-name" id="opponent-name"></span>
+              <div class="player-stats" id="opponent-stats"></div>
+            </div>
+            <div class="hand-label">Hand (<span id="opponent-hand-count">0</span>)</div>
+            <div class="hand" id="opponent-hand"></div>
+            <div class="board-label">Enemy Board</div>
+            <div class="board" id="opponent-board"></div>
           </div>
-          <div class="hand-label">Hand (<span id="opponent-hand-count">0</span>)</div>
-          <div class="hand" id="opponent-hand"></div>
-          <div class="board-label">Board</div>
-          <div class="board" id="opponent-board"></div>
+
+          <!-- Player zone -->
+          <div class="player-section active" id="player-section">
+            <div class="player-header hero-frame">
+              <div class="hero-portrait" id="player-portrait"></div>
+              <span class="player-name" id="player-name-display"></span>
+              <div class="player-stats" id="player-stats"></div>
+            </div>
+            <div class="board-label">Your Board</div>
+            <div class="board" id="player-board"></div>
+          </div>
         </div>
 
-        <!-- Player section -->
-        <div class="player-section active" id="player-section">
-          <div class="player-header">
-            <span class="player-name" id="player-name-display"></span>
-            <div class="player-stats" id="player-stats"></div>
+        <!-- RIGHT RAIL: Controls -->
+        <aside id="control-panel">
+          <div id="energy-display"></div>
+          <button id="btn-start-turn" class="primary" onclick="submitStartTurn()">Start Turn</button>
+          <button id="btn-play" class="primary" onclick="submitPlay()" disabled>Play Card</button>
+          <button id="btn-recycle" onclick="submitRecycle()" hidden>Recycle</button>
+          <div class="end-wrap">
+            <button id="btn-end-turn" class="end-turn" onclick="submitEndTurn()" aria-label="End Turn"></button>
+            <span>End Turn</span>
           </div>
-          <div class="board-label">Board</div>
-          <div class="board" id="player-board"></div>
-          <div class="hand-label">Hand</div>
-          <div class="hand" id="player-hand"></div>
+          <div id="deck-info" class="deck-well">
+            <h3>Deck</h3>
+            <img id="deck-back" alt="Deck">
+            <div id="deck-remaining">0</div>
+          </div>
+          <button onclick="returnToMenu()" class="ghost">Menu</button>
+        </aside>
+
+        <!-- Player hand sits at the very bottom, full width -->
+        <div id="hand-strip">
+          <div class="hand collapsed" id="player-hand"></div>
         </div>
       </div>
 
-      <div id="actions">
-        <button id="btn-start-turn" class="primary" onclick="submitStartTurn()">Start Turn</button>
-        <button id="btn-play" class="primary" onclick="submitPlay()" disabled>Play Card</button>
-        <button id="btn-attack" onclick="submitAttack()" disabled>Attack</button>
-        <button id="btn-end-turn" onclick="submitEndTurn()">End Turn</button>
+      <div id="actions" hidden></div>
+
+      <div id="discover-overlay" hidden>
+        <h2>Discovery</h2>
+        <p class="lede">Choose one card to add to your hand.</p>
+        <div id="discover-choices" class="hand"></div>
       </div>
 
-      <div id="log"></div>
+      <div id="split-overlay" hidden>
+        <h2>Split</h2>
+        <p class="lede">Choose one option.</p>
+        <div id="split-choices" class="menu-actions"></div>
+      </div>
 
-      <!-- Game over overlay -->
-      <div id="game-over" style="display:none;">
+      <div id="game-over" hidden>
         <h2 id="game-over-text"></h2>
         <p id="game-over-sub"></p>
-        <button class="primary" onclick="location.reload()" style="margin-top: 16px;">
-          Play Again
-        </button>
+        <div id="recap-stats"></div>
+        <p id="recap-lesson" class="lede"></p>
+        <div id="tutorial-cheatsheet" hidden>
+          <h3>Rules cheat sheet</h3>
+          <ul>
+            <li>Energy grows by 1 each turn (max 10). Spend it or lose it.</li>
+            <li>Characters enter exhausted unless they have Charge or Rush.</li>
+            <li>Charge can hit face the turn it is played. Rush can only hit characters that turn.</li>
+            <li>Shielding ignores the next damage. Enraged can attack twice.</li>
+            <li>Taunt must be attacked first. Stealth cannot be targeted.</li>
+            <li>Spells resolve once. Locations stay until replaced.</li>
+          </ul>
+        </div>
+        <div class="menu-actions">
+          <button class="primary" onclick="returnToMenu(true)">Main Menu</button>
+          <button id="btn-play-vs-ai" onclick="playAfterTutorial()">Play vs AI</button>
+          <button id="btn-replay-tutorial" hidden onclick="startTutorial()">Replay Tutorial</button>
+        </div>
       </div>
     </div>
   </div>

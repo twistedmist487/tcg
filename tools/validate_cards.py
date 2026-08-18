@@ -15,13 +15,14 @@ SPELL_FIELDS = ["effect"]
 LOCATION_FIELDS = ["effect"]
 
 VALID_TYPES = {"Character", "Spell", "Location"}
-VALID_FACTIONS = {"illuminati", "templars", "reptilians"}
-VALID_ENERGY = {"Influence", "Faith", "Psionics"}
+VALID_FACTIONS = {"illuminati", "templars", "reptilians", "neutral"}
+VALID_ENERGY = {"Influence", "Faith", "Psionics", "Conspiracy"}
 
 FACTION_ENERGY_MAP = {
     "illuminati": "Influence",
     "templars": "Faith",
     "reptilians": "Psionics",
+    "neutral": "Conspiracy",
 }
 
 
@@ -88,6 +89,59 @@ def validate_cards(cards: list[dict]) -> list[str]:
                 if field not in card:
                     errors.append(f"{prefix}: Location missing '{field}'")
 
+        errors.extend(_network_balance_errors(card, prefix))
+
+    return errors
+
+
+_GRANDFATHERED_NETWORK = {
+    f"neutral_char_{n:03d}" for n in range(1, 21)
+} | {
+    f"neutral_spell_{n:03d}" for n in range(1, 12)
+} | {
+    f"neutral_loc_{n:03d}" for n in range(1, 4)
+}
+
+
+def _network_balance_errors(card: dict, prefix: str) -> list[str]:
+    """New Network cards should sit 15–20% under the faction baseline."""
+    if card.get("faction") != "neutral":
+        return []
+    if card.get("id") in _GRANDFATHERED_NETWORK:
+        return []
+    if (card.get("ability") or "").startswith("Token"):
+        return []
+    if card.get("balance") == "exception":
+        return []
+    errors: list[str] = []
+    cost = card.get("cost")
+    if not isinstance(cost, int):
+        return errors
+    ctype = card.get("type")
+    text = f"{card.get('ability', '')} {card.get('effect', '')}"
+    if ctype == "Character":
+        atk = card.get("attack", 0)
+        hp = card.get("health", 0)
+        if not isinstance(atk, int) or not isinstance(hp, int):
+            return errors
+        body = atk + hp
+        cap = cost + 1
+        if body > cap:
+            errors.append(
+                f"{prefix}: Network body {atk}+{hp}={body} exceeds cap {cap} for cost {cost}"
+            )
+    if ctype == "Spell":
+        import re
+
+        deal = re.search(r"Deal (\d+) damage", text)
+        if deal:
+            amount = int(deal.group(1))
+            flexible = any(word in text for word in ("Recycle", "Split", "Draw", "Flash"))
+            cap = cost if flexible else max(0, cost - 1)
+            if amount > cap:
+                errors.append(
+                    f"{prefix}: Network damage {amount} exceeds cap {cap} for cost {cost}"
+                )
     return errors
 
 

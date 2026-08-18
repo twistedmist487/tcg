@@ -1,12 +1,13 @@
 # Conspiracy TCG - Rules Draft
 
-Complete game rules for the Conspiracy TCG. References the 27-card pool across 3 factions.
+Complete game rules for the Conspiracy TCG. Live pool: 40 cards per faction plus a 120-card Network hire-pool.
 
 ## 1. Game Components
 
 *   **Deck:** Each player needs a deck of 30 cards.
-    *   A deck can contain a maximum of 3 copies of any given card (by ID).
+    *   A deck can contain a maximum of 2 copies of any given card (by ID).
     *   A deck must be associated with a single faction (Illuminati, Templars, or Reptilians).
+    *   A deck may include at most 12 Network (neutral) cards. Those cards are ~15–20% weaker than faction cards and exist for utility.
 *   **Card Types:**
     *   **Character Cards (15):** Primary units on the field. Have Attack, Health, and unique abilities. 5 per faction.
     *   **Spell Cards (6):** One-time use cards with immediate effects (damage, buffs, debuffs, draw, heal, mind control). 2 per faction.
@@ -32,7 +33,7 @@ Each turn consists of three phases:
 
 *   The active player draws 1 card from their deck. (Exception: first player's first turn skips this.)
 *   The active player gains 1 energy (up to their current max energy cap).
-*   Max energy cap increases by 1 each turn (starts at 1, max 20).
+*   Max energy cap increases by 1 each turn (starts at 1, max 10).
 *   All exhaustion is cleared from the active player's characters (they can now attack).
 *   Any "start of turn" effects from locations or abilities trigger.
 
@@ -74,7 +75,42 @@ The active player can perform these actions as long as they have sufficient ener
 | **Taunt** | Enemy characters must attack a Taunt character if able. Non-Taunt characters cannot be targeted while a Taunt is present. | `has_taunt(character)` -- checked during target selection. Stealth characters with Taunt are still untargetable. |
 | **Stealth** | Cannot be targeted by enemy attacks or abilities until it attacks or its Stealth is removed. | `has_stealth(character)` -- checked during target selection. Breaks when the character attacks. |
 | **Silence** | Removes all abilities from a character or location. Silenced characters lose Taunt, Stealth, and any triggered abilities. | `apply_silence(character)` -- sets `is_silenced = True`. Can be permanent or timed. |
-| **Exhausted** | Cannot attack or use abilities. Newly played characters enter exhausted. Characters become exhausted after attacking. Cleared at the start of the controller's next turn. | `is_exhausted` flag on CardInstance. `clear_all_exhaustion()` at turn start. |
+| **Exhausted** | Cannot attack or use abilities. Newly played characters enter exhausted unless they have Charge or Rush. Characters become exhausted after attacking (Enraged attacks twice). Cleared at the start of the controller's next turn. | `is_exhausted` flag on CardInstance. `clear_all_exhaustion()` at turn start. |
+| **Charge** | Can attack anyone, including the hero, the turn it is played. | `has_charge` — enters ready. |
+| **Rush** | Can attack enemy characters the turn it is played, but not the hero. Next turn it can hit face. | `has_rush` + `rush_locked` that turn. |
+| **Shielding** | Ignores the next instance of damage to that character (or hero), then pops. | `has_shield` on the instance or player. |
+| **Enraged** | Can attack twice each turn. Persistent. | `has_enraged` + `attacks_this_turn`. |
+| **Assault** | Triggers when the character is played from hand (not when summoned). May damage, heal, or buff/debuff a target. | `When played` / `Assault:` parsed in `resolve_on_play_ability`. |
+| **Deathrattle** | Triggers when the character dies. | `When this character dies` / `Deathrattle:` in `resolve_deathrattle`. |
+| **Discovery** | Choose 1 of 3 random cards from your faction plus the Network. | `Game.pending_discovery` + `choose_discovery`. |
+| **Drain** | Combat damage this deals heals its controller. | `has_drain` in `resolve_attack`. |
+| **Venom** | Any damage this deals to a character is lethal. Blocked by Ward/Shielding. | `has_venom` after actual damage. |
+| **Recur** | The first time it dies, it returns at 1 Health (Deathrattle still fires). | `has_recur` / `recur_used` in `_resolve_deaths`. |
+| **Stasis** | Cannot attack until the end of its controller's next turn. | `stasis` flag; re-exhausted at turn start. |
+| **Amplify** | Your spells deal +1 damage per Amplify character you control. | `amplify` summed in spell damage. |
+| **Recycle** | Pay 1 energy: shuffle this from hand into your deck and draw. | `Game.recycle`. |
+| **Chain** | Extra effect if you already played a card this turn. | `cards_played_this_turn` in `_after_play_keywords`. |
+| **Split** | Choose one printed option. | `pending_split` + `choose_split`. |
+| **Echo** | After you play this, add a copy to your hand that vanishes at end of turn. | `echo_expiry`. |
+| **Excess** | Extra effect if this deals more attack than the defender's current Health. | `excess_ready` then `fire_excess`. |
+| **Retaliate** | Once: when this takes damage and survives. | `fire_retaliate`. |
+| **Flash** | Resolves immediately when drawn. | `Game._draw`. |
+| **Manifest** | Enters the board when drawn (no Assault). | `Game._draw`. |
+| **Opening** | Fires once on your first turn start, from hand or deck. | `_fire_opening`. |
+| **Ward** | Ignore all damage until end of turn. Does not pop. | `has_ward` on character or hero. |
+
+### 4.4. Network balance (15–20% weaker)
+
+Faction baseline: character `attack + health ≈ cost + 1`; spell damage ≈ cost.
+
+Network (Conspiracy) cards should sit under that:
+
+- Keyword body: `attack + health ≤ cost` (or `cost + 1` if vanilla with no keyword).
+- Direct damage: `N ≤ cost - 1`, unless the spell also Recycles, Splits, or draws.
+- Heal: about 1 less than a same-cost faction heal, or smaller heal + cantrip.
+- No 9+ cost Network bombs. Leave finishers to factions.
+
+Existing Network cards printed before this rule are grandfathered. New `neutral_*` cards are linted by `tools/validate_cards.py`.
 
 ### 4.3. Target Selection Rules
 
@@ -110,7 +146,7 @@ The active player can perform these actions as long as they have sufficient ener
 | ID | Name | Type | Cost | ATK | HP | Ability/Effect |
 |----|------|------|------|-----|----|-----------------|
 | templars_char_001 | Knight Commander | Character | 4 | 3 | 5 | Other Templar characters you control gain +1 Health. |
-| templars_char_002 | Templar Guardian | Character | 2 | 1 | 6 | Taunt. |
+| templars_char_002 | Templar Guardian | Character | 2 | 1 | 4 | Taunt. |
 | templars_char_003 | Exorcist | Character | 4 | 3 | 3 | Destroyed enemy characters cannot be resurrected or returned to hand. |
 | templars_char_004 | Relic Keeper | Character | 3 | 2 | 4 | Taunt. When this character is damaged, deal 1 damage to a random enemy character. |
 | templars_spell_001 | Divine Smite | Spell | 3 | - | - | Deal 4 damage to a target character. |
@@ -174,7 +210,7 @@ from engine.ai import AIPlayer, execute_turn
 cards = load_cards("data/cards.json")
 factions = load_factions("data/factions.json")
 
-# Build decks (30 cards, max 3 copies, single faction)
+# Build decks (30 cards, max 2 copies, single faction)
 illuminati_cards = [c for c in cards if c.faction.value == "illuminati"]
 deck = (illuminati_cards * 3)[:30]
 
@@ -198,11 +234,15 @@ json_str = serialize_game(game)
 restored_game = deserialize_game(json_str)
 ```
 
-## 10. Additional Rules (To Be Developed in Phase 6+)
+## 10. Additional Rules & Product Scope
 
-*   **Spell Effect Resolution:** Currently spells resolve their cost but not their effects. Phase 6 implements the effect engine.
-*   **Location Effects:** Currently locations are played but their ongoing effects don't trigger. Phase 6 implements location persistence.
-*   **Triggered Abilities:** "When played", "on attack", "on death", "start of turn" triggers. Phase 6+.
-*   **Mulligan Rules:** Redraw starting hand. Phase 7.
-*   **Multiplayer Rules:** 3+ player games. Phase 7.
-*   **Card Rarity:** Common/Rare/Legendary tiers. Phase 8.
+Implemented:
+*   **Spell, location, and triggered-ability resolution** (Phase 6).
+*   **Mulligan:** redraw any number of starting-hand cards once before turn 1 (Phase 7).
+
+Planned:
+*   **Tutorial match:** a guided first game that teaches turn structure, combat, and keywords by doing (Phase 8).
+*   **Card rarity:** Common / Rare / Legendary tiers (Phase 9).
+
+Out of scope:
+*   Online multiplayer, matchmaking, and 3+ player games. Conspiracy TCG is a single-player game.

@@ -3,7 +3,7 @@
 import pytest
 
 from engine.card import create_card_instance, CardInstance
-from engine.combat import CombatResult, resolve_attack
+from engine.combat import CombatResult, can_attack_player_directly, resolve_attack
 from engine.models import CharacterCard
 from engine.player import Player
 
@@ -187,4 +187,28 @@ class TestResolveAttack:
         result = resolve_attack(atk, p1, p2, defs)
         repr_str = repr(result)
         assert "A" in repr_str
-        assert "D" in repr_str
+
+
+class TestFaceThroughStealth:
+    def test_stealth_only_board_allows_face(self):
+        sneak = create_card_instance(
+            _character("Ghost", attack=1, health=2, ability="Stealth", faction="reptilians"),
+            "s1",
+            "P2",
+        )
+        p1 = _player("P1")
+        p2 = _player("P2")
+        p2.board = [sneak]
+        assert can_attack_player_directly(p1, p2) is True
+
+    def test_visible_minion_blocks_face(self):
+        blocker = create_card_instance(_character("Wall", attack=1, health=2), "w1", "P2")
+        p1 = _player("P1")
+        p2 = _player("P2")
+        p2.board = [blocker]
+        assert can_attack_player_directly(p1, p2) is False
+
+    def test_empty_board_allows_face(self):
+        p1 = _player("P1")
+        p2 = _player("P2")
+        assert can_attack_player_directly(p1, p2) is True

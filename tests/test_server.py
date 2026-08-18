@@ -146,6 +146,31 @@ class TestGameLifecycle:
             # No board chars to attack with — skip
             pass
 
+    def test_board_and_location_include_lore(self, client):
+        from engine.game import Game
+        from engine.models import load_cards
+
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        lobbyist = cards["illuminati_char_009"]
+        chapel = cards["templars_loc_001"]
+        game = Game.setup(
+            [lobbyist] * 10, [lobbyist] * 10, "A", "B", first_player=0, shuffle=False
+        )
+        game.start_turn()
+        game.play_card(0)
+        piece = game.get_state()["players"][0]["board"][0]
+        assert piece["lore"]
+        assert piece["ability"]
+        assert piece["type"] == "Character"
+
+        game.players[0].energy = 10
+        game.players[0].hand.append(chapel)
+        game.play_card(len(game.players[0].hand) - 1)
+        loc = game.get_state()["players"][0]["location"]
+        assert loc["type"] == "Location"
+        assert loc["lore"]
+        assert loc["id"] == "templars_loc_001"
+
     def test_session_not_found(self, client):
         resp = client.get("/api/game/fake-id-123/state")
         assert resp.status_code == 404
@@ -170,6 +195,64 @@ class TestGameLifecycle:
         sessions = resp.json()
         assert isinstance(sessions, list)
         assert len(sessions) >= 2
+
+
+class TestSoloEndpoints:
+    def test_list_encounters(self, client):
+        resp = client.get("/api/encounters")
+        assert resp.status_code == 200
+        ids = {e["id"] for e in resp.json()}
+        assert "tutorial" in ids
+        assert "showcase_illuminati" in ids
+
+    def test_list_decks(self, client):
+        resp = client.get("/api/decks")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "illuminati" in data
+        assert "templars" in data
+
+    def test_validate_deck(self, client):
+        resp = client.post(
+            "/api/decks/validate",
+            json={"faction": "templars", "cards": [{"id": "templars_char_009", "copies": 3}]},
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["valid"] is False
+        assert body["size"] == 3
+
+    def test_create_tutorial_game(self, client):
+        resp = client.post("/api/game/new", json={"encounter_id": "tutorial", "player_name": "Recruit"})
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["mode"] == "tutorial"
+        assert data["difficulty"] == "easy"
+        assert data["encounter"]["id"] == "tutorial"
+        recruit = next(p for p in data["state"]["players"] if p["name"] == "Recruit")
+        assert recruit["hand"][0]["name"] == "Squire"
+
+    def test_ai_turn_endpoint(self, client):
+        create = client.post(
+            "/api/game/new",
+            json={"encounter_id": "tutorial", "player_name": "Recruit"},
+        )
+        session_id = create.json()["session_id"]
+        client.post(f"/api/game/{session_id}/start-turn")
+        client.post(f"/api/game/{session_id}/end-turn")
+        ai_resp = client.post(f"/api/game/{session_id}/ai-turn")
+        assert ai_resp.status_code == 200
+        assert "results" in ai_resp.json()
+        assert "state" in ai_resp.json()
+
+    def test_recap_endpoint(self, client):
+        create = client.post("/api/game/new?player_name=Test&player_faction=illuminati")
+        session_id = create.json()["session_id"]
+        recap = client.get(f"/api/game/{session_id}/recap")
+        assert recap.status_code == 200
+        body = recap.json()
+        assert "cards_played" in body
+        assert "lesson" in body or body["winner"] is None
 
 
 class TestFullGameFlow:

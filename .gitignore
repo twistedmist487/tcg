@@ -43,6 +43,7 @@ htmlcov/
 # Local dev
 *.local
 .env.local
+tmp/
 
 # Game-specific exports
 *.log

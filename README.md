@@ -1,8 +1,10 @@
 # Conspiracy TCG
 
-A strategic card game where three conspiracy-themed factions battle for global dominance through manipulation, ancient power, and otherworldly influence. Inspired by Hearthstone's gameplay with a dark conspiracy theme drawn from Robert Storey's "Ancient Origins" series.
+A single-player strategic card game where three conspiracy-themed factions battle for global dominance through manipulation, ancient power, and otherworldly influence. Inspired by Hearthstone's gameplay with a dark conspiracy theme drawn from Robert Storey's "Ancient Origins" series.
 
-**27 cards | 3 factions | Web + CLI play | AI opponent**
+Learn in a guided tutorial, then play against AI. No multiplayer, accounts, or matchmaking.
+
+**240 cards | 3 factions + Network | Browser vs AI | Tutorial-first solo play**
 
 ## Factions
 
@@ -16,7 +18,7 @@ A strategic card game where three conspiracy-themed factions battle for global d
 # Install dependencies
 make install
 
-# Validate cards, run linter, run all 127 tests
+# Validate cards, run linter, run all tests
 make validate
 make lint
 make test
@@ -29,18 +31,12 @@ make test
 pip install fastapi uvicorn httpx  # web server dependencies
 python3 -m uvicorn server.app:app --port 8080
 ```
-Open http://localhost:8080 in your browser. Pick a faction and play against the AI.
-
-### CLI (Two Players)
-```bash
-python3 -m cli/game.py
-# Choose [1] Two Players
-```
+Open http://localhost:8080 in your browser. Play the tutorial, fight the AI, run a faction encounter, or build a deck.
 
 ### CLI (vs AI)
 ```bash
 python3 -m cli/game.py
-# Choose [2] Single Player
+# Choose Single Player
 ```
 
 ## How to Play
@@ -60,13 +56,19 @@ python3 -m cli/game.py
 │   ├── lore_agent.py    # Card lore generation from faction data
 │   └── rules_agent.py   # Balance checking (stat-to-cost heuristics)
 ├── cli/                 # Command-line interface
-│   └── game.py          # Two-player and vs-AI text game
+│   └── game.py          # Vs-AI text game
 ├── data/                # JSON data store
-│   ├── cards.json       # 27 cards (9 per faction)
+│   ├── cards.json       # 240 cards (40 per faction + 120 Network)
+│   ├── decks.json       # Curated 30-card faction decks
+│   ├── encounters.json  # Tutorial + showcase matchups
 │   └── factions.json    # 3 faction definitions
+├── assets/
+│   ├── card-templates/  # Faction card front/back plates
+│   └── ui-table/        # Table chrome kit + preview mock
 ├── docs/
 │   ├── design/          # Game design (rules, factions, concept)
-│   └── dev/             # Developer docs (roadmap, data model, plans)
+│   ├── dev/             # Developer docs (roadmap, data model, plans)
+│   └── wiki/            # Product wiki (UI layout and assets)
 ├── engine/              # Core game engine (zero UI dependencies)
 │   ├── models.py        # Pydantic card/faction models + loaders
 │   ├── game.py          # Game state, turn loop, win conditions
@@ -81,9 +83,11 @@ python3 -m cli/game.py
 │   └── session.py       # In-memory session management
 ├── static/              # Web frontend (no build step)
 │   ├── index.html       # SPA shell
-│   ├── style.css        # Dark-themed responsive CSS
-│   └── app.js           # Game UI logic + client-side AI
-├── tests/               # 127 tests across 8 files
+│   ├── style.css        # Dark theme + Conspiracy Table
+│   ├── app.js           # Game UI, Dossier, client-side AI
+│   ├── cards/           # Card front/back plates
+│   └── ui/              # Rails, energy crystals, buttons, heroes
+├── tests/               # 286 tests
 │   ├── test_ai.py       # AI behavior (19 tests)
 │   ├── test_card.py     # CardInstance state (23 tests)
 │   ├── test_combat.py   # Combat resolution (9 tests)
@@ -141,10 +145,11 @@ state = game.get_state()  # Full serializable dict
 ## Design Documents
 
 - [Game Concept](docs/design/game_concept.md) -- Theme, USPs, gameplay loop
-- [Factions](docs/design/factions.md) -- Full lore, all 27 cards listed with stats
+- [Factions](docs/design/factions.md) -- Full lore and card listings
 - [Rules](docs/design/rules.md) -- Complete rules, turn structure, keywords
 - [Data Model](docs/dev/data-model.md) -- Full schema, engine API, state structure
-- [Roadmap](docs/dev/roadmap.md) -- All phases (0-5 complete, 6-8 pending)
+- [Roadmap](docs/dev/roadmap.md) -- Phases 0–8 complete, Phase 9 in progress
+- [Wiki](docs/wiki/README.md) -- TCG slice of chriswiki (project, cards, [UI](docs/wiki/entities/conspiracy-tcg-ui.md))
 
 ## Development Phases
 
@@ -154,9 +159,10 @@ state = game.get_state()  # Full serializable dict
 | 3 | Card expansion (27 cards) | COMPLETE |
 | 4 | AI opponent | COMPLETE |
 | 5 | Web UI + FastAPI server | COMPLETE |
-| 6 | Spell/location effect resolution | PENDING |
-| 7 | Deck builder + online multiplayer | PENDING |
-| 8 | Content expansion (120+ cards) & polish | PENDING |
+| 6 | Spell/location effect resolution | COMPLETE |
+| 7 | Content expansion (decks, mulligan, balance) | COMPLETE |
+| 8 | Tutorial, solo play, deck builder | COMPLETE |
+| 9 | Polish, Hard AI, replayability, 240-card pool | IN PROGRESS |
 
 ## License
 

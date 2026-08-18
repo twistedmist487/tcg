@@ -40,15 +40,22 @@ class Player:
     STARTING_LIFE: int = 30
     MAX_HAND_SIZE: int = 10
     MAX_BOARD_SIZE: int = 7
-    MAX_ENERGY: int = 20
+    MAX_ENERGY: int = 10
 
-    def __init__(self, name: str, deck: list[Card]) -> None:
+    def __init__(
+        self,
+        name: str,
+        deck: list[Card],
+        faction: str | None = None,
+    ) -> None:
         """
         Initialize a player.
 
         Args:
             name: Display name for this player.
             deck: List of Card objects. Will be copied and shuffled.
+            faction: Starting identity (illuminati/templars/reptilians).
+                Inferred from the deck if omitted.
         """
         self.name: str = name
         self.deck: list[Card] = list(deck)
@@ -57,9 +64,27 @@ class Player:
         self.location: CardInstance | None = None
         self.life: int = self.STARTING_LIFE
         self.energy: int = 0
-        self.max_energy: int = 1
+        self.max_energy: int = 0
         self.fatigue_damage: int = 0
         self.instance_counter: int = 0
+        self.faction: str = faction or self.infer_faction(self.deck)
+        self.has_shield: bool = False
+        self.has_ward: bool = False
+        self.echo_expiry: dict[int, int] = {}
+        self.opening_fired: bool = False
+        self.hand_cost_bonus: dict[int, int] = {}
+
+    @staticmethod
+    def infer_faction(deck: list[Card]) -> str:
+        """Majority non-neutral faction in a deck list."""
+        counts: dict[str, int] = {}
+        for card in deck:
+            faction = card.faction.value if hasattr(card.faction, "value") else str(card.faction)
+            if faction and faction != "neutral":
+                counts[faction] = counts.get(faction, 0) + 1
+        if not counts:
+            return "neutral"
+        return max(counts, key=counts.get)
 
     def shuffle_deck(self) -> None:
         """Shuffle the player's deck."""
@@ -95,9 +120,13 @@ class Player:
         for _ in range(self.STARTING_HAND_SIZE):
             self.draw_card()
 
+    def play_cost(self, card: Card) -> int:
+        """Printed cost plus any temporary hand-cost bumps (Wiretap)."""
+        return max(0, card.cost + int(self.hand_cost_bonus.get(id(card), 0)))
+
     def can_play_card(self, card: Card) -> bool:
         """Check if the player has enough energy to play a card."""
-        return self.energy >= card.cost
+        return self.energy >= self.play_cost(card)
 
     def spend_energy(self, amount: int) -> bool:
         """
@@ -139,7 +168,7 @@ class Player:
         if card not in self.hand:
             return None
 
-        if not self.spend_energy(card.cost):
+        if not self.spend_energy(self.play_cost(card)):
             return None
 
         # Remove from hand
@@ -198,8 +227,19 @@ class Player:
         """
         if amount < 0:
             raise ValueError("Damage must be non-negative")
+        if amount == 0:
+            return 0
+        if self.has_ward:
+            return 0
+        if self.has_shield:
+            self.has_shield = False
+            return 0
         self.life -= amount
         return amount
+
+    def summon(self, card: Card) -> CardInstance | None:
+        """Put a character onto the board without paying or drawing from hand."""
+        return self._play_character(card)
 
     @property
     def board_size(self) -> int:
@@ -236,6 +276,7 @@ class Player:
 
     def end_turn_cleanup(self) -> None:
         """Clean up end-of-turn effects (clear temp buffs, reduce silence duration)."""
+        self.hand_cost_bonus = {}
         for character in self.board:
             character.clear_temp_buffs()
             # Reduce silence duration

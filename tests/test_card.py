@@ -223,3 +223,19 @@ class TestCreateCardInstance:
         )
         inst = create_card_instance(card, "p1_1", "Bob")
         assert inst.is_stealth is True
+
+    def test_detect_charge_skips_exhaustion(self):
+        card = CharacterCard(
+            id="templars_char_012",
+            name="Zealot",
+            faction="templars",
+            energy_type="Faith",
+            cost=3,
+            lore="lore",
+            attack=3,
+            health=2,
+            ability="Charge. When this character dies, deal 2 damage to the enemy hero.",
+        )
+        inst = create_card_instance(card, "p1_1", "Alice")
+        assert inst.has_charge is True
+        assert inst.is_exhausted is False
