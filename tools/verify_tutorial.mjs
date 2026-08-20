@@ -27,6 +27,7 @@ try {
   const menu = page.locator("#screen-menu");
   note(await menu.isVisible(), "Main menu is visible");
   note(await page.getByRole("button", { name: "Play Tutorial" }).isVisible(), "Play Tutorial button exists");
+  note(await page.getByRole("button", { name: "Keyword Lab" }).isVisible(), "Keyword Lab button exists");
   note(await page.getByRole("button", { name: "Play vs AI" }).isVisible(), "Play vs AI button exists");
   note(await page.getByRole("button", { name: "Faction Encounters" }).isVisible(), "Encounters button exists");
   note(await page.getByRole("button", { name: "Deck Builder" }).isVisible(), "Deck Builder button exists");
@@ -45,8 +46,8 @@ try {
 
   const turnInfo = (await page.locator("#turn-info").innerText()).trim();
   note(/recruit/i.test(turnInfo), `It is the player's turn: "${turnInfo}"`);
-  const energyText = await page.locator("#player-stats").innerText();
-  note(/★\s*1\/1/.test(energyText), `First-turn energy is 1/1: "${energyText.replace(/\s+/g, " ")}"`);
+  const energyText = await page.locator("#energy-display .count").innerText();
+  note(/^\s*1\s*\/\s*1\s*$/.test(energyText), `First-turn energy is 1/1: "${energyText.replace(/\s+/g, " ")}"`);
 
   const squire = page.locator("#player-hand .card", { hasText: "Squire" }).first();
   note(await squire.isVisible(), "Squire is in the starting hand");
@@ -108,8 +109,13 @@ try {
 
   const hintCombat = (await page.locator("#hint-text").innerText().catch(() => "")).trim();
   note(
-    /combat|taunt|spell|location|your move|attack/i.test(hintCombat) || !(await hint.isVisible()),
+    /combat|taunt|spell|location|your move|attack|deathrattle|raptor/i.test(hintCombat) || !(await hint.isVisible()),
     `Post-combat hint: "${hintCombat || "(hidden/dismissed)"}"`,
+  );
+  const oppBoard = (await page.locator("#opponent-board").innerText().catch(() => "")).trim();
+  note(
+    /Raptor|Hatchling|Deathrattle/i.test(`${oppBoard} ${hintCombat}`),
+    `Deathrattle taught (board/hint): "${hintCombat}" / "${oppBoard.slice(0, 80)}"`,
   );
 
   note(!(await page.locator("#game-over").isVisible()), "Game is still in progress (not an instant loss)");

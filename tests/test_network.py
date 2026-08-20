@@ -79,7 +79,7 @@ class TestConditionalEffects:
         game.start_turn()
         inst = create_card_instance(courier, "rc1", "A")
         resolve_on_play_ability(game, "A", inst)
-        assert game.players[0].life == 23
+        assert game.players[0].life == 22
 
         game.players[0].faction = "illuminati"
         game.players[0].life = 20

@@ -2,7 +2,7 @@
   "tutorial": {
     "id": "tutorial",
     "name": "First Contact",
-    "description": "A guided first match. Learn energy, characters, combat, Taunt, spells, and locations by playing them.",
+    "description": "A guided first match. Learn energy, characters, combat, Taunt, Deathrattle, spells, locations, and Charge by playing them.",
     "mode": "tutorial",
     "player_goes_first": true,
     "shuffle": false,
@@ -94,6 +94,11 @@
         "text": "Your character is ready. Click it on your board, then click the highlighted enemy. If nothing is blocking you, click Attack Face instead."
       },
       {
+        "id": "deathrattle",
+        "title": "Deathrattle",
+        "text": "Hatchling Brood died and summoned a Raptor. Deathrattle happens when a character dies — you still have to deal with the new body."
+      },
+      {
         "id": "taunt",
         "title": "Taunt",
         "text": "That enemy has Taunt — you must attack it first. Click your ready character, then click the outlined Taunt character. You cannot hit face until the wall is gone."
@@ -116,7 +121,118 @@
       {
         "id": "free",
         "title": "Your move",
-        "text": "You know the loop: spend energy, attack, end turn. Reduce the Recruiter to 0 life."
+        "text": "You know the loop: spend energy, attack, end turn. Reduce the Recruiter to 0 life. The Recruiter will keep poking your hero, so do not stall."
+      }
+    ]
+  },
+  "keyword_lab": {
+    "id": "keyword_lab",
+    "name": "Keyword Lab",
+    "description": "A skippable drill. Recycle, Split, Drain, and Ward one at a time on a live board.",
+    "mode": "lab",
+    "player_goes_first": true,
+    "shuffle": false,
+    "difficulty": "easy",
+    "player_faction": "templars",
+    "ai_faction": "reptilians",
+    "ai_name": "The Instructor",
+    "player_name": "Operator",
+    "require_faction": false,
+    "ai_starting_life": 16,
+    "player_deck": [
+      "neutral_spell_007",
+      "neutral_spell_008",
+      "neutral_char_013",
+      "templars_char_009",
+      "neutral_char_047",
+      "templars_char_006",
+      "templars_spell_001",
+      "templars_loc_001",
+      "templars_char_012",
+      "templars_char_002",
+      "neutral_spell_007",
+      "neutral_spell_008",
+      "neutral_char_013",
+      "templars_char_009",
+      "neutral_char_047",
+      "templars_char_006",
+      "templars_spell_001",
+      "templars_loc_001",
+      "templars_char_012",
+      "templars_char_002",
+      "templars_char_004",
+      "templars_char_001",
+      "templars_spell_003",
+      "templars_char_005",
+      "templars_spell_004",
+      "templars_char_007",
+      "templars_char_013",
+      "templars_spell_005",
+      "templars_char_011",
+      "templars_loc_003"
+    ],
+    "ai_deck": [
+      "reptilians_char_007",
+      "reptilians_char_007",
+      "neutral_char_007",
+      "reptilians_char_005",
+      "reptilians_char_009",
+      "reptilians_char_005",
+      "neutral_char_007",
+      "reptilians_char_008",
+      "reptilians_spell_004",
+      "reptilians_char_003",
+      "reptilians_spell_001",
+      "reptilians_loc_001",
+      "reptilians_char_008",
+      "reptilians_char_003",
+      "reptilians_spell_004",
+      "reptilians_spell_009",
+      "reptilians_char_011",
+      "reptilians_loc_003",
+      "reptilians_spell_006",
+      "reptilians_char_001",
+      "reptilians_char_002",
+      "reptilians_spell_009",
+      "reptilians_char_011",
+      "reptilians_loc_003",
+      "reptilians_spell_006",
+      "reptilians_char_012",
+      "reptilians_char_013",
+      "reptilians_char_004",
+      "reptilians_char_001",
+      "reptilians_char_006"
+    ],
+    "steps": [
+      {
+        "id": "recycle",
+        "title": "Recycle",
+        "text": "Burn Bag has Recycle. Select it, then click Recycle — pay 1 energy, shuffle it into your deck, and draw. You are not playing it."
+      },
+      {
+        "id": "split",
+        "title": "Split",
+        "text": "Play Forked Brief. Split lets you pick one printed option. Deal 2 damage to the highlighted Hatchling — killing it is better than drawing here."
+      },
+      {
+        "id": "drain",
+        "title": "Drain",
+        "text": "Play Leech Contact. Drain heals your hero for the combat damage it deals. Next turn, attack with it."
+      },
+      {
+        "id": "drain-attack",
+        "title": "Drain combat",
+        "text": "Leech Contact is ready. Attack face or a character — the damage heals you. That is Drain."
+      },
+      {
+        "id": "ward",
+        "title": "Ward",
+        "text": "Play Quiet Vest. Ward ignores all damage until the end of this turn and does not pop. It fades when your turn ends."
+      },
+      {
+        "id": "free",
+        "title": "Lab complete",
+        "text": "Recycle, Split, Drain, and Ward are the new verbs. Finish the Instructor or return to the menu whenever you like."
       }
     ]
   },

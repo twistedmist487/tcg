@@ -6,7 +6,7 @@ the highest-scoring one. No ML — pure priority evaluation inspired by
 Hearthstone AI design.
 
 Key design principles:
-- Action space: play card, attack character, attack face, end turn
+- Action space: play card, recycle, attack character, attack face, end turn
 - Scoring: weighted sum of board state evaluation terms
 - Faction flavor: different weights per faction for variety
 - Safe: never suggests invalid actions (validated before execution)
@@ -16,17 +16,31 @@ from __future__ import annotations
 
 import math
 import random
+import re
 from typing import Any
 
-from engine.card import CardInstance
+from engine.card import CardInstance, prefix_keywords
+from engine.combat import can_attack_player_directly
 from engine.game import Game
 from engine.keywords import get_valid_attack_targets, has_taunt
 from engine.models import Card
 from engine.player import Player
 
 DIFFICULTY_PRESETS: dict[str, dict[str, float]] = {
-    "easy": {"aggression": 0.2, "mistake_chance": 0.4, "skip_attack_chance": 0.3},
-    "medium": {"aggression": 0.5, "mistake_chance": 0.0, "skip_attack_chance": 0.0},
+    # Easy still fumbles plays, but always considers attacks and prefers face
+    # so a stalled board cannot last forever (tutorial Recruiter included).
+    "easy": {
+        "aggression": 0.35,
+        "mistake_chance": 0.25,
+        "skip_attack_chance": 0.0,
+        "poke_face": 1.0,
+    },
+    "medium": {
+        "aggression": 0.5,
+        "mistake_chance": 0.0,
+        "skip_attack_chance": 0.0,
+        "poke_face": 0.0,
+    },
 }
 
 # ---------------------------------------------------------------------------
@@ -96,6 +110,7 @@ class AIPlayer:
         self.aggression = max(0.0, min(1.0, preset["aggression"] if aggression is None else aggression))
         self.mistake_chance = float(preset["mistake_chance"])
         self.skip_attack_chance = float(preset["skip_attack_chance"])
+        self.poke_face = float(preset.get("poke_face", 0.0))
         self.weights: dict[str, float] = dict(
             FACTION_WEIGHTS.get(faction, FACTION_WEIGHTS["illuminati"])
         )
@@ -115,6 +130,7 @@ def choose_action(game: Game, ai: AIPlayer | None = None) -> dict[str, Any]:
 
     Returns:
         Action dict: {"action": "play", "card_index": N}
+                     {"action": "recycle", "card_index": N}
                      {"action": "attack", "attacker_index": N, "target_index": N|None}
                      {"action": "end_turn"}
     """
@@ -124,42 +140,44 @@ def choose_action(game: Game, ai: AIPlayer | None = None) -> dict[str, Any]:
     candidates: list[tuple[float, dict[str, Any]]] = []
 
     end_action: dict[str, Any] = {"action": "end_turn"}
-    candidates.append((score_action(game, end_action), end_action))
+    candidates.append((score_action(game, end_action, ai), end_action))
 
-    # Score all possible card plays
     for i, _card in enumerate(player.hand):
         action = {"action": "play", "card_index": i}
-        score = score_action(game, action)
+        score = score_action(game, action, ai)
         if score > -math.inf:
             candidates.append((score, action))
+        recycle_action = {"action": "recycle", "card_index": i}
+        recycle_score = score_action(game, recycle_action, ai)
+        if recycle_score > -math.inf:
+            candidates.append((recycle_score, recycle_action))
 
     skip_attacks = bool(ai and random.random() < ai.skip_attack_chance)
 
-    # Score all possible attacks
     if not skip_attacks:
         for attacker_idx, attacker in enumerate(player.board):
             if not attacker.can_attack:
                 continue
 
-            # Score attacking each valid target
             for target_idx in range(len(opponent.board)):
                 action = {
                     "action": "attack",
                     "attacker_index": attacker_idx,
                     "target_index": target_idx,
                 }
-                score = score_action(game, action)
+                score = score_action(game, action, ai)
                 if score > -math.inf:
                     candidates.append((score, action))
 
-            # Score attacking face (Charge / normal). Rush cannot hit the hero this turn.
-            if not getattr(attacker, "rush_locked", False) and len(opponent.board) == 0:
+            if not getattr(attacker, "rush_locked", False) and can_attack_player_directly(
+                player, opponent
+            ):
                 action = {
                     "action": "attack",
                     "attacker_index": attacker_idx,
                     "target_index": None,
                 }
-                score = score_action(game, action)
+                score = score_action(game, action, ai)
                 if score > -math.inf:
                     candidates.append((score, action))
 
@@ -186,32 +204,42 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
     """
     results: list[dict[str, Any]] = []
     max_actions = 50  # safety limit to prevent infinite loops
+    recycles = 0
 
     for _ in range(max_actions):
         if game.is_over:
             break
 
-        action = choose_action(game, ai)
-
         if getattr(game, "pending_discovery", None):
-            options = game.pending_discovery["cards"]
-            pick = max(range(len(options)), key=lambda i: options[i].cost)
+            pick = _best_discovery_index(game)
             result = game.choose_discovery(pick)
             results.append({"action": "discover", "result": result})
             continue
 
         if getattr(game, "pending_split", None):
-            options = game.pending_split["options"]
-            pick = 0
-            target = 0 if game.inactive_player.board else None
+            pick, target = _best_split_choice(game)
             result = game.choose_split(pick, target_index=target)
             results.append({"action": "split", "result": result})
             continue
+
+        action = choose_action(game, ai)
 
         if action["action"] == "end_turn":
             result = game.end_turn()
             results.append({"action": "end_turn", "result": result})
             break
+        elif action["action"] == "recycle":
+            if recycles >= 2:
+                result = game.end_turn()
+                results.append({"action": "end_turn", "result": result})
+                break
+            result = game.recycle(action["card_index"])
+            results.append({"action": "recycle", "result": result})
+            recycles += 1
+            if not result.get("success"):
+                result = game.end_turn()
+                results.append({"action": "end_turn", "result": result})
+                break
         elif action["action"] == "play":
             card = game.active_player.hand[action["card_index"]]
             text = f"{getattr(card, 'ability', '')} {getattr(card, 'effect', '')}".lower()
@@ -225,11 +253,10 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
             else:
                 target = action.get("target_index")
                 if target is None and game.inactive_player.board:
-                    target = 0
+                    target = _best_spell_target_index(game)
                 result = game.play_card(action["card_index"], spell_target_index=target)
             results.append({"action": "play", "result": result})
             if not result.get("success"):
-                # If play failed, end turn rather than breaking silently
                 result = game.end_turn()
                 results.append({"action": "end_turn", "result": result})
                 break
@@ -247,7 +274,6 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
         if game.is_over:
             break
     else:
-        # Safety: if we hit max_actions without ending, force end turn
         if not game.is_over:
             result = game.end_turn()
             results.append({"action": "end_turn", "result": result})
@@ -255,7 +281,7 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
     return results
 
 
-def score_action(game: Game, action: dict[str, Any]) -> float:
+def score_action(game: Game, action: dict[str, Any], ai: AIPlayer | None = None) -> float:
     """
     Score a hypothetical action. Higher scores are better.
 
@@ -263,10 +289,12 @@ def score_action(game: Game, action: dict[str, Any]) -> float:
     """
     if action["action"] == "end_turn":
         return _score_end_turn(game)
-    elif action["action"] == "play":
-        return _score_play_card(game, action["card_index"])
-    elif action["action"] == "attack":
-        return _score_attack(game, action["attacker_index"], action.get("target_index"))
+    if action["action"] == "play":
+        return _score_play_card(game, action["card_index"], ai)
+    if action["action"] == "recycle":
+        return _score_recycle(game, action["card_index"])
+    if action["action"] == "attack":
+        return _score_attack(game, action["attacker_index"], action.get("target_index"), ai)
     return -math.inf
 
 
@@ -275,36 +303,80 @@ def score_action(game: Game, action: dict[str, Any]) -> float:
 # ---------------------------------------------------------------------------
 
 
+def _card_text(card: Card) -> str:
+    return f"{getattr(card, 'ability', '') or ''} {getattr(card, 'effect', '') or ''}"
+
+
+def _keyword_score(text: str) -> float:
+    """Value printed evergreen / combat keywords on a card about to be played."""
+    score = 0.0
+    keys = prefix_keywords(text)
+    mapping = {
+        "Taunt": 2.0,
+        "Stealth": 1.5,
+        "Charge": 2.2,
+        "Rush": 1.6,
+        "Drain": 1.3,
+        "Venom": 2.4,
+        "Recur": 1.5,
+        "Ward": 1.6,
+        "Shielding": 1.3,
+        "Enraged": 1.6,
+        "Amplify": 1.1,
+        "Flash": 0.8,
+        "Opening": 0.8,
+        "Manifest": 1.0,
+        "Recycle": 0.4,
+        "Echo": 0.7,
+        "Excess": 0.8,
+        "Retaliate": 1.0,
+        "Stasis": -0.4,
+    }
+    for key, value in mapping.items():
+        if key in keys or key in text:
+            score += value
+    if "Deathrattle" in text or "When this character dies" in text:
+        score += 1.6
+    if "Discover" in text:
+        score += 1.2
+    if "Split:" in text:
+        score += 0.8
+    lowered = text.lower()
+    if "discard" in lowered:
+        score += 1.6
+    if "return an enemy" in lowered or "return a target" in lowered:
+        score += 1.4
+    if "take control" in lowered:
+        score += 2.0
+    return score
+
+
 def _score_end_turn(game: Game) -> float:
     """Score ending the turn. Baseline — only do this when nothing better."""
     player = game.active_player
     score = 0.0
 
-    # Penalize ending turn with unspent energy
     if player.energy > 0:
         unspent_ratio = player.energy / max(1, player.max_energy)
         score -= unspent_ratio * 3.0
 
-    # Slight bonus for ending turn if board is strong (defensive play)
     my_power = _board_power(player)
     enemy_power = _board_power(game.inactive_player)
     if my_power > enemy_power:
-        score += 0.5  # "I'm ahead, consolidate"
+        score += 0.5
 
     return score
 
 
-def _score_play_card(game: Game, card_index: int) -> float:
+def _score_play_card(game: Game, card_index: int, ai: AIPlayer | None = None) -> float:
     """Score playing a specific card from hand."""
     player = game.active_player
 
-    # Validate
     if card_index < 0 or card_index >= len(player.hand):
         return -math.inf
 
     card = player.hand[card_index]
 
-    # Can't afford it
     if player.energy < card.cost:
         return -math.inf
 
@@ -314,68 +386,62 @@ def _score_play_card(game: Game, card_index: int) -> float:
     score = 0.0
     card_type = card.type.value if hasattr(card, "type") else ""
 
-    # Base score: cost efficiency (playing cards is generally good)
     score += card.cost * 0.5
 
     from engine.effects import effect_requires_board_target
 
-    text = getattr(card, "ability", "") or getattr(card, "effect", "") or ""
+    text = _card_text(card)
     if "friendly" in text.lower() and not player.board:
         return -math.inf
-    if effect_requires_board_target(text) and "friendly" not in text.lower() and not game.inactive_player.board:
+    if (
+        effect_requires_board_target(text)
+        and "friendly" not in text.lower()
+        and not game.inactive_player.board
+    ):
         return -math.inf
 
     if card_type == "Character":
-        score += _score_character_card(game, card)
+        score += _score_character_card(game, card, ai)
     elif card_type == "Spell":
         score += _score_spell_card(game, card)
     elif card_type == "Location":
         score += _score_location_card(game, card)
 
-    # Efficiency bonus: prefer playing highest-cost affordable card
     affordable = [c for c in player.hand if player.can_play_card(c)]
     if affordable:
         max_cost = max(c.cost for c in affordable)
         if card.cost == max_cost:
-            score += 1.0  # tiebreaker for best cost efficiency
+            score += 1.0
 
-    # Small bonus for playing any card (keeps tempo)
     score += 0.3
-
     return score
 
 
-def _score_character_card(game: Game, card: Card) -> float:
+def _score_character_card(game: Game, card: Card, ai: AIPlayer | None = None) -> float:
     """Score playing a character card."""
     player = game.active_player
     score = 0.0
-
-    # Board presence
-    score += (
-        FACTION_WEIGHTS.get(player.board_size < 7 and "illuminati" or "illuminati", {}).get(
-            "board_presence", 1.0
-        )
-        * 2.0
+    weights = (ai.weights if ai else None) or FACTION_WEIGHTS.get(
+        player.faction, FACTION_WEIGHTS["illuminati"]
     )
 
-    # Stats value: (attack + health) relative to cost
+    if len(player.board) >= Player.MAX_BOARD_SIZE:
+        return -math.inf
+
+    score += weights.get("board_presence", 1.0) * 2.0
+
     if hasattr(card, "attack") and hasattr(card, "health"):
         total_stats = card.attack + card.health
         cost_efficiency = total_stats / max(1, card.cost)
         score += cost_efficiency * 1.5
 
-    # Keyword bonuses
-    ability = getattr(card, "ability", "") or ""
-    if "Taunt" in ability:
-        score += 2.0  # Taunt is valuable for protection
-    if "Stealth" in ability:
-        score += 1.5  # Stealth protects the character first turn
+    text = getattr(card, "ability", "") or ""
+    score += _keyword_score(text)
+    if "Taunt" in text:
+        score += weights.get("taunt_value", 1.0)
+    if "Stealth" in text:
+        score += weights.get("stealth_value", 1.0)
 
-    # Board full check
-    if len(player.board) >= Player.MAX_BOARD_SIZE:
-        return -math.inf
-
-    # Prefer playing characters early (board presence matters)
     if len(player.board) < 3:
         score += 1.0
 
@@ -384,39 +450,88 @@ def _score_character_card(game: Game, card: Card) -> float:
 
 def _score_spell_card(game: Game, card: Card) -> float:
     """Score playing a spell card."""
-    score = 1.0  # Base: spells are fine
-
-    # Prefer efficient spells (higher cost = assumed stronger effect)
+    score = 1.0
     score += card.cost * 0.3
+    text = getattr(card, "effect", "") or ""
+    score += _keyword_score(text)
 
-    # Bonus if enemy has a strong board (removal is valuable)
     enemy_power = _board_power(game.inactive_player)
     if enemy_power > 5:
         score += enemy_power * 0.5
 
+    damage = _extract_damage(text)
+    if damage:
+        board = game.inactive_player.board
+        if board:
+            kills = sum(1 for c in board if c.current_health <= damage)
+            score += kills * 3.0 + damage * 0.4
+        else:
+            score += damage * 0.2
+    if "draw" in text.lower():
+        score += 1.5
+    if "silence" in text.lower() and game.inactive_player.board:
+        score += 2.0
+    if "discard" in text.lower():
+        score += 1.8
+    if "return" in text.lower() and game.inactive_player.board:
+        score += 1.5
+    if "split:" in text.lower() and game.inactive_player.board:
+        score += 1.5
     return score
 
 
 def _score_location_card(game: Game, card: Card) -> float:
-    """Score playing a location card."""
+    """Score playing a location card. Playing a new one replaces the old."""
     player = game.active_player
-
-    # Can only have one location
-    if player.location is not None:
-        return -math.inf
-
-    # Locations are expensive but provide ongoing value
     score = 2.0 + card.cost * 0.2
-
+    score += _keyword_score(getattr(card, "effect", "") or "")
+    if player.location is not None:
+        # Replacing is legal and often correct — just pay a small tax.
+        score -= 1.8
     return score
 
 
-def _score_attack(game: Game, attacker_index: int, target_index: int | None) -> float:
+def _score_recycle(game: Game, card_index: int) -> float:
+    """Score paying 1 to shuffle a Recycle card and draw."""
+    player = game.active_player
+    if card_index < 0 or card_index >= len(player.hand):
+        return -math.inf
+    if player.energy < 1:
+        return -math.inf
+    card = player.hand[card_index]
+    text = _card_text(card)
+    if "Recycle" not in prefix_keywords(text):
+        return -math.inf
+
+    score = 1.0
+    if card.cost > player.energy:
+        score += 2.4
+    elif player.can_play_card(card) and card.cost <= player.energy:
+        # Could play it this turn — recycling is usually worse.
+        score -= 1.8
+        if card.cost >= 5:
+            score += 0.6
+
+    playable = [c for c in player.hand if player.can_play_card(c) and c is not card]
+    if not playable and player.can_play_card(card):
+        score -= 2.5
+    if player.hand_size <= 2:
+        score += 0.8
+    if player.energy <= 1 and card.cost > 1:
+        score += 1.2
+    return score
+
+
+def _score_attack(
+    game: Game,
+    attacker_index: int,
+    target_index: int | None,
+    ai: AIPlayer | None = None,
+) -> float:
     """Score a specific attack action."""
     player = game.active_player
     opponent = game.inactive_player
 
-    # Validate attacker
     if attacker_index < 0 or attacker_index >= len(player.board):
         return -math.inf
 
@@ -426,23 +541,27 @@ def _score_attack(game: Game, attacker_index: int, target_index: int | None) -> 
         return -math.inf
 
     score = 0.0
-
     valid_targets = get_valid_attack_targets(player, opponent)
+    weights = (ai.weights if ai else None) or FACTION_WEIGHTS.get(
+        player.faction, FACTION_WEIGHTS["illuminati"]
+    )
+    poke = ai.poke_face if ai else 0.0
 
     if target_index is None:
-        # Face attack — only valid if no legal character targets
         if valid_targets:
             return -math.inf
+        if getattr(attacker, "rush_locked", False):
+            return -math.inf
+        if not can_attack_player_directly(player, opponent):
+            return -math.inf
 
-        score += attacker.current_attack * 1.0  # damage to face is good
-        score += attacker.current_attack * 0.5  # aggression bonus
-
-        # Big bonus for lethal
+        score += attacker.current_attack * (1.0 + weights.get("face_damage", 1.0))
+        score += poke * 3.0
         if attacker.current_attack >= opponent.life:
             score += 100.0
-
+        if getattr(attacker, "has_drain", False):
+            score += attacker.current_attack * 0.4
     else:
-        # Character attack
         if target_index < 0 or target_index >= len(opponent.board):
             return -math.inf
 
@@ -451,6 +570,10 @@ def _score_attack(game: Game, attacker_index: int, target_index: int | None) -> 
             return -math.inf
 
         score += _score_character_attack(attacker, defender, player, opponent)
+        if getattr(attacker, "has_venom", False):
+            score += 4.0
+        if getattr(attacker, "has_drain", False):
+            score += min(attacker.current_attack, 30 - player.life) * 0.3
 
     return score
 
@@ -464,42 +587,37 @@ def _score_character_attack(
     """Score an attack of one character against another."""
     score = 0.0
 
-    # Killing the enemy is the highest priority
-    if attacker.current_attack >= defender.current_health:
-        score += 10.0  # Big kill bonus
-        # Bonus for killing high-value targets
+    if attacker.current_attack >= defender.current_health or getattr(attacker, "has_venom", False):
+        score += 10.0
         score += defender.current_attack * 2.0
         score += defender.current_health * 1.0
 
-        # Prefer trades where we also die (removing threat)
-        if defender.current_attack >= attacker.current_health:
-            # Trading: good if our character is less valuable
+        if defender.current_attack >= attacker.current_health and not getattr(
+            attacker, "has_ward", False
+        ):
             my_value = attacker.current_attack + attacker.current_health
             their_value = defender.current_attack + defender.current_health
-            if their_value > my_value:
-                score += 3.0  # Favorable trade
+            if getattr(attacker, "has_recur", False) and not getattr(attacker, "recur_used", False):
+                score += 2.0
+            elif their_value > my_value:
+                score += 3.0
             else:
-                score -= 1.0  # Unfavorable trade
+                score -= 1.0
     else:
-        # Not a kill — value based on damage dealt
         score += attacker.current_attack * 0.3
 
-    # Don't attack into big retaliation unless we have advantage
-    if defender.current_attack >= attacker.current_health:
-        # We'll die — only good if we kill them too (handled above)
+    if defender.current_attack >= attacker.current_health and not getattr(attacker, "has_ward", False):
         score -= 2.0
 
-    # Prefer attacking low-health, high-attack enemies (remove threats)
     if defender.current_health <= 2:
         score += 1.5
 
-    # Prefer not to waste stealth on bad trades
     if (
         attacker.is_stealth
         and attacker.current_attack < defender.current_health
         and defender.current_attack >= attacker.current_health
     ):
-        score -= 1.0  # Bad stealth trade
+        score -= 1.0
 
     return score
 
@@ -511,8 +629,67 @@ def _board_power(player: Player) -> float:
         power += char.current_attack * 1.0 + char.current_health * 0.5
         if has_taunt(char):
             power += 1.0
-    # Factor in life total
+        if getattr(char, "has_recur", False) and not getattr(char, "recur_used", False):
+            power += 1.5
+        if getattr(char, "has_ward", False):
+            power += 1.0
+        if getattr(char, "has_venom", False):
+            power += 1.2
     power += player.life * 0.1
-    # Factor in hand size (card advantage)
     power += player.hand_size * 0.3
     return power
+
+
+def _extract_damage(text: str) -> int:
+    match = re.search(r"deal (\d+) damage", text.lower())
+    return int(match.group(1)) if match else 0
+
+
+def _best_spell_target_index(game: Game) -> int | None:
+    board = game.inactive_player.board
+    if not board:
+        return None
+    return max(range(len(board)), key=lambda i: board[i].current_attack + board[i].current_health)
+
+
+def _best_discovery_index(game: Game) -> int:
+    options = game.pending_discovery["cards"]
+    scores = []
+    for i, card in enumerate(options):
+        text = _card_text(card)
+        value = card.cost + _keyword_score(text)
+        if hasattr(card, "attack") and hasattr(card, "health"):
+            value += (card.attack + card.health) * 0.4
+        scores.append((value, i))
+    scores.sort(reverse=True)
+    return scores[0][1]
+
+
+def _best_split_choice(game: Game) -> tuple[int, int | None]:
+    options = game.pending_split["options"]
+    target = _best_spell_target_index(game)
+    scored: list[tuple[float, int]] = []
+    for i, option in enumerate(options):
+        text = option.lower()
+        value = 1.0
+        damage = _extract_damage(text)
+        if damage and game.inactive_player.board:
+            value = 4.0 + damage
+            if any(c.current_health <= damage for c in game.inactive_player.board):
+                value += 4.0
+        elif damage:
+            value = 0.8
+        if "draw" in text:
+            value = 3.0 if game.active_player.hand_size < 5 else 1.6
+        if "restore" in text or "heal" in text:
+            missing = 30 - game.active_player.life
+            value = missing * 0.45
+        scored.append((value, i))
+    scored.sort(reverse=True)
+    pick = scored[0][1]
+    chosen = options[pick].lower()
+    if _extract_damage(chosen) and target is None:
+        target = 0 if game.inactive_player.board else None
+    if "draw" in chosen or "restore" in chosen:
+        target = None
+    return pick, target

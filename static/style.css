@@ -532,6 +532,28 @@ button.hint-glow { box-shadow: 0 0 0 2px var(--accent-gold); }
 .encounter-card .meta, .deck-row .meta, #deck-count { color: var(--text-muted); font-size: 0.8em; }
 
 .help-copy ul, #recap-stats ul { margin: 12px 0 0 20px; color: var(--text-secondary); }
+.help-copy h3 { color: var(--accent-gold); margin: 16px 0 6px; font-size: 1em; }
+
+#keyword-glossary { margin-top: 18px; }
+#keyword-search {
+  width: 100%;
+  max-width: 420px;
+  margin: 8px 0 12px;
+  padding: 8px 10px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.keyword-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.keyword-card h3 { color: var(--accent-gold); font-size: 0.95em; margin-bottom: 4px; }
+.keyword-card p { color: var(--text-secondary); font-size: 0.88em; }
+.keyword-card .meta { color: var(--text-muted); font-size: 0.75em; margin-top: 6px; }
 
 .deck-toolbar, .deck-filters {
   display: flex;

@@ -51,7 +51,7 @@ Energy type: **Conspiracy**. Source of truth: data/cards.json in the [[conspirac
 | Graymail | Character | 3 | 1 | 2 | Recycle. Taunt. |
 | Intern Asset | Character | 3 | 1 | 2 | Assault: Deal 1 damage to a target character. |
 | Leech Contact | Character | 3 | 2 | 3 | Drain. |
-| Relic Courier | Character | 3 | 1 | 4 | Taunt. When played, if you are Templars, restore 3 Health to your hero. |
+| Relic Courier | Character | 3 | 1 | 4 | Taunt. When played, if you are Templars, restore 2 Health to your hero. |
 | Revenant Hire | Character | 3 | 2 | 1 | Recur. |
 | Second Strike | Character | 3 | 3 | 2 | Chain: Deal 2 damage to the enemy hero. |
 | Shadow Rat | Character | 3 | 1 | 2 | Stealth. |

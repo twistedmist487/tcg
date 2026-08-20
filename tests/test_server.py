@@ -203,6 +203,7 @@ class TestSoloEndpoints:
         assert resp.status_code == 200
         ids = {e["id"] for e in resp.json()}
         assert "tutorial" in ids
+        assert "keyword_lab" in ids
         assert "showcase_illuminati" in ids
 
     def test_list_decks(self, client):

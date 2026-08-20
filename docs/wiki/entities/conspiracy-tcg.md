@@ -1,7 +1,7 @@
 ---
 title: Conspiracy TCG
 created: 2026-08-15
-updated: 2026-08-17
+updated: 2026-08-20
 type: entity
 tags: [project, gaming, conspiracy, secret-society, status]
 sources: []
@@ -18,15 +18,16 @@ Single-player card game. Three conspiracies fight for the same world. Learn in a
 
 ## Status (2026-08-17)
 
-Playable through Phase 8. Phase 9 is in progress: the 240-card pool, 12-Network hire cap, and constructed rules (2 copies, energy 10) are live. The browser **Conspiracy Table** is wired (Dossier, hero frames, energy well). Next is teaching the new verbs, a balance pass, and Hard AI.
+Playable through Phase 8. Phase 9 is in progress: the 240-card pool, 12-Network hire cap, constructed rules, **First Contact Deathrattle beat**, **Keyword Lab**, searchable keyword glossary, and honest Medium AI scoring are live. Next is Hard AI.
 
 | | |
 |---|---|
 | Phases 0–8 | Complete (engine, web UI, tutorial, deck builder) |
-| Phase 9 | In progress — pool and keywords in; teach / rebalance / Hard AI next |
-| Tests | 286 passing |
+| Phase 9 | In progress — teach + Medium rebalance in; Hard AI next |
+| Tests | 297 passing |
 | Cards | 240 — 40 per faction + 120 Network (1 token) |
-| Loop | Tutorial → Play vs AI / faction encounters → deck builder |
+| Loop | Tutorial → Keyword Lab → Play vs AI / faction encounters → deck builder |
+
 
 ## How to run
 
@@ -62,7 +63,9 @@ Network cards can go in any 30-card deck (max 12). They are printed weaker than 
 - **Taunt** must be attacked first. **Stealth** cannot be targeted until that character attacks (you may hit face instead)
 - Win at 0 life or deck-out
 
-**First Contact** tutorial: play as Recruit (Templars) vs The Recruiter (Easy Reptilians, 12 life). Teaches energy, exhaustion, combat, Taunt, spells, locations, Charge. Recruiter's Taunt wall is Network Contract Guard.
+**First Contact** tutorial: play as Recruit (Templars) vs The Recruiter (Easy Reptilians, 12 life). Teaches energy, exhaustion, combat, Taunt, Deathrattle (Hatchling Brood → Raptor), spells, locations, Charge. Recruiter's Taunt wall is Network Contract Guard. Recruiter pokes face so a stall cannot last forever.
+
+**Keyword Lab:** skippable drill vs The Instructor. Recycle (Burn Bag) → Split (Forked Brief) → Drain (Leech Contact) → Ward (Quiet Vest).
 
 ## Keywords (Conspiracy names)
 
@@ -104,9 +107,9 @@ Test/brew: Templar Charge, Templar Walls, Illuminati Denial, Reptilian Swarm, Ne
 
 ## Next 3 steps (from the roadmap)
 
-1. **Teach what we just built** — Deathrattle beat in First Contact, skippable keyword-lab encounter (Recycle / Split / Drain / Ward), static keyword reference. Easy Recruiter should still poke face so a stall cannot last forever.
-2. **Rebalance the 240-card pool** — curated lists already hire new cards. Run `python tools/playtest_balance.py` and tune anything that dominates.
-3. **Hard AI + challenge encounters** — look-ahead Hard difficulty that scores the new verbs, then 2–3 themed challenge matches.
+1. **Teach what we just built** — DONE (Deathrattle in First Contact, Keyword Lab, glossary, Recruiter pokes face).
+2. **Rebalance the 240-card pool** — Medium AI now scores the new verbs. Run `python tools/playtest_balance.py` and tune anything that dominates.
+3. **Hard AI + challenge encounters** — 2-ply Hard difficulty, then 2–3 themed challenge matches.
 
 Out of product scope: multiplayer, matchmaking, Secrets, Quests, hero powers.
 

@@ -28,7 +28,7 @@ Energy type: **Faith**. Source of truth: data/cards.json in the [[conspiracy-tcg
 | Squire | Character | 1 | 1 | 3 | Taunt. |
 | Archivist | Character | 2 | 1 | 3 | When played, draw a card. When this character dies, draw a card. |
 | Battle Chaplain | Character | 2 | 2 | 2 | When played, restore 3 Health to your hero. |
-| Templar Guardian | Character | 2 | 1 | 4 | Taunt (Enemy characters must attack this character if able). |
+| Templar Guardian | Character | 2 | 1 | 3 | Taunt (Enemy characters must attack this character if able). |
 | Field Medic | Character | 3 | 2 | 3 | Assault: Restore 2 Health to a target. |
 | Relic Keeper | Character | 3 | 2 | 3 | Taunt. When this character is damaged, deal 1 damage to a random enemy character. |
 | Zealot | Character | 3 | 3 | 2 | Charge. When this character dies, deal 2 damage to the enemy hero. |
@@ -38,7 +38,7 @@ Energy type: **Faith**. Source of truth: data/cards.json in the [[conspiracy-tcg
 | Warden of Secrets | Character | 4 | 2 | 5 | Taunt. When this character is destroyed, draw 2 cards. |
 | Crusader | Character | 5 | 4 | 4 | Charge (Can attack the turn it is played). |
 | Healing Seraph | Character | 5 | 3 | 5 | At the end of your turn, restore 2 Health to all friendly characters. |
-| Crypt Warden | Character | 6 | 3 | 6 | Taunt. Recur. |
+| Crypt Warden | Character | 6 | 3 | 5 | Taunt. Recur. |
 | Paladin Champion | Character | 6 | 4 | 6 | Other Templar characters you control gain +1 Attack. |
 | Temple Sentinel | Character | 6 | 4 | 7 | Taunt. When this character is damaged, deal 2 damage to a random enemy character. |
 | Grand Master Aldric | Character | 9 | 6 | 7 | Taunt. Holy. At the start of your turn, restore 3 Health to all your characters. |
@@ -58,7 +58,7 @@ Energy type: **Faith**. Source of truth: data/cards.json in the [[conspiracy-tcg
 | Holy Ground | Spell | 3 | — | — | All your characters gain Taunt until end of turn. Restore 2 Health to your hero. |
 | Divine Favor | Spell | 4 | — | — | Give a friendly character +3 Attack and 'Can't be targeted by enemy abilities' until end of turn. |
 | Martyr's Blessing | Spell | 4 | — | — | Destroy a friendly character. Draw 3 cards. Restore 5 Health to your hero. |
-| Penance | Spell | 4 | — | — | Deal 3 damage to a target character. Restore 3 Health to your hero. |
+| Penance | Spell | 4 | — | — | Deal 3 damage to a target character. Restore 2 Health to your hero. |
 | Excommunicate | Spell | 5 | — | — | Deal 4 damage to a target character. |
 | Holy Inquisition | Spell | 5 | — | — | Silence and deal 3 damage to an enemy character. |
 | Judgment | Spell | 6 | — | — | Deal 5 damage to an enemy character. Restore 5 Health to your hero. |
