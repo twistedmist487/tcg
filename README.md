@@ -87,7 +87,7 @@ python3 -m cli/game.py
 │   ├── app.js           # Game UI, Dossier, client-side AI
 │   ├── cards/           # Card front/back plates
 │   └── ui/              # Rails, energy crystals, buttons, heroes
-├── tests/               # 297 tests
+├── tests/               # 306 tests
 │   ├── test_ai.py       # AI behavior (19 tests)
 │   ├── test_card.py     # CardInstance state (23 tests)
 │   ├── test_combat.py   # Combat resolution (9 tests)
@@ -162,7 +162,7 @@ state = game.get_state()  # Full serializable dict
 | 6 | Spell/location effect resolution | COMPLETE |
 | 7 | Content expansion (decks, mulligan, balance) | COMPLETE |
 | 8 | Tutorial, solo play, deck builder | COMPLETE |
-| 9 | Polish, Hard AI, replayability, 240-card pool | IN PROGRESS |
+| 9 | Polish, Hard AI, replayability, 240-card pool | IN PROGRESS (Hard AI + challenges in) |
 
 ## License
 

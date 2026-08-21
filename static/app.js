@@ -1263,7 +1263,7 @@ function openEncounters() {
       <article class="encounter-card">
         <h3>${escHtml(e.name)}</h3>
         <p>${escHtml(e.description)}</p>
-        <p class="meta">${titleCase(e.player_faction)} vs ${titleCase(e.ai_faction)} · ${titleCase(e.difficulty)}${e.mode === 'lab' ? ' · Lab' : ''}</p>
+        <p class="meta">${titleCase(e.player_faction)} vs ${titleCase(e.ai_faction)} · ${titleCase(e.difficulty)}${e.mode === 'challenge' ? ' · Challenge' : ''}</p>
         <button class="primary" onclick="startEncounter('${e.id}')">Play encounter</button>
       </article>
     `).join('');

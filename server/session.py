@@ -136,7 +136,7 @@ def create_session(
     if len(ai_deck) != 30:
         raise ValueError(f"AI deck has {len(ai_deck)} cards (expected 30)")
 
-    if difficulty not in ("easy", "medium"):
+    if difficulty not in ("easy", "medium", "hard"):
         difficulty = "medium"
 
     game = Game.setup(

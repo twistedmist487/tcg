@@ -205,6 +205,11 @@ class TestSoloEndpoints:
         assert "tutorial" in ids
         assert "keyword_lab" in ids
         assert "showcase_illuminati" in ids
+        assert "challenge_black_room" in ids
+        assert "challenge_unquiet" in ids
+        by_id = {e["id"]: e for e in resp.json()}
+        assert by_id["challenge_black_room"]["difficulty"] == "hard"
+        assert by_id["challenge_street_war"]["mode"] == "challenge"
 
     def test_list_decks(self, client):
         resp = client.get("/api/decks")
@@ -232,6 +237,31 @@ class TestSoloEndpoints:
         assert data["encounter"]["id"] == "tutorial"
         recruit = next(p for p in data["state"]["players"] if p["name"] == "Recruit")
         assert recruit["hand"][0]["name"] == "Squire"
+
+    def test_create_challenge_game_is_hard(self, client):
+        resp = client.post(
+            "/api/game/new",
+            json={"encounter_id": "challenge_black_room", "player_name": "Recruit"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["mode"] == "challenge"
+        assert data["difficulty"] == "hard"
+        assert data["ai_name"] == "The Censor"
+        assert data["encounter"]["id"] == "challenge_black_room"
+
+    def test_create_hard_standard_game(self, client):
+        resp = client.post(
+            "/api/game/new",
+            json={
+                "player_name": "P",
+                "player_faction": "templars",
+                "ai_faction": "illuminati",
+                "difficulty": "hard",
+            },
+        )
+        assert resp.status_code == 200
+        assert resp.json()["difficulty"] == "hard"
 
     def test_ai_turn_endpoint(self, client):
         create = client.post(

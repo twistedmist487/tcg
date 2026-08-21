@@ -86,7 +86,7 @@
       {
         "id": "exhaustion",
         "title": "Exhausted characters",
-        "text": "Most characters cannot attack the turn they are played. Click End Turn and let the Recruiter go. Charge is the exception — those can attack immediately."
+        "text": "Most characters cannot attack the turn they are played. Click End Turn and let the Recruiter go. Charge is the exception \u2014 those can attack immediately."
       },
       {
         "id": "attack",
@@ -96,12 +96,12 @@
       {
         "id": "deathrattle",
         "title": "Deathrattle",
-        "text": "Hatchling Brood died and summoned a Raptor. Deathrattle happens when a character dies — you still have to deal with the new body."
+        "text": "Hatchling Brood died and summoned a Raptor. Deathrattle happens when a character dies \u2014 you still have to deal with the new body."
       },
       {
         "id": "taunt",
         "title": "Taunt",
-        "text": "That enemy has Taunt — you must attack it first. Click your ready character, then click the outlined Taunt character. You cannot hit face until the wall is gone."
+        "text": "That enemy has Taunt \u2014 you must attack it first. Click your ready character, then click the outlined Taunt character. You cannot hit face until the wall is gone."
       },
       {
         "id": "spell",
@@ -111,12 +111,12 @@
       {
         "id": "location",
         "title": "Locations",
-        "text": "Locations stay in play (one at a time). Play Sacred Chapel — it appears in your location slot and heals your characters each turn."
+        "text": "Locations stay in play (one at a time). Play Sacred Chapel \u2014 it appears in your location slot and heals your characters each turn."
       },
       {
         "id": "charge",
         "title": "Charge",
-        "text": "Zealot has Charge — it can attack the turn you play it. Click Zealot, Play Card, then attack with it immediately."
+        "text": "Zealot has Charge \u2014 it can attack the turn you play it. Click Zealot, Play Card, then attack with it immediately."
       },
       {
         "id": "free",
@@ -207,12 +207,12 @@
       {
         "id": "recycle",
         "title": "Recycle",
-        "text": "Burn Bag has Recycle. Select it, then click Recycle — pay 1 energy, shuffle it into your deck, and draw. You are not playing it."
+        "text": "Burn Bag has Recycle. Select it, then click Recycle \u2014 pay 1 energy, shuffle it into your deck, and draw. You are not playing it."
       },
       {
         "id": "split",
         "title": "Split",
-        "text": "Play Forked Brief. Split lets you pick one printed option. Deal 2 damage to the highlighted Hatchling — killing it is better than drawing here."
+        "text": "Play Forked Brief. Split lets you pick one printed option. Deal 2 damage to the highlighted Hatchling \u2014 killing it is better than drawing here."
       },
       {
         "id": "drain",
@@ -222,7 +222,7 @@
       {
         "id": "drain-attack",
         "title": "Drain combat",
-        "text": "Leech Contact is ready. Attack face or a character — the damage heals you. That is Drain."
+        "text": "Leech Contact is ready. Attack face or a character \u2014 the damage heals you. That is Drain."
       },
       {
         "id": "ward",
@@ -277,5 +277,140 @@
     "ai_name": "Handler",
     "player_deck_faction": "reptilians",
     "ai_deck_faction": "illuminati"
+  },
+  "challenge_black_room": {
+    "id": "challenge_black_room",
+    "name": "The Black Room",
+    "description": "Hard. Break an Illuminati + Network silence/discard lock before they empty your hand.",
+    "mode": "challenge",
+    "player_goes_first": true,
+    "shuffle": true,
+    "difficulty": "hard",
+    "player_faction": "templars",
+    "ai_faction": "illuminati",
+    "ai_name": "The Censor",
+    "player_deck_faction": "templars",
+    "ai_deck": [
+      "illuminati_spell_001",
+      "illuminati_spell_001",
+      "illuminati_char_018",
+      "illuminati_char_018",
+      "illuminati_char_015",
+      "illuminati_char_015",
+      "illuminati_char_006",
+      "illuminati_char_006",
+      "illuminati_spell_002",
+      "illuminati_spell_002",
+      "illuminati_spell_013",
+      "illuminati_spell_013",
+      "illuminati_char_001",
+      "illuminati_char_001",
+      "illuminati_loc_007",
+      "illuminati_loc_007",
+      "illuminati_char_008",
+      "illuminati_char_008",
+      "illuminati_spell_011",
+      "illuminati_spell_011",
+      "illuminati_spell_010",
+      "illuminati_spell_010",
+      "neutral_spell_002",
+      "neutral_spell_002",
+      "neutral_spell_014",
+      "neutral_spell_014",
+      "neutral_spell_006",
+      "neutral_spell_006",
+      "neutral_char_031",
+      "neutral_char_031"
+    ]
+  },
+  "challenge_street_war": {
+    "id": "challenge_street_war",
+    "name": "Street War",
+    "description": "Hard. Survive a Rush/Charge curve of runners, hatchlings, and late Alpha Predator.",
+    "mode": "challenge",
+    "player_goes_first": true,
+    "shuffle": true,
+    "difficulty": "hard",
+    "player_faction": "illuminati",
+    "ai_faction": "reptilians",
+    "ai_name": "The Sprinter",
+    "player_deck_faction": "illuminati",
+    "ai_deck": [
+      "reptilians_char_007",
+      "reptilians_char_007",
+      "reptilians_char_015",
+      "reptilians_char_015",
+      "reptilians_char_005",
+      "reptilians_char_005",
+      "reptilians_char_001",
+      "reptilians_char_001",
+      "reptilians_char_012",
+      "reptilians_char_012",
+      "reptilians_char_014",
+      "reptilians_char_014",
+      "reptilians_char_009",
+      "reptilians_char_009",
+      "reptilians_char_008",
+      "reptilians_char_008",
+      "reptilians_spell_001",
+      "reptilians_spell_001",
+      "neutral_char_010",
+      "neutral_char_010",
+      "neutral_char_024",
+      "neutral_char_024",
+      "neutral_char_041",
+      "neutral_char_041",
+      "neutral_char_045",
+      "neutral_char_045",
+      "neutral_char_056",
+      "neutral_char_056",
+      "neutral_char_027",
+      "neutral_char_027"
+    ]
+  },
+  "challenge_unquiet": {
+    "id": "challenge_unquiet",
+    "name": "The Unquiet",
+    "description": "Hard. Recur hires and Deathrattle hatches keep coming back. Clear them twice.",
+    "mode": "challenge",
+    "player_goes_first": true,
+    "shuffle": true,
+    "difficulty": "hard",
+    "player_faction": "templars",
+    "ai_faction": "reptilians",
+    "ai_name": "The Brood-Wake",
+    "player_deck_faction": "templars",
+    "ai_deck": [
+      "reptilians_char_007",
+      "reptilians_char_007",
+      "reptilians_char_005",
+      "reptilians_char_005",
+      "reptilians_char_017",
+      "reptilians_char_017",
+      "reptilians_char_003",
+      "reptilians_char_003",
+      "reptilians_char_008",
+      "reptilians_char_008",
+      "reptilians_char_011",
+      "reptilians_char_011",
+      "reptilians_char_002",
+      "reptilians_char_002",
+      "reptilians_char_006",
+      "reptilians_char_006",
+      "reptilians_char_013",
+      "reptilians_char_013",
+      "neutral_char_015",
+      "neutral_char_015",
+      "neutral_char_034",
+      "neutral_char_034",
+      "neutral_char_054",
+      "neutral_char_054",
+      "neutral_char_044",
+      "neutral_char_044",
+      "neutral_char_007",
+      "neutral_char_007",
+      "reptilians_loc_001",
+      "reptilians_loc_001"
+    ]
   }
 }

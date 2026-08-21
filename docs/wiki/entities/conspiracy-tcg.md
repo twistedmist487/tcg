@@ -18,13 +18,13 @@ Single-player card game. Three conspiracies fight for the same world. Learn in a
 
 ## Status (2026-08-17)
 
-Playable through Phase 8. Phase 9 is in progress: the 240-card pool, 12-Network hire cap, constructed rules, **First Contact Deathrattle beat**, **Keyword Lab**, searchable keyword glossary, and honest Medium AI scoring are live. Next is Hard AI.
+Playable through Phase 8. Phase 9 Hard AI is in: 2-ply look-ahead plus three challenge encounters (Black Room, Street War, The Unquiet). Visual polish and QoL remain.
 
 | | |
 |---|---|
 | Phases 0–8 | Complete (engine, web UI, tutorial, deck builder) |
-| Phase 9 | In progress — teach + Medium rebalance in; Hard AI next |
-| Tests | 297 passing |
+| Phase 9 | In progress — Hard AI + challenges in; polish next |
+| Tests | 306 passing |
 | Cards | 240 — 40 per faction + 120 Network (1 token) |
 | Loop | Tutorial → Keyword Lab → Play vs AI / faction encounters → deck builder |
 
@@ -91,7 +91,7 @@ Match HUD details: [[conspiracy-tcg-ui]].
 | [[conspiracy-tcg-cards]] | Full card tables (name, cost, stats, effect) |
 | `data/cards.json` | All 240 cards |
 | `data/decks.json` | Curated 30s + 10 test/brew presets |
-| `data/encounters.json` | Tutorial + 3 showcases |
+| `data/encounters.json` | Tutorial + Keyword Lab + 3 showcases + 3 Hard challenges |
 | `server/` | FastAPI + in-memory sessions |
 | `static/` | SPA + `cards/` plates + `ui/` chrome — no build step |
 | `docs/wiki/` | Repo copy of this TCG wiki slice |
@@ -109,7 +109,7 @@ Test/brew: Templar Charge, Templar Walls, Illuminati Denial, Reptilian Swarm, Ne
 
 1. **Teach what we just built** — DONE (Deathrattle in First Contact, Keyword Lab, glossary, Recruiter pokes face).
 2. **Rebalance the 240-card pool** — Medium AI now scores the new verbs. Run `python tools/playtest_balance.py` and tune anything that dominates.
-3. **Hard AI + challenge encounters** — 2-ply Hard difficulty, then 2–3 themed challenge matches.
+3. **Hard AI + challenge encounters** — DONE (2-ply Hard; Black Room / Street War / Unquiet).
 
 Out of product scope: multiplayer, matchmaking, Secrets, Quests, hero powers.
 

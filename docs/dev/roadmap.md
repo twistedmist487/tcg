@@ -129,7 +129,7 @@ locations, turn labels, and a stalling 30–30 match were broken. Those
 fixes landed in Phase 9 and were re-checked in Chromium (desktop + 390x844).
 
 **Solo Play:**
-- [x] Main menu: Play vs AI with faction, opponent faction, Easy / Medium
+- [x] Main menu: Play vs AI with faction, opponent faction, Easy / Medium / Hard
 - [x] Easy AI is conservative (mistakes + skipped attacks); Medium is the heuristic
 - [x] Showcase encounters: Shadow Council, Holy Host, Invasion Force
 - [x] Post-match recap: cards played, damage, lesson if you lost
@@ -152,7 +152,7 @@ fixes landed in Phase 9 and were re-checked in Chromium (desktop + 390x844).
 ## Phase 9: Polish & Replayability [IN PROGRESS]
 Goal: Make the solo game feel complete after the tutorial. Onboarding,
 The Network, and the evergreen keyword wave are in. The 240-card pool and 12-Network hire cap are in. Remaining Phase 9
-work is Hard AI.
+work is visual polish and QoL.
 
 ### Next 3 steps
 
@@ -179,10 +179,10 @@ work is Hard AI.
    Flash / Opening / Venom / Amplify did not dominate. Recycle Engine
    and Silence Toolbox brew lists still lose to real curated decks.
 
-3. **Hard AI + challenge encounters.**
-   Medium is a greedy heuristic with honest verb scoring. Next is a Hard
-   difficulty with 2-ply look-ahead, then 2–3 challenge encounters
-   (control Network, aggro Rush/Charge, Recur/Deathrattle swarm).
+3. **Hard AI + challenge encounters.** DONE.
+   Hard uses 2-ply look-ahead (greedy rest of turn + opponent Medium reply).
+   Three challenge encounters: The Black Room (Network control), Street War
+   (Rush/Charge), The Unquiet (Recur/Deathrattle swarm). Play vs AI offers Hard.
 
 **Play table UI (browser, 2026-08-17):**
 - [x] Conspiracy Table: history (5) + Dossier + locations | oval field | energy / End Turn / deck
@@ -244,9 +244,8 @@ work is Hard AI.
 
 **AI Improvements:**
 - [x] Medium scores Recycle, location replace, Stealth-face, Split, Discovery, evergreen verbs
-- Hard AI with look-ahead (minimax, 2-3 ply)
-- Aggro / Control / Midrange AI deck preferences
-- Optional challenge encounters that reuse Hard AI plus themed decks
+- [x] Hard AI with 2-ply look-ahead (rest of turn + opponent Medium reply)
+- [x] Challenge encounters: Black Room, Street War, The Unquiet
 
 **Visual Polish:**
 - Card art placeholders with faction-themed icons
@@ -267,7 +266,7 @@ work is Hard AI.
 
 ---
 
-*Total tests: 297*
+*Total tests: 306*
 *Total cards: 240 (40 per faction + 120 Network, including 1 token)*
 *Constructed: 30-card decks, max 2 copies, energy cap 10, max 12 Network*
 *Curated 30-card faction decks + 10 test/brew presets in data/decks.json*

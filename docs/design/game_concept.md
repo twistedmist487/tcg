@@ -86,7 +86,7 @@ The opponent AI is a rule-based heuristic agent (`engine/ai.py`) that:
 - Scales aggression per faction (Illuminati: defensive control, Templars: healing trades, Reptilians: aggressive face pressure)
 - Includes configurable aggression slider (0.0 defensive to 1.0 aggressive)
 
-Future improvements planned: multiple difficulty levels, minimax look-ahead for Hard AI.
+- Easy fumbles plays, Medium is the greedy heuristic, Hard looks one opponent reply ahead (2-ply).
 
 ## Balance Philosophy
 
