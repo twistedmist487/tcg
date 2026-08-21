@@ -81,7 +81,7 @@
       {
         "id": "welcome",
         "title": "Energy and your hand",
-        "text": "You start with 1 energy. Cards cost energy to play. Click Squire (cost 1) in your hand, then Play Card."
+        "text": "You start with 1 energy. Cards cost energy to play. Drag Squire (cost 1) onto your board, or click it then Play Card."
       },
       {
         "id": "exhaustion",
@@ -91,7 +91,7 @@
       {
         "id": "attack",
         "title": "Combat",
-        "text": "Your character is ready. Click it on your board, then click the highlighted enemy. If nothing is blocking you, click Attack Face instead."
+        "text": "Your character is ready. Drag it onto the highlighted enemy, or click it then the enemy. If nothing is blocking you, drag onto their hero (Attack Face)."
       },
       {
         "id": "deathrattle",
@@ -101,22 +101,22 @@
       {
         "id": "taunt",
         "title": "Taunt",
-        "text": "That enemy has Taunt \u2014 you must attack it first. Click your ready character, then click the outlined Taunt character. You cannot hit face until the wall is gone."
+        "text": "That enemy has Taunt \u2014 you must attack it first. Drag your ready character onto the outlined Taunt, or click it then the Taunt. You cannot hit face until the wall is gone."
       },
       {
         "id": "spell",
         "title": "Spells",
-        "text": "Spells are one-shot effects. Click Divine Smite, then click the highlighted enemy you want to damage."
+        "text": "Spells are one-shot effects. Drag Divine Smite onto the highlighted enemy, or click it then the enemy you want to damage."
       },
       {
         "id": "location",
         "title": "Locations",
-        "text": "Locations stay in play (one at a time). Play Sacred Chapel \u2014 it appears in your location slot and heals your characters each turn."
+        "text": "Locations stay in play (one at a time). Drag Sacred Chapel onto your location slot, or click it then Play Card."
       },
       {
         "id": "charge",
         "title": "Charge",
-        "text": "Zealot has Charge \u2014 it can attack the turn you play it. Click Zealot, Play Card, then attack with it immediately."
+        "text": "Zealot has Charge \u2014 it can attack the turn you play it. Drag Zealot onto your board, then drag it onto an enemy. You can also click it, Play Card, then attack."
       },
       {
         "id": "free",
@@ -207,7 +207,7 @@
       {
         "id": "recycle",
         "title": "Recycle",
-        "text": "Burn Bag has Recycle. Select it, then click Recycle \u2014 pay 1 energy, shuffle it into your deck, and draw. You are not playing it."
+        "text": "Burn Bag has Recycle. Drag it onto your deck, or select it and click Recycle \u2014 pay 1 energy, shuffle it into your deck, and draw. You are not playing it."
       },
       {
         "id": "split",

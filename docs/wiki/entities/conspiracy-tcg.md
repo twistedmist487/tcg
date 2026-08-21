@@ -18,15 +18,17 @@ Single-player card game. Three conspiracies fight for the same world. Learn in a
 
 ## Status (2026-08-17)
 
-Playable through Phase 8. Phase 9 Hard AI is in: 2-ply look-ahead plus three challenge encounters (Black Room, Street War, The Unquiet). Visual polish and QoL remain.
+Playable through Phase 8. Phase 9 Hard AI is in. Battlefield is a Hearthstone-style table: drag to play and attack. Visual polish leftovers: damage VFX, sound.
 
 | | |
 |---|---|
 | Phases 0–8 | Complete (engine, web UI, tutorial, deck builder) |
-| Phase 9 | In progress — Hard AI + challenges in; polish next |
+| Phase 9 | In progress — Hard AI, challenges, drag table; VFX next |
 | Tests | 306 passing |
 | Cards | 240 — 40 per faction + 120 Network (1 token) |
-| Loop | Tutorial → Keyword Lab → Play vs AI / faction encounters → deck builder |
+| Loop | Tutorial → Keyword Lab → Play vs AI / encounters → deck builder |
+| Table | Hearthstone-style field: drag to play and attack |
+
 
 
 ## How to run

@@ -120,6 +120,7 @@ function showScreen(id) {
   document.querySelectorAll('.screen').forEach((el) => {
     el.hidden = el.id !== id;
   });
+  document.body.classList.toggle('in-match', id === 'screen-game');
 }
 
 function returnToMenu(force = false) {
@@ -225,6 +226,9 @@ async function boot() {
   renderDeckBuilder();
   renderKeywordGlossary();
   showScreen('screen-menu');
+  setupDragAndDrop();
+  setupDossierInteractions();
+  setupHandInteractions();
 }
 
 function titleCase(value) {
@@ -410,14 +414,14 @@ function render() {
     const faceLegal = attackMode && canFace;
     oppHeader.classList.toggle('face-targetable', !!faceLegal);
     oppHeader.onclick = faceLegal ? () => attackFace() : null;
-    oppHeader.title = faceLegal ? 'Click to attack face' : '';
+    oppHeader.title = faceLegal ? 'Drag a character here, or click to attack face' : '';
   }
   const myHeader = document.querySelector('#player-section .player-header');
   if (myHeader) {
     const heroLegal = pendingSpellTarget && (pendingTargetSide === 'hero' || pendingTargetSide === 'ally_or_hero');
     myHeader.classList.toggle('hero-targetable', !!heroLegal);
     myHeader.onclick = heroLegal ? () => chooseHero() : null;
-    myHeader.title = heroLegal ? 'Click to target your hero' : '';
+    myHeader.title = heroLegal ? 'Drag or click to target your hero' : '';
   }
 
   document.getElementById('btn-start-turn').style.display = (isMyTurn && !turnStarted) ? 'inline-block' : 'none';
@@ -565,10 +569,31 @@ function renderDeckWell(player) {
   if (count) count.textContent = String(player && player.deck_size != null ? player.deck_size : 0);
 }
 
-function renderCardFace(card, extraClass, onclick, meta) {
+function renderCardFace(card, extraClass, onclick, meta, extraAttrs) {
   const faction = getFactionClass(card.faction);
   const type = card.type || (card.attack !== undefined ? 'Character' : '');
   const body = card.ability || card.effect || '';
+  const kws = cardKeywordChips(card);
+  const isChar = card.attack !== undefined && card.attack !== null;
+  return `<div class="card frame ${faction} ${extraClass || ''}" data-card-id="${escHtml(card.id || '')}" data-card-name="${escHtml(card.name || '')}" ${extraAttrs || ''} ${onclick ? `onclick="${onclick}"` : ''}>
+    <div class="card-title" title="${escHtml(card.name)}">${escHtml(card.name)}</div>
+    <div class="card-art" style="background-image:url('${cardFrontUrl(card.faction)}')">
+      <span class="card-cost">${card.cost ?? ''}</span>
+    </div>
+    <div class="card-type">${escHtml(type)}${card.faction ? ' · ' + factionLabel(card.faction) : ''}</div>
+    <div class="card-text">
+      <p class="card-ability">${formatRulesHtml(body)}</p>
+      ${kws.length ? `<div class="card-kws">${kws.map(([cls, label]) => `<span class="kw ${cls}">${label}</span>`).join('')}</div>` : ''}
+      ${meta ? `<div class="meta">${meta}</div>` : ''}
+    </div>
+    <div class="card-footer">
+      <div class="card-atk${isChar ? '' : ' empty'}">${isChar ? card.attack : ''}</div>
+      <div class="card-hp${isChar ? '' : ' empty'}">${isChar ? card.health : ''}</div>
+    </div>
+  </div>`;
+}
+
+function cardKeywordChips(card) {
   const kws = [];
   if (card.exhausted) kws.push(['exhausted', 'Exhausted']);
   if (card.stealth) kws.push(['stealth', 'Stealth']);
@@ -596,22 +621,21 @@ function renderCardFace(card, extraClass, onclick, meta) {
   prefixKw('Opening', 'opening', 'Opening');
   if (card.ward || /(^|[.]\s*)Ward\b/.test(printed)) kws.push(['ward', 'Ward']);
   if (card.silenced) kws.push(['silenced', 'Silenced']);
-  const isChar = card.attack !== undefined && card.attack !== null;
-  return `<div class="card frame ${faction} ${extraClass || ''}" data-card-id="${escHtml(card.id || '')}" data-card-name="${escHtml(card.name || '')}" ${onclick ? `onclick="${onclick}"` : ''}>
-    <div class="card-title" title="${escHtml(card.name)}">${escHtml(card.name)}</div>
-    <div class="card-art" style="background-image:url('${cardFrontUrl(card.faction)}')">
-      <span class="card-cost">${card.cost ?? ''}</span>
-    </div>
-    <div class="card-type">${escHtml(type)}${card.faction ? ' · ' + factionLabel(card.faction) : ''}</div>
-    <div class="card-text">
-      <p class="card-ability">${formatRulesHtml(body)}</p>
-      ${kws.length ? `<div class="card-kws">${kws.map(([cls, label]) => `<span class="kw ${cls}">${label}</span>`).join('')}</div>` : ''}
-      ${meta ? `<div class="meta">${meta}</div>` : ''}
-    </div>
-    <div class="card-footer">
-      <div class="card-atk${isChar ? '' : ' empty'}">${isChar ? card.attack : ''}</div>
-      <div class="card-hp${isChar ? '' : ' empty'}">${isChar ? card.health : ''}</div>
-    </div>
+  return kws;
+}
+
+function renderMinion(card, extraClass, onclick, extraAttrs) {
+  const faction = getFactionClass(card.faction);
+  const kws = cardKeywordChips(card);
+  const shown = kws.filter(([cls]) => ['exhausted', 'taunt', 'stealth', 'charge', 'rush', 'ward', 'shield', 'silenced'].includes(cls));
+  const taunt = card.taunt ? ' has-taunt' : '';
+  const stealth = card.stealth ? ' has-stealth' : '';
+  return `<div class="card minion oval ${faction} ${extraClass || ''}${taunt}${stealth}" data-card-id="${escHtml(card.id || '')}" data-card-name="${escHtml(card.name || '')}" ${extraAttrs || ''} ${onclick ? `onclick="${onclick}"` : ''}>
+    <div class="minion-art" style="background-image:url('${cardFrontUrl(card.faction)}')"></div>
+    <div class="minion-name">${escHtml(card.name || '')}</div>
+    <div class="minion-atk">${card.attack ?? ''}</div>
+    <div class="minion-hp">${card.health ?? ''}</div>
+    ${shown.length ? `<div class="minion-kws">${shown.map(([cls, label]) => `<span class="kw ${cls}">${label}</span>`).join('')}</div>` : ''}
   </div>`;
 }
 
@@ -644,7 +668,7 @@ function renderLocation(location, isPlayer) {
 
 function renderBoard(board, isPlayer) {
   if (!board || board.length === 0) {
-    return `<div style="color:var(--text-muted);font-size:0.8em;">(empty)</div>`;
+    return `<div class="board-empty">${isPlayer ? '<span>Drop characters here</span>' : ''}</div>`;
   }
   const opp = getOpponent();
   const me = getMyPlayer();
@@ -666,7 +690,8 @@ function renderBoard(board, isPlayer) {
     else if (isPlayer) onclick = `selectAttacker(${i})`;
     else if (targetingEnemy) onclick = `chooseEnemy(${i})`;
     const extra = `${selected ? 'selected' : ''} ${validTarget ? 'targetable' : ''} ${hintReady || hintTarget ? 'hint-glow' : ''} ${!canAttack && isPlayer && !targetingAlly ? 'disabled' : ''}`;
-    return renderCardFace(c, extra, onclick);
+    const attrs = `data-board-index="${i}" data-board-side="${isPlayer ? 'player' : 'opponent'}"`;
+    return renderMinion(c, extra, onclick, attrs);
   }).join('');
 }
 
@@ -687,7 +712,7 @@ function renderHand(hand, energy) {
       || (step.id === 'ward' && c.name === 'Quiet Vest')
     );
     const extra = `${selected ? 'selected' : ''} ${teach && canAfford ? 'hint-glow' : ''} ${!canAfford ? 'disabled' : ''}`;
-    return renderCardFace(c, extra, canAfford ? `selectCard(${i})` : '');
+    return renderCardFace(c, extra, canAfford ? `selectCard(${i})` : '', '', `data-hand-index="${i}"`);
   }).join('');
 }
 
@@ -724,9 +749,9 @@ function selectCard(index) {
   }
   pendingSpellTarget = true;
   pendingTargetSide = spec.mode;
-  if (spec.mode === 'enemy') addLog('Click a highlighted enemy to target.', 'turn');
-  else if (spec.mode === 'ally') addLog('Click a highlighted friendly character.', 'turn');
-  else addLog('Click your hero or a friendly character.', 'turn');
+  if (spec.mode === 'enemy') addLog('Drag onto a highlighted enemy, or click one.', 'turn');
+  else if (spec.mode === 'ally') addLog('Drag onto a friendly character, or click one.', 'turn');
+  else addLog('Drag onto your hero or a friendly character.', 'turn');
   render();
 }
 
@@ -867,7 +892,7 @@ async function submitPlay() {
     }
     pendingSpellTarget = true;
     pendingTargetSide = 'enemy';
-    addLog('Click a highlighted enemy to target.', 'turn');
+    addLog('Drag onto a highlighted enemy, or click one.', 'turn');
     render();
     return;
   }
@@ -879,13 +904,13 @@ async function submitPlay() {
     }
     pendingSpellTarget = true;
     pendingTargetSide = 'ally';
-    addLog('Click a highlighted friendly character.', 'turn');
+    addLog('Drag onto a friendly character, or click one.', 'turn');
     render();
     return;
   }
   pendingSpellTarget = true;
   pendingTargetSide = spec.mode;
-  addLog(spec.mode === 'hero' ? 'Click your hero, or Play again.' : 'Click your hero or a friendly character.', 'turn');
+  addLog(spec.mode === 'hero' ? 'Drag onto your hero, or Play again.' : 'Drag onto your hero or a friendly character.', 'turn');
   render();
 }
 
@@ -1017,7 +1042,7 @@ async function submitSplit(index) {
     pendingSpellTarget = true;
     const box = document.getElementById('split-overlay');
     if (box) box.hidden = true;
-    addLog('Click a highlighted enemy for that Split option.', 'turn');
+    addLog('Drag onto a highlighted enemy for that Split option, or click one.', 'turn');
     render();
     return;
   }
@@ -1042,10 +1067,11 @@ async function sendSplit(index, targetIndex) {
   }
 }
 
-async function submitRecycle() {
-  if (selectedCardIndex === null) return;
+async function submitRecycle(forcedIndex) {
+  const cardIndex = (forcedIndex !== undefined && forcedIndex !== null) ? forcedIndex : selectedCardIndex;
+  if (cardIndex === null || cardIndex === undefined) return;
   try {
-    const data = await api('POST', `/api/game/${sessionId}/recycle`, { card_index: selectedCardIndex });
+    const data = await api('POST', `/api/game/${sessionId}/recycle`, { card_index: cardIndex });
     state = data.state || state;
     if (data.recycle_result && data.recycle_result.recycled) {
       addLog(`Recycled ${data.recycle_result.recycled}`, 'play');
@@ -1475,7 +1501,7 @@ let pinnedInspectCard = null;
 
 function inspectTarget(el) {
   if (!el) return null;
-  return el.closest('.card.frame:not(.back), .location-slot');
+  return el.closest('.card.frame:not(.back), .card.minion, .location-slot');
 }
 
 function resolveInspectCard(el) {
@@ -1557,27 +1583,11 @@ function setupHandInteractions() {
   hand.classList.add('collapsed');
   hand.classList.remove('expanded');
 
-  hand.addEventListener('pointerenter', (e) => {
-    const card = e.target.closest('.card.frame');
-    if (!card || !hand.contains(card)) return;
-    hand.classList.add('expanded');
-    hand.classList.remove('collapsed');
-  }, true);
-
-  hand.addEventListener('pointerleave', () => {
-    setTimeout(() => {
-      if (!hand.matches(':hover')) {
-        hand.classList.remove('expanded');
-        hand.classList.add('collapsed');
-        hand.querySelectorAll('.card.frame.lifted').forEach(c => c.classList.remove('lifted'));
-      }
-    }, 80);
-  });
-
   hand.addEventListener('pointerover', (e) => {
+    if (document.body.classList.contains('dragging')) return;
     const card = e.target.closest('.card.frame');
     if (!card || !hand.contains(card)) return;
-    hand.querySelectorAll('.card.frame.lifted').forEach(c => c.classList.remove('lifted'));
+    hand.querySelectorAll('.card.frame.lifted').forEach((c) => c.classList.remove('lifted'));
     card.classList.add('lifted');
   });
 
@@ -1587,18 +1597,281 @@ function setupHandInteractions() {
   });
 }
 
+/* ---- Drag to play / attack (pointer events, click still works) ---- */
+const dragState = {
+  tracking: false,
+  active: false,
+  kind: null,
+  index: -1,
+  startX: 0,
+  startY: 0,
+  source: null,
+};
+let dragConsumedClick = false;
+
+function setupDragAndDrop() {
+  const root = document.getElementById('screen-game');
+  if (!root || root.dataset.dragReady) return;
+  root.dataset.dragReady = '1';
+  root.addEventListener('pointerdown', onDragPointerDown);
+  window.addEventListener('pointermove', onDragPointerMove);
+  window.addEventListener('pointerup', onDragPointerUp);
+  window.addEventListener('pointercancel', cancelDrag);
+  root.addEventListener('click', (e) => {
+    if (!dragConsumedClick) return;
+    e.stopPropagation();
+    e.preventDefault();
+    dragConsumedClick = false;
+  }, true);
+}
+
+function onDragPointerDown(e) {
+  if (e.button !== 0) return;
+  if (!state || state.is_over) return;
+  if (state.pending_discovery || (state.pending_split && pendingSplitIndex === null)) return;
+  const me = getMyPlayer();
+  if (!me || state.active_player !== me.name || !state.turn_started) return;
+
+  const handCard = e.target.closest('#player-hand .card.frame');
+  if (handCard && !handCard.classList.contains('disabled')) {
+    const idx = Number(handCard.dataset.handIndex);
+    if (Number.isNaN(idx)) return;
+    beginDragTrack(e, 'hand', idx, handCard);
+    return;
+  }
+  const minion = e.target.closest('#player-board .card.minion');
+  if (minion && !minion.classList.contains('disabled')) {
+    const idx = Number(minion.dataset.boardIndex);
+    const c = me.board && me.board[idx];
+    if (!c || c.attack <= 0 || c.exhausted) return;
+    beginDragTrack(e, 'attacker', idx, minion);
+  }
+}
+
+function beginDragTrack(e, kind, index, source) {
+  dragState.tracking = true;
+  dragState.active = false;
+  dragState.kind = kind;
+  dragState.index = index;
+  dragState.startX = e.clientX;
+  dragState.startY = e.clientY;
+  dragState.source = source;
+}
+
+function onDragPointerMove(e) {
+  if (!dragState.tracking) return;
+  const dx = e.clientX - dragState.startX;
+  const dy = e.clientY - dragState.startY;
+  if (!dragState.active) {
+    if ((dx * dx + dy * dy) < 64) return;
+    startDragGhost();
+  }
+  const ghost = document.getElementById('drag-ghost');
+  if (ghost && !ghost.hidden) {
+    ghost.style.left = `${e.clientX}px`;
+    ghost.style.top = `${e.clientY}px`;
+  }
+}
+
+function startDragGhost() {
+  dragState.active = true;
+  document.body.classList.add('dragging');
+  if (dragState.source) dragState.source.classList.add('dragging-source');
+  const ghost = document.getElementById('drag-ghost');
+  if (ghost && dragState.source) {
+    ghost.innerHTML = dragState.source.outerHTML;
+    const inner = ghost.querySelector('[onclick]');
+    if (inner) inner.removeAttribute('onclick');
+    ghost.hidden = false;
+    ghost.style.left = `${dragState.startX}px`;
+    ghost.style.top = `${dragState.startY}px`;
+  }
+  highlightDropZones(dragState.kind, dragState.index);
+}
+
+function onDragPointerUp(e) {
+  if (!dragState.tracking) return;
+  const wasActive = dragState.active;
+  const kind = dragState.kind;
+  const index = dragState.index;
+  const x = e.clientX;
+  const y = e.clientY;
+  endDragVisual();
+  if (wasActive) {
+    dragConsumedClick = true;
+    setTimeout(() => { dragConsumedClick = false; }, 0);
+    resolveDrop(kind, index, x, y);
+  }
+}
+
+function cancelDrag() {
+  endDragVisual();
+}
+
+function endDragVisual() {
+  dragState.tracking = false;
+  dragState.active = false;
+  document.body.classList.remove('dragging');
+  if (dragState.source) dragState.source.classList.remove('dragging-source');
+  dragState.source = null;
+  const ghost = document.getElementById('drag-ghost');
+  if (ghost) {
+    ghost.hidden = true;
+    ghost.innerHTML = '';
+  }
+  clearDropHighlights();
+}
+
+function highlightDropZones(kind, index) {
+  clearDropHighlights();
+  const me = getMyPlayer();
+  const opp = getOpponent();
+  if (!me) return;
+  if (kind === 'hand') {
+    const card = me.hand && me.hand[index];
+    if (!card) return;
+    const spec = targetSpec(card);
+    if (card.type === 'Character' || card.type === 'Location' || spec.mode === 'none') {
+      const board = document.getElementById('player-board');
+      if (board) board.classList.add('drop-ready');
+    }
+    if (card.type === 'Location') {
+      const loc = document.getElementById('location-rail');
+      if (loc) loc.classList.add('drop-ready');
+    }
+    if (spec.mode === 'enemy') {
+      const legal = targetableEnemies(opp);
+      document.querySelectorAll('#opponent-board .card.minion').forEach((el) => {
+        const i = Number(el.dataset.boardIndex);
+        if (opp.board && legal.includes(opp.board[i])) el.classList.add('drop-ready', 'targetable');
+      });
+    }
+    if (spec.mode === 'ally' || spec.mode === 'ally_or_hero') {
+      document.querySelectorAll('#player-board .card.minion').forEach((el) => el.classList.add('drop-ready'));
+    }
+    if (spec.mode === 'hero' || spec.mode === 'ally_or_hero') {
+      const hero = document.querySelector('#player-section .player-header');
+      if (hero) hero.classList.add('drop-ready');
+    }
+    if (card.recycle && me.energy >= 1) {
+      const deck = document.getElementById('deck-info');
+      if (deck) deck.classList.add('drop-ready');
+    }
+    return;
+  }
+  if (kind === 'attacker') {
+    const attacker = me.board && me.board[index];
+    const legal = targetableEnemies(opp);
+    document.querySelectorAll('#opponent-board .card.minion').forEach((el) => {
+      const i = Number(el.dataset.boardIndex);
+      if (opp.board && legal.includes(opp.board[i])) el.classList.add('drop-ready', 'targetable');
+    });
+    const face = document.querySelector('#opponent-section .player-header');
+    if (face && canAttackFace(opp) && !(attacker && attacker.rush_locked)) {
+      face.classList.add('drop-ready', 'face-targetable');
+    }
+  }
+}
+
+function clearDropHighlights() {
+  document.querySelectorAll('.drop-ready').forEach((el) => el.classList.remove('drop-ready'));
+}
+
+function dropTargetAt(x, y) {
+  const ghost = document.getElementById('drag-ghost');
+  const prev = ghost ? ghost.style.pointerEvents : '';
+  if (ghost) ghost.style.pointerEvents = 'none';
+  const el = document.elementFromPoint(x, y);
+  if (ghost) ghost.style.pointerEvents = prev || 'none';
+  if (!el) return null;
+  const enemy = el.closest('#opponent-board .card.minion');
+  if (enemy) return { type: 'enemy', index: Number(enemy.dataset.boardIndex) };
+  const ally = el.closest('#player-board .card.minion');
+  if (ally) return { type: 'ally', index: Number(ally.dataset.boardIndex) };
+  if (el.closest('#opponent-section .player-header, [data-drop="face"]')) return { type: 'face' };
+  if (el.closest('#player-section .player-header, [data-drop="hero"]')) return { type: 'hero' };
+  if (el.closest('#player-location, #location-rail')) return { type: 'location' };
+  if (el.closest('#deck-info, [data-drop="deck"]')) return { type: 'deck' };
+  if (el.closest('#player-board, [data-drop="board"]')) return { type: 'board' };
+  if (el.closest('#table-surface')) return { type: 'table' };
+  return null;
+}
+
+async function resolveDrop(kind, index, x, y) {
+  const target = dropTargetAt(x, y);
+  if (!target) return;
+  const me = getMyPlayer();
+  if (!me) return;
+
+  if (pendingSplitIndex !== null && pendingSpellTarget && target.type === 'enemy' && !Number.isNaN(target.index)) {
+    await sendSplit(pendingSplitIndex, target.index);
+    return;
+  }
+
+  if (kind === 'attacker') {
+    selectedAttackerIndex = index;
+    attackMode = true;
+    selectedCardIndex = null;
+    if (target.type === 'enemy' && !Number.isNaN(target.index)) {
+      await attackTarget(target.index);
+      return;
+    }
+    if (target.type === 'face') {
+      await attackFace();
+      return;
+    }
+    return;
+  }
+
+  if (kind !== 'hand') return;
+  const card = me.hand && me.hand[index];
+  if (!card) return;
+  selectedCardIndex = index;
+  selectedAttackerIndex = null;
+  attackMode = false;
+  const spec = targetSpec(card);
+
+  if (target.type === 'deck' && card.recycle && me.energy >= 1) {
+    await submitRecycle(index);
+    return;
+  }
+  if (target.type === 'enemy' && spec.mode === 'enemy' && !Number.isNaN(target.index)) {
+    await playSelectedCard(target.index, 'enemy');
+    return;
+  }
+  if (target.type === 'ally' && (spec.mode === 'ally' || spec.mode === 'ally_or_hero') && !Number.isNaN(target.index)) {
+    await playSelectedCard(target.index, 'ally');
+    return;
+  }
+  if (target.type === 'hero' && (spec.mode === 'hero' || spec.mode === 'ally_or_hero')) {
+    await playSelectedCard(null, 'hero');
+    return;
+  }
+  if (target.type === 'location' && card.type === 'Location') {
+    await playSelectedCard(null, 'enemy');
+    return;
+  }
+  const ontoField = target.type === 'board' || target.type === 'table' || target.type === 'ally';
+  if (ontoField && (card.type === 'Character' || card.type === 'Location' || spec.mode === 'none')) {
+    await playSelectedCard(null, 'enemy');
+    return;
+  }
+  if (spec.mode !== 'none') {
+    selectedCardIndex = null;
+    selectCard(index);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   boot();
-  // Re-bind after first render cycle
   setTimeout(setupHandInteractions, 100);
   setupDossierInteractions();
+  setupDragAndDrop();
 
-  // Click empty table area to cancel current selection (Hearthstone-style)
   const table = document.getElementById('table-surface');
   if (table) {
     table.addEventListener('click', (e) => {
-      // Only clear if the click was on the table background, not on a card or header
-      if (e.target === table || e.target.classList.contains('board-label') || e.target.classList.contains('board')) {
+      if (e.target === table || e.target.classList.contains('board-label') || e.target.classList.contains('board') || e.target.classList.contains('combat-gutter') || e.target.classList.contains('board-empty')) {
         if (selectedAttackerIndex !== null || selectedCardIndex !== null || attackMode || pendingSpellTarget) {
           clearSelection();
         }

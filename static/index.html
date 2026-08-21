@@ -17,7 +17,7 @@
     </header>
 
     <!-- Main menu -->
-    <div id="screen-menu" class="screen">
+    <div id="screen-menu" class="screen lodge-panel">
       <h2>Single Player</h2>
       <p class="lede">Learn the rules in a guided match, then take on the AI.</p>
       <div class="menu-actions">
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Play vs AI setup -->
-    <div id="screen-setup" class="screen" hidden>
+    <div id="screen-setup" class="screen lodge-panel" hidden>
       <h2>Play vs AI</h2>
       <label class="field">Your name
         <input type="text" id="player-name" placeholder="Player">
@@ -57,7 +57,7 @@
     </div>
 
     <!-- Showcase encounters -->
-    <div id="screen-encounters" class="screen" hidden>
+    <div id="screen-encounters" class="screen lodge-panel" hidden>
       <h2>Encounters</h2>
       <p class="lede">Faction showcases on Medium, then Hard challenges: control, rush, and swarm.</p>
       <div id="encounter-list" class="card-grid"></div>
@@ -67,7 +67,7 @@
     </div>
 
     <!-- Deck builder -->
-    <div id="screen-deck" class="screen" hidden>
+    <div id="screen-deck" class="screen lodge-panel" hidden>
       <h2>Deck Builder</h2>
       <div class="deck-toolbar">
         <input type="text" id="deck-name" placeholder="Deck name">
@@ -140,15 +140,15 @@
     </div>
 
     <!-- Help / rules -->
-    <div id="screen-help" class="screen" hidden>
+    <div id="screen-help" class="screen lodge-panel" hidden>
       <h2>How to Play</h2>
       <div class="help-copy">
         <p>Conspiracy TCG is a single-player card game. You play against an AI opponent.</p>
         <h3>A turn</h3>
         <ul>
           <li>Draw a card and gain +1 energy (max 10). The first player skips that first draw.</li>
-          <li>Spend energy to play characters, spells, or one location.</li>
-          <li>Attack with ready characters, then End Turn.</li>
+          <li>Spend energy to play characters, spells, or one location. Drag a card onto the table to play it, or click it then Play Card.</li>
+          <li>Attack by dragging a ready character onto an enemy or their hero. Click still works.</li>
           <li>Win at 0 life or by decking the opponent out.</li>
         </ul>
         <h3>Constructed</h3>
@@ -171,7 +171,7 @@
     </div>
 
     <!-- Mulligan -->
-    <div id="screen-mulligan" class="screen" hidden>
+    <div id="screen-mulligan" class="screen lodge-panel" hidden>
       <h2>Mulligan</h2>
       <p class="lede">Click any cards you want to redraw, then confirm. You only get one mulligan.</p>
       <div id="mulligan-hand" class="hand"></div>
@@ -220,37 +220,41 @@
               <p id="dossier-lore"></p>
             </div>
           </section>
-          <section class="rail-locations">
+          <section class="rail-locations" id="location-rail" data-drop="location">
             <h3>Locations</h3>
             <div class="location-row" id="opponent-location"></div>
             <div class="location-row" id="player-location"></div>
           </section>
         </aside>
 
-        <!-- CENTER: The table surface -->
+        <!-- CENTER: The table surface — opponent hero, two minion rows, your hero -->
         <div id="table-surface">
-          <!-- Opponent zone -->
           <div class="player-section" id="opponent-section">
-            <div class="player-header hero-frame">
-              <div class="hero-portrait" id="opponent-portrait"></div>
-              <span class="player-name" id="opponent-name"></span>
-              <div class="player-stats" id="opponent-stats"></div>
+            <div class="hero-cluster">
+              <div class="opp-hand-stack">
+                <div class="hand-label"><span id="opponent-hand-count">0</span></div>
+                <div class="hand" id="opponent-hand"></div>
+              </div>
+              <div class="player-header hero-frame" data-drop="face">
+                <div class="hero-portrait" id="opponent-portrait"></div>
+                <span class="player-name" id="opponent-name"></span>
+                <div class="player-stats" id="opponent-stats"></div>
+              </div>
             </div>
-            <div class="hand-label">Hand (<span id="opponent-hand-count">0</span>)</div>
-            <div class="hand" id="opponent-hand"></div>
-            <div class="board-label">Enemy Board</div>
-            <div class="board" id="opponent-board"></div>
+            <div class="board minion-row enemy" id="opponent-board" data-drop="enemy-row"></div>
           </div>
 
-          <!-- Player zone -->
+          <div class="combat-gutter" aria-hidden="true"></div>
+
           <div class="player-section active" id="player-section">
-            <div class="player-header hero-frame">
-              <div class="hero-portrait" id="player-portrait"></div>
-              <span class="player-name" id="player-name-display"></span>
-              <div class="player-stats" id="player-stats"></div>
+            <div class="board minion-row ally" id="player-board" data-drop="board"></div>
+            <div class="hero-cluster">
+              <div class="player-header hero-frame" data-drop="hero">
+                <div class="hero-portrait" id="player-portrait"></div>
+                <span class="player-name" id="player-name-display"></span>
+                <div class="player-stats" id="player-stats"></div>
+              </div>
             </div>
-            <div class="board-label">Your Board</div>
-            <div class="board" id="player-board"></div>
           </div>
         </div>
 
@@ -264,19 +268,23 @@
             <button id="btn-end-turn" class="end-turn" onclick="submitEndTurn()" aria-label="End Turn"></button>
             <span>End Turn</span>
           </div>
-          <div id="deck-info" class="deck-well">
+          <div id="deck-info" class="deck-well" data-drop="deck">
             <h3>Deck</h3>
             <img id="deck-back" alt="Deck">
             <div id="deck-remaining">0</div>
+            <p class="well-hint">Drop Recycle here</p>
           </div>
           <button onclick="returnToMenu()" class="ghost">Menu</button>
         </aside>
 
         <!-- Player hand sits at the very bottom, full width -->
         <div id="hand-strip">
+          <p class="drag-hint">Drag a card onto the table to play it. Drag a ready character onto an enemy — or their hero — to attack.</p>
           <div class="hand collapsed" id="player-hand"></div>
         </div>
       </div>
+
+      <div id="drag-ghost" hidden></div>
 
       <div id="actions" hidden></div>
 
