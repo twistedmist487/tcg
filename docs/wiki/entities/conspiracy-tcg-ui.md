@@ -34,27 +34,28 @@ Browser match HUD for [[conspiracy-tcg]]. Vanilla JS, no build step. The engine 
 ```
 ┌──────────────┬──────────────────────────────────┬─────────────────┐
 │ HISTORY      │  OPPONENT HERO  (portrait + ♥)   │ ENERGY WELL     │
-│ last 5 lines │  opponent hand (face-down)       │ 10 sockets      │
-│              │  enemy board (max 7)             │                 │
-│ DOSSIER      │                                  │ PLAY / START    │
-│ hover/click  │  combat stage (oval table)       │ END TURN        │
-│ art+effect   │                                  │ DECK + count    │
-│ + flavor     │  YOUR HERO  (portrait + ♥)       │ MENU            │
-│              │  your board (max 7)              │                 │
-│ LOCATIONS    │                                  │                 │
+│ last 5 lines │  opponent hand (stacked backs)   │ 10 sockets      │
+│              │  enemy minions (ovals, max 7)    │                 │
+│ DOSSIER      │  ──────── combat line ────────   │ PLAY / START    │
+│ hover/click  │  your minions (ovals, max 7)     │ END TURN        │
+│ art+effect   │  YOUR HERO                       │ DECK + count    │
+│ + flavor     │                                  │ (Recycle drop)  │
+│ LOCATIONS    │                                  │ MENU            │
 │ enemy, yours │                                  │                 │
 ├──────────────┴──────────────────────────────────┴─────────────────┤
-│                    YOUR HAND  (fan, max 10)                       │
+│                    YOUR HAND  (fan, drag onto table)              │
 └───────────────────────────────────────────────────────────────────┘
 ```
 
+- **Drag** — drag a hand card onto the table (or a target) to play. Drag a ready character onto an enemy minion or the enemy hero to attack. Click still works (tutorial, mobile tap). Recycle: drag onto the deck well.
 - **History** — newest five log lines (`addLog` drops older).
 - **Dossier** — hover previews a card; click or Play pins it. Art, cost, name, type, stats, effect (keywords **bold**), italic lore. Opponent backs do not inspect.
 - **Locations** — one plaque per player on the left rail (`Yours` / `Enemy`). Empty slots still use the plaque.
 - **Hero frames** — circular faction commander + gold ring, name under the portrait, `♥ life` beside it. No wide name/life bars. Face targeting still uses `.player-header`.
 - **Energy** — ten sockets for the human player's type. Lit = unspent, dark unlocked = spent, dim locked = not yet gained.
-- **Hand** — fan, max 10. Unaffordable cards stay opaque and only desaturate (not 42% fade). Lifted card scales up.
-- **Opponent hand** — face-down faction backs, 56×86, full opacity.
+- **Hand** — fan, max 10. Unaffordable cards stay opaque and only desaturate (not 42% fade). Lifted card scales up. Drag onto the table to play.
+- **Board minions** — oval portraits with large attack (left) and health (right), not miniature full cards.
+- **Opponent hand** — small stacked faction backs beside the enemy hero.
 
 ## Look
 

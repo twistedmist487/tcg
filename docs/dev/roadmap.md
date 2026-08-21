@@ -248,7 +248,9 @@ work is visual polish and QoL.
 - [x] Challenge encounters: Black Room, Street War, The Unquiet
 
 **Visual Polish:**
-- Card art placeholders with faction-themed icons
+- [x] Card art placeholders with faction-themed icons (faction plates)
+- [x] Hearthstone-style battlefield: opponent hero, two minion rows, your hero
+- [x] Drag to play from hand; drag to attack onto enemies or face
 - Damage animations, play effects, turn transitions
 - Sound effects (optional, browser-based)
 - [x] Responsive mobile-friendly layout (action bar must stay reachable)
