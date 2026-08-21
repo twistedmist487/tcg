@@ -230,15 +230,30 @@
         <!-- CENTER: The table surface — opponent hero, two minion rows, your hero -->
         <div id="table-surface">
           <div class="player-section" id="opponent-section">
-            <div class="hero-cluster">
-              <div class="opp-hand-stack">
-                <div class="hand-label"><span id="opponent-hand-count">0</span></div>
-                <div class="hand" id="opponent-hand"></div>
+            <div class="hero-plaque" id="opponent-plaque">
+              <div class="plaque-wing left">
+                <div class="opp-hand-stack">
+                  <div class="hand-label">Hand <span id="opponent-hand-count">0</span></div>
+                  <div class="hand" id="opponent-hand"></div>
+                </div>
               </div>
-              <div class="player-header hero-frame" data-drop="face">
-                <div class="hero-portrait" id="opponent-portrait"></div>
-                <span class="player-name" id="opponent-name"></span>
-                <div class="player-stats" id="opponent-stats"></div>
+              <div class="hero-stack">
+                <div class="player-header hero-frame" data-drop="face">
+                  <div class="hero-portrait" id="opponent-portrait"></div>
+                </div>
+                <div class="nameplate">
+                  <div class="player-name" id="opponent-name"></div>
+                </div>
+              </div>
+              <div class="plaque-wing right">
+                <div class="life-cluster">
+                  <div class="life-orb" id="opponent-life">30</div>
+                  <span class="life-caption">Life</span>
+                </div>
+                <div class="plaque-copy">
+                  <div class="player-role" id="opponent-role"></div>
+                  <div class="player-stats" id="opponent-stats"></div>
+                </div>
               </div>
             </div>
             <div class="board minion-row enemy" id="opponent-board" data-drop="enemy-row"></div>
@@ -248,11 +263,28 @@
 
           <div class="player-section active" id="player-section">
             <div class="board minion-row ally" id="player-board" data-drop="board"></div>
-            <div class="hero-cluster">
-              <div class="player-header hero-frame" data-drop="hero">
-                <div class="hero-portrait" id="player-portrait"></div>
-                <span class="player-name" id="player-name-display"></span>
-                <div class="player-stats" id="player-stats"></div>
+            <div class="hero-plaque" id="player-plaque">
+              <div class="plaque-wing left">
+                <div class="life-cluster">
+                  <div class="life-orb" id="player-life">30</div>
+                  <span class="life-caption">Life</span>
+                </div>
+                <div class="plaque-copy">
+                  <div class="player-role" id="player-role"></div>
+                  <div class="player-stats" id="player-stats"></div>
+                </div>
+              </div>
+              <div class="hero-stack">
+                <div class="player-header hero-frame" data-drop="hero">
+                  <div class="hero-portrait" id="player-portrait"></div>
+                </div>
+                <div class="nameplate">
+                  <div class="player-name" id="player-name-display"></div>
+                </div>
+              </div>
+              <div class="plaque-wing right">
+                <div class="field-meter" id="player-field-meter" aria-hidden="true"></div>
+                <div class="plaque-note" id="player-plaque-note">Field</div>
               </div>
             </div>
           </div>

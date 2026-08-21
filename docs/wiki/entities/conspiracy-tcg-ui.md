@@ -1,7 +1,7 @@
 ---
 title: Conspiracy TCG — Play table UI
 created: 2026-08-17
-updated: 2026-08-17
+updated: 2026-08-21
 type: entity
 tags: [project, gaming, conspiracy, status]
 sources: []
@@ -33,12 +33,12 @@ Browser match HUD for [[conspiracy-tcg]]. Vanilla JS, no build step. The engine 
 
 ```
 ┌──────────────┬──────────────────────────────────┬─────────────────┐
-│ HISTORY      │  OPPONENT HERO  (portrait + ♥)   │ ENERGY WELL     │
-│ last 5 lines │  opponent hand (stacked backs)   │ 10 sockets      │
-│              │  enemy minions (ovals, max 7)    │                 │
-│ DOSSIER      │  ──────── combat line ────────   │ PLAY / START    │
-│ hover/click  │  your minions (ovals, max 7)     │ END TURN        │
-│ art+effect   │  YOUR HERO                       │ DECK + count    │
+│ HISTORY      │  OPPONENT TRAY (hand | hero | ♥) │ ENERGY WELL     │
+│ last 5 lines │  enemy minions (7 oval slots)    │ 10 sockets      │
+│              │  ──────── combat line ────────   │                 │
+│ DOSSIER      │  your minions (7 oval slots)     │ PLAY / START    │
+│ hover/click  │  YOUR TRAY (♥ | hero | field)    │ END TURN        │
+│ art+effect   │                                  │ DECK + count    │
 │ + flavor     │                                  │ (Recycle drop)  │
 │ LOCATIONS    │                                  │ MENU            │
 │ enemy, yours │                                  │                 │
@@ -51,10 +51,10 @@ Browser match HUD for [[conspiracy-tcg]]. Vanilla JS, no build step. The engine 
 - **History** — newest five log lines (`addLog` drops older).
 - **Dossier** — hover previews a card; click or Play pins it. Art, cost, name, type, stats, effect (keywords **bold**), italic lore. Opponent backs do not inspect.
 - **Locations** — one plaque per player on the left rail (`Yours` / `Enemy`). Empty slots still use the plaque.
-- **Hero frames** — circular faction commander + gold ring, name under the portrait, `♥ life` beside it. No wide name/life bars. Face targeting still uses `.player-header`.
+- **Hero frames** — each commander sits in a wide wooden HUD tray that spans the oval: hand (or life) on one wing, framed portrait on a faction nameplate in the center, life orb + role on the other. The player tray also shows a 7-pip field meter. Face targeting still uses `.player-header`.
 - **Energy** — ten sockets for the human player's type. Lit = unspent, dark unlocked = spent, dim locked = not yet gained.
 - **Hand** — fan, max 10. Unaffordable cards stay opaque and only desaturate (not 42% fade). Lifted card scales up. Drag onto the table to play.
-- **Board minions** — oval portraits with large attack (left) and health (right), not miniature full cards.
+- **Board minions** — oval portraits with large attack (left) and health (right). Empty boards still show 7 dashed slot silhouettes so the battlefield fills the occult oval.
 - **Opponent hand** — small stacked faction backs beside the enemy hero.
 
 ## Look
@@ -71,6 +71,8 @@ Browser match HUD for [[conspiracy-tcg]]. Vanilla JS, no build step. The engine 
 | Path | Used for |
 |---|---|
 | `chrome/table-surface.jpg` | Oval play field |
+| `chrome/nameplate.jpg` | Name banner under each commander (neutral) |
+| `chrome/nameplate-*.jpg` | Faction name banners |
 | `chrome/panel-rail.jpg` | Slim left and right rails |
 | `chrome/location-slot.jpg` | Location plaques |
 | `energy/influence.jpg` | Lit Influence |
@@ -80,14 +82,14 @@ Browser match HUD for [[conspiracy-tcg]]. Vanilla JS, no build step. The engine 
 | `buttons/end-turn-normal.jpg` | Hourglass End Turn |
 | `buttons/end-turn-hover.jpg` | Hover |
 | `buttons/end-turn-pressed.jpg` | Pressed |
-| `heroes/hero-frame.jpg` | Ornate badge (authoring; live ring is CSS) |
+| `heroes/hero-frame.jpg` | Gold ring around commander portraits |
 | `heroes/portrait-illuminati.jpg` | Hooded commander |
 | `heroes/portrait-templars.jpg` | Knight commander |
 | `heroes/portrait-reptilians.jpg` | Reptilian commander |
 | `static/cards/fronts/{faction}-front.jpg` | Card art plate |
 | `static/cards/backs/{faction}-back.jpg` | Deck pile and opponent hand |
 
-`chrome/nameplate*.jpg` is leftover banner HUD. The live match does not use it.
+`chrome/nameplate*.jpg` is the name banner under each commander portrait.
 
 ## How the Dossier gets text
 

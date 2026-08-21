@@ -9,6 +9,7 @@ const FACTIONS = [
   { id: 'reptilians', name: 'Reptilians', energy: 'Psionics', icon: '▲' },
 ];
 const DECK_STORAGE_KEY = 'conspiracy_decks_v1';
+const BOARD_SLOTS = 7;
 
 const KEYWORD_GLOSSARY = [
   { name: 'Taunt', example: 'Squire', text: 'Enemies must attack a Taunt character first.' },
@@ -380,8 +381,11 @@ function render() {
 
   document.getElementById('opponent-name').textContent = opp.name;
   paintHeroFrame('opponent-section', opp.faction, 'opponent-portrait');
-  document.getElementById('opponent-stats').innerHTML =
-    `${heroGuard(opp)}<span class="life-num">♥ ${opp.life}</span>`;
+  const oppLife = document.getElementById('opponent-life');
+  if (oppLife) oppLife.textContent = String(opp.life);
+  const oppRole = document.getElementById('opponent-role');
+  if (oppRole) oppRole.textContent = factionLabel(opp.faction);
+  document.getElementById('opponent-stats').innerHTML = heroGuard(opp);
   document.getElementById('opponent-hand-count').textContent = opp.hand_size;
   document.getElementById('opponent-hand').innerHTML = renderHiddenHand(opp.hand_size);
   document.getElementById('opponent-location').innerHTML = renderLocation(opp.location, false);
@@ -390,8 +394,28 @@ function render() {
   document.getElementById('player-name-display').textContent = me ? me.name : '?';
   if (me) {
     paintHeroFrame('player-section', me.faction, 'player-portrait');
-    document.getElementById('player-stats').innerHTML =
-      `${heroGuard(me)}<span class="life-num">♥ ${me.life}</span>`;
+    const myLife = document.getElementById('player-life');
+    if (myLife) myLife.textContent = String(me.life);
+    const myRole = document.getElementById('player-role');
+    if (myRole) myRole.textContent = factionLabel(me.faction);
+    document.getElementById('player-stats').innerHTML = heroGuard(me);
+    const note = document.getElementById('player-plaque-note');
+    const meter = document.getElementById('player-field-meter');
+    const board = me.board || [];
+    const n = board.length;
+    const ready = board.filter((c) => c.attack > 0 && !c.exhausted).length;
+    if (note) {
+      note.textContent = ready ? `${ready} ready` : `${n} / ${BOARD_SLOTS}`;
+    }
+    if (meter) {
+      meter.innerHTML = Array.from({ length: BOARD_SLOTS }, (_, i) => {
+        const c = board[i];
+        const filled = !!c;
+        const isReady = filled && c.attack > 0 && !c.exhausted;
+        const title = filled ? escHtml(c.name) : 'Empty slot';
+        return `<span class="pip${filled ? ' filled' : ''}${isReady ? ' ready' : ''}" title="${title}"></span>`;
+      }).join('');
+    }
     document.getElementById('player-location').innerHTML = renderLocation(me.location, true);
     document.getElementById('player-board').innerHTML = renderBoard(me.board, true);
     document.getElementById('player-hand').innerHTML = renderHand(me.hand || [], me.energy);
@@ -535,12 +559,14 @@ function heroPortraitUrl(faction) {
 
 function paintHeroFrame(sectionId, faction, portraitId) {
   const header = document.querySelector(`#${sectionId} .player-header`);
-  if (header) {
-    header.classList.remove('illuminati', 'templars', 'reptilians');
+  const plaque = document.querySelector(`#${sectionId} .hero-plaque`);
+  [header, plaque].forEach((el) => {
+    if (!el) return;
+    el.classList.remove('illuminati', 'templars', 'reptilians');
     if (faction === 'illuminati' || faction === 'templars' || faction === 'reptilians') {
-      header.classList.add(faction);
+      el.classList.add(faction);
     }
-  }
+  });
   const portrait = document.getElementById(portraitId);
   if (portrait) portrait.style.backgroundImage = `url('${heroPortraitUrl(faction)}')`;
 }
@@ -667,9 +693,7 @@ function renderLocation(location, isPlayer) {
 }
 
 function renderBoard(board, isPlayer) {
-  if (!board || board.length === 0) {
-    return `<div class="board-empty">${isPlayer ? '<span>Drop characters here</span>' : ''}</div>`;
-  }
+  const list = board || [];
   const opp = getOpponent();
   const me = getMyPlayer();
   const targetingEnemy = (attackMode || pendingSpellTarget) && pendingTargetSide === 'enemy';
@@ -677,7 +701,13 @@ function renderBoard(board, isPlayer) {
   const legalEnemies = !isPlayer && targetingEnemy ? targetableEnemies(opp) : [];
   const legalAllies = isPlayer && targetingAlly ? ((me && me.board) || []) : [];
   const step = currentTutorialStep();
-  return board.map((c, i) => {
+  const cells = [];
+  for (let i = 0; i < BOARD_SLOTS; i += 1) {
+    const c = list[i];
+    if (!c) {
+      cells.push(`<div class="minion-slot ${isPlayer ? 'ally' : 'enemy'}" data-slot="${i}"></div>`);
+      continue;
+    }
     const canAttack = isPlayer && c.attack > 0 && !c.exhausted && !targetingAlly;
     const validTarget = isPlayer
       ? targetingAlly && legalAllies.includes(c)
@@ -691,8 +721,9 @@ function renderBoard(board, isPlayer) {
     else if (targetingEnemy) onclick = `chooseEnemy(${i})`;
     const extra = `${selected ? 'selected' : ''} ${validTarget ? 'targetable' : ''} ${hintReady || hintTarget ? 'hint-glow' : ''} ${!canAttack && isPlayer && !targetingAlly ? 'disabled' : ''}`;
     const attrs = `data-board-index="${i}" data-board-side="${isPlayer ? 'player' : 'opponent'}"`;
-    return renderMinion(c, extra, onclick, attrs);
-  }).join('');
+    cells.push(renderMinion(c, extra, onclick, attrs));
+  }
+  return cells.join('');
 }
 
 function renderHand(hand, energy) {
