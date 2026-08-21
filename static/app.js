@@ -10,6 +10,35 @@ const FACTIONS = [
 ];
 const DECK_STORAGE_KEY = 'conspiracy_decks_v1';
 
+const KEYWORD_GLOSSARY = [
+  { name: 'Taunt', example: 'Squire', text: 'Enemies must attack a Taunt character first.' },
+  { name: 'Stealth', example: 'Shape-Shifter Infiltrator', text: 'Cannot be targeted until it attacks. You may hit face instead.' },
+  { name: 'Silence', example: 'Media Blackout', text: 'Strips abilities, Taunt, and Stealth from a character or location.' },
+  { name: 'Exhausted', example: 'Squire', text: 'Cannot attack. New characters enter exhausted unless they have Charge or Rush.' },
+  { name: 'Charge', example: 'Zealot', text: 'Can attack anyone, including the hero, the turn it is played.' },
+  { name: 'Rush', example: 'Raptor Swarm', text: 'Can attack characters the turn it is played, but not the hero.' },
+  { name: 'Shielding', example: 'Templar walls', text: 'Ignores the next instance of damage, then pops.' },
+  { name: 'Enraged', example: 'Second Strike', text: 'Can attack twice each turn. Persistent.' },
+  { name: 'Assault', example: 'Hired Gun', text: 'Triggers when the character is played from hand (not when summoned).' },
+  { name: 'Deathrattle', example: 'Hatchling Brood', text: 'Triggers when the character dies. Hatchling Brood summons a 2/1 Raptor.' },
+  { name: 'Discovery', example: 'Open Channel', text: 'Choose 1 of 3 random cards from your faction plus the Network.' },
+  { name: 'Drain', example: 'Leech Contact', text: 'Combat damage this deals heals its controller.' },
+  { name: 'Venom', example: 'Toxin Needle', text: 'Any damage this deals to a character is lethal. Blocked by Ward or Shielding.' },
+  { name: 'Recur', example: 'Sleeper Cell', text: 'The first time it dies, it returns at 1 Health. Deathrattle still fires.' },
+  { name: 'Stasis', example: 'Black Ice', text: 'Cannot attack until the end of its controller’s next turn.' },
+  { name: 'Amplify', example: 'Signal Booster', text: 'Your spells deal +1 damage per Amplify character you control.' },
+  { name: 'Recycle', example: 'Burn Bag', text: 'Pay 1 energy: shuffle this from hand into your deck and draw.' },
+  { name: 'Chain', example: 'Second Strike', text: 'Extra effect if you already played a card this turn.' },
+  { name: 'Split', example: 'Forked Brief', text: 'Choose one printed option when you play it.' },
+  { name: 'Echo', example: 'Carbon Copy', text: 'After you play this, add a copy to your hand that vanishes at end of turn.' },
+  { name: 'Excess', example: 'Overpen', text: 'Extra effect if this deals more attack than the defender’s current Health.' },
+  { name: 'Retaliate', example: 'Tripwire', text: 'Once: when this takes damage and survives.' },
+  { name: 'Flash', example: 'Dead Drop Memo', text: 'Resolves immediately when drawn.' },
+  { name: 'Manifest', example: 'Walk-In', text: 'Enters the board when drawn (no Assault).' },
+  { name: 'Opening', example: 'Contingency', text: 'Fires once on your first turn start, from hand or deck.' },
+  { name: 'Ward', example: 'Quiet Vest / Safe House', text: 'Ignore all damage until end of turn. Does not pop.' },
+];
+
 let state = null;
 let sessionId = null;
 let selectedCardIndex = null;
@@ -40,6 +69,12 @@ let tutorialProgress = {
   playedSpell: false,
   playedLocation: false,
   playedCharge: false,
+  sawDeathrattle: false,
+  recycled: false,
+  splitPlayed: false,
+  playedDrain: false,
+  drainAttacked: false,
+  playedWard: false,
 };
 
 function resetTutorialProgress() {
@@ -50,7 +85,23 @@ function resetTutorialProgress() {
     playedSpell: false,
     playedLocation: false,
     playedCharge: false,
+    sawDeathrattle: false,
+    recycled: false,
+    splitPlayed: false,
+    playedDrain: false,
+    drainAttacked: false,
+    playedWard: false,
   };
+}
+
+function isGuidedMode() {
+  return !!(encounter && encounter.steps && encounter.steps.length
+    && (gameMode === 'tutorial' || gameMode === 'lab'));
+}
+
+function isSkipMulliganMode(mode, encounterId) {
+  return mode === 'tutorial' || mode === 'lab'
+    || encounterId === 'tutorial' || encounterId === 'keyword_lab';
 }
 
 async function api(method, path, body = null) {
@@ -172,6 +223,7 @@ async function boot() {
   });
   refreshSavedDeckSelect();
   renderDeckBuilder();
+  renderKeywordGlossary();
   showScreen('screen-menu');
 }
 
@@ -181,6 +233,10 @@ function titleCase(value) {
 
 async function startTutorial() {
   await beginMatch({ encounter_id: 'tutorial', player_name: 'Recruit' }, { skipMulligan: true });
+}
+
+async function startKeywordLab() {
+  await beginMatch({ encounter_id: 'keyword_lab', player_name: 'Operator' }, { skipMulligan: true });
 }
 
 async function startStandardGame() {
@@ -209,7 +265,7 @@ async function startStandardGame() {
 
 async function startEncounter(id) {
   const name = document.getElementById('player-name').value.trim() || 'Player';
-  await beginMatch({ encounter_id: id, player_name: name }, { skipMulligan: id === 'tutorial' });
+  await beginMatch({ encounter_id: id, player_name: name }, { skipMulligan: isSkipMulliganMode(null, id) });
 }
 
 async function beginMatch(payload, { skipMulligan }) {
@@ -231,9 +287,9 @@ async function beginMatch(payload, { skipMulligan }) {
     document.getElementById('log').innerHTML = '';
     pinnedInspectCard = null;
     showDossier(null);
-    addLog(`${gameMode === 'tutorial' ? 'Tutorial' : 'Match'} started.`, 'turn');
+    addLog(`${gameMode === 'tutorial' ? 'Tutorial' : (gameMode === 'lab' ? 'Keyword Lab' : 'Match')} started.`, 'turn');
 
-    if (!skipMulligan && gameMode !== 'tutorial') {
+    if (!skipMulligan && !isSkipMulliganMode(gameMode, payload.encounter_id)) {
       showScreen('screen-mulligan');
       renderMulligan();
       return;
@@ -310,7 +366,7 @@ function render() {
   const turnStarted = !!state.turn_started;
 
   const myTurnCount = playerTurnCount(isMyTurn);
-  const turnLabel = gameMode === 'tutorial' && myTurnCount
+  const turnLabel = isGuidedMode() && myTurnCount
     ? `Your turn ${myTurnCount}`
     : `Turn ${state.turn || 1}`;
   document.getElementById('turn-info').innerHTML =
@@ -371,11 +427,12 @@ function render() {
   document.getElementById('btn-play').textContent = pendingSpellTarget
     ? (targetingHeroOptional ? 'Heal Hero' : 'Click a target')
     : 'Play Card';
-  document.getElementById('btn-play').classList.toggle('hint-glow', !!(step && step.id === 'welcome' && selectedCardIndex !== null));
+  document.getElementById('btn-play').classList.toggle('hint-glow', !!(step && selectedCardIndex !== null && ['welcome', 'split', 'drain', 'ward', 'spell', 'location', 'charge'].includes(step.id)));
   const recycleBtn = document.getElementById('btn-recycle');
   if (recycleBtn) {
     recycleBtn.hidden = !canRecycle;
     recycleBtn.disabled = !canRecycle;
+    recycleBtn.classList.toggle('hint-glow', !!(step && step.id === 'recycle' && selectedCard && selectedCard.recycle));
   }
   const attackBtn = document.getElementById('btn-attack');
   if (attackBtn) {
@@ -602,8 +659,8 @@ function renderBoard(board, isPlayer) {
       ? targetingAlly && legalAllies.includes(c)
       : targetingEnemy && legalEnemies.includes(c);
     const selected = isPlayer && i === selectedAttackerIndex;
-    const hintReady = isPlayer && canAttack && step && (step.id === 'attack' || step.id === 'taunt');
-    const hintTarget = validTarget && step && (step.id === 'attack' || step.id === 'taunt' || step.id === 'spell');
+    const hintReady = isPlayer && canAttack && step && (step.id === 'attack' || step.id === 'taunt' || step.id === 'drain-attack' || step.id === 'deathrattle');
+    const hintTarget = validTarget && step && (step.id === 'attack' || step.id === 'taunt' || step.id === 'spell' || step.id === 'split' || step.id === 'deathrattle' || step.id === 'drain-attack');
     let onclick = '';
     if (isPlayer && targetingAlly) onclick = `chooseAlly(${i})`;
     else if (isPlayer) onclick = `selectAttacker(${i})`;
@@ -624,6 +681,10 @@ function renderHand(hand, energy) {
       || (step.id === 'spell' && c.name === 'Divine Smite')
       || (step.id === 'location' && c.name === 'Sacred Chapel')
       || (step.id === 'charge' && c.name === 'Zealot')
+      || (step.id === 'recycle' && c.name === 'Burn Bag')
+      || (step.id === 'split' && c.name === 'Forked Brief')
+      || (step.id === 'drain' && c.name === 'Leech Contact')
+      || (step.id === 'ward' && c.name === 'Quiet Vest')
     );
     const extra = `${selected ? 'selected' : ''} ${teach && canAfford ? 'hint-glow' : ''} ${!canAfford ? 'disabled' : ''}`;
     return renderCardFace(c, extra, canAfford ? `selectCard(${i})` : '');
@@ -758,6 +819,12 @@ async function sendAttack(attackerIndex, targetIndex) {
       addLog(`${ar.attacker} attacks ${ar.target} (${ar.damage_dealt} dmg)`, 'damage');
       tutorialProgress.attacked = true;
       if (targetBefore && targetBefore.taunt) tutorialProgress.attackedTaunt = true;
+      if (/Hatchling|Deathrattle|Raptor|when this character dies/i.test(
+        `${(targetBefore && (targetBefore.ability || '')) || ''} ${JSON.stringify(ar)}`,
+      )) {
+        tutorialProgress.sawDeathrattle = true;
+      }
+      if (/Leech Contact/i.test(ar.attacker || '')) tutorialProgress.drainAttacked = true;
     } else {
       addLog(`Cannot attack: ${data.action_result?.error || 'unknown'}`, 'damage');
     }
@@ -838,6 +905,9 @@ async function playSelectedCard(spellTarget, targetSide) {
       if (card && card.type === 'Spell') tutorialProgress.playedSpell = true;
       if (card && card.type === 'Location') tutorialProgress.playedLocation = true;
       if (card && /^(Charge)\b/i.test(card.ability || '')) tutorialProgress.playedCharge = true;
+      if (card && /Drain/i.test(card.ability || '')) tutorialProgress.playedDrain = true;
+      if (card && /Ward/i.test(`${card.ability || ''} ${card.effect || ''}`)) tutorialProgress.playedWard = true;
+      if (data.action_result.split || (card && /Split:/i.test(card.effect || ''))) tutorialProgress.splitPlayed = true;
     } else {
       addLog(`Cannot play: ${data.action_result?.error || 'unknown'}`, 'damage');
     }
@@ -962,6 +1032,7 @@ async function sendSplit(index, targetIndex) {
     state = data.state || state;
     if (data.split_result && data.split_result.choice) {
       addLog(`Split: ${data.split_result.choice}`, 'play');
+      tutorialProgress.splitPlayed = true;
     }
     pendingSplitIndex = null;
     pendingSpellTarget = false;
@@ -978,6 +1049,7 @@ async function submitRecycle() {
     state = data.state || state;
     if (data.recycle_result && data.recycle_result.recycled) {
       addLog(`Recycled ${data.recycle_result.recycled}`, 'play');
+      tutorialProgress.recycled = true;
     }
     selectedCardIndex = null;
     render();
@@ -1034,7 +1106,7 @@ async function ensureMyTurnStarted() {
 }
 
 function currentTutorialStep() {
-  if (gameMode !== 'tutorial' || !encounter || !encounter.steps) return null;
+  if (!isGuidedMode()) return null;
   const me = getMyPlayer();
   const opp = getOpponent();
   if (!me) return encounter.steps[0];
@@ -1044,6 +1116,28 @@ function currentTutorialStep() {
   const energy = me.energy || 0;
   const ready = (me.board || []).some((c) => c.attack > 0 && !c.exhausted);
   const oppTaunt = (opp.board || []).some((c) => c.taunt && !c.stealth);
+  const oppRaptor = (opp.board || []).some((c) => /Raptor/i.test(c.name || ''));
+  const oppHatchling = (opp.board || []).some((c) => /Hatchling/i.test(c.name || ''));
+  const drainReady = (me.board || []).some((c) => /Leech Contact/i.test(c.name || '') && c.attack > 0 && !c.exhausted);
+
+  if (gameMode === 'lab') {
+    if (!tutorialProgress.recycled && names.includes('Burn Bag') && energy >= 1) {
+      return findStep('recycle');
+    }
+    if (!tutorialProgress.splitPlayed && names.includes('Forked Brief') && energy >= 2) {
+      return findStep('split');
+    }
+    if (!tutorialProgress.playedDrain && names.includes('Leech Contact') && energy >= 3) {
+      return findStep('drain');
+    }
+    if (tutorialProgress.playedDrain && drainReady && !tutorialProgress.drainAttacked) {
+      return findStep('drain-attack');
+    }
+    if (!tutorialProgress.playedWard && names.includes('Quiet Vest') && energy >= 4) {
+      return findStep('ward');
+    }
+    return findStep('free');
+  }
 
   if (!tutorialProgress.playedCharacter && !playedChar && names.includes('Squire') && energy >= 1) {
     return findStep('welcome');
@@ -1051,6 +1145,9 @@ function currentTutorialStep() {
   if (playedChar && !ready && !tutorialProgress.attacked) return findStep('exhaustion');
   if (ready && oppTaunt && !tutorialProgress.attackedTaunt) return findStep('taunt');
   if (ready && !tutorialProgress.attacked) return findStep('attack');
+  if ((tutorialProgress.sawDeathrattle || oppRaptor) && !dismissedHints.has('deathrattle') && (oppRaptor || !oppHatchling)) {
+    return findStep('deathrattle');
+  }
   if (names.includes('Divine Smite') && energy >= 3 && !tutorialProgress.playedSpell) return findStep('spell');
   if (names.includes('Sacred Chapel') && energy >= 4 && !hasLocation && !tutorialProgress.playedLocation) {
     return findStep('location');
@@ -1078,7 +1175,7 @@ function findStep(id) {
 
 function renderTutorialHint() {
   const box = document.getElementById('tutorial-hint');
-  if (gameMode !== 'tutorial' || state.is_over) {
+  if (!isGuidedMode() || state.is_over) {
     box.hidden = true;
     return;
   }
@@ -1099,7 +1196,8 @@ function skipTutorialHint() {
 }
 
 function skipTutorial() {
-  if (!window.confirm('Skip the guided match and read the rules recap?')) return;
+  const noun = gameMode === 'lab' ? 'keyword lab' : 'guided match';
+  if (!window.confirm(`Skip the ${noun} and read the rules recap?`)) return;
   (encounter.steps || []).forEach((step) => dismissedHints.add(step.id));
   dismissedHints.add('hold');
   renderTutorialHint();
@@ -1151,19 +1249,21 @@ function renderRecap(recap) {
     </ul>
   `;
   document.getElementById('recap-lesson').textContent = recap.lesson || '';
-  document.getElementById('tutorial-cheatsheet').hidden = gameMode !== 'tutorial';
+  document.getElementById('tutorial-cheatsheet').hidden = !isGuidedMode();
   document.getElementById('btn-replay-tutorial').hidden = gameMode !== 'tutorial';
+  const replayLab = document.getElementById('btn-replay-lab');
+  if (replayLab) replayLab.hidden = gameMode !== 'lab';
 }
 
 function openEncounters() {
   const list = document.getElementById('encounter-list');
   list.innerHTML = encounters
-    .filter((e) => e.mode !== 'tutorial')
+    .filter((e) => e.mode !== 'tutorial' && e.mode !== 'lab')
     .map((e) => `
       <article class="encounter-card">
         <h3>${escHtml(e.name)}</h3>
         <p>${escHtml(e.description)}</p>
-        <p class="meta">${titleCase(e.player_faction)} vs ${titleCase(e.ai_faction)} · ${titleCase(e.difficulty)}</p>
+        <p class="meta">${titleCase(e.player_faction)} vs ${titleCase(e.ai_faction)} · ${titleCase(e.difficulty)}${e.mode === 'lab' ? ' · Lab' : ''}</p>
         <button class="primary" onclick="startEncounter('${e.id}')">Play encounter</button>
       </article>
     `).join('');
@@ -1175,6 +1275,31 @@ function openDeckBuilder() {
   refreshSavedDeckSelect();
   renderDeckBuilder();
   showScreen('screen-deck');
+}
+
+function renderKeywordGlossary() {
+  const list = document.getElementById('keyword-list');
+  const search = document.getElementById('keyword-search');
+  if (!list) return;
+  const q = (search && search.value ? search.value : '').trim().toLowerCase();
+  const rows = KEYWORD_GLOSSARY.filter((k) => {
+    if (!q) return true;
+    return `${k.name} ${k.text} ${k.example}`.toLowerCase().includes(q);
+  });
+  list.innerHTML = rows.map((k) => `
+    <article class="keyword-card">
+      <h3>${escHtml(k.name)}</h3>
+      <p>${escHtml(k.text)}</p>
+      <p class="meta">e.g. ${escHtml(k.example)}</p>
+    </article>
+  `).join('') || '<p class="lede">No keywords match that search.</p>';
+}
+
+function openKeywordGlossary() {
+  renderKeywordGlossary();
+  showScreen('screen-help');
+  const glossary = document.getElementById('keyword-glossary');
+  if (glossary) glossary.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function loadSavedDecks() {

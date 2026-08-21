@@ -87,7 +87,7 @@ class TestChooseAction:
             if game.is_over:
                 break
             action = choose_action(game)
-            assert action["action"] in ("play", "attack", "end_turn")
+            assert action["action"] in ("play", "attack", "end_turn", "recycle")
             if action["action"] == "end_turn":
                 game.end_turn()
             elif action["action"] == "play":
@@ -274,8 +274,8 @@ class TestAIUsability:
         player = game.active_player
         player.board.clear()  # force empty board
         action = choose_action(game)
-        # Should either play a card or end turn
-        assert action["action"] in ("play", "end_turn")
+        # Should either play a card, recycle, or end turn
+        assert action["action"] in ("play", "end_turn", "recycle")
 
     def test_ai_respects_energy(self):
         """AI never suggests playing a card it can't afford."""
@@ -288,7 +288,136 @@ class TestAIUsability:
             if action["action"] == "play":
                 card = game.active_player.hand[action["card_index"]]
                 assert game.active_player.energy >= card.cost
+            if action["action"] == "recycle":
+                card = game.active_player.hand[action["card_index"]]
+                assert game.active_player.energy >= 1
+                text = f"{getattr(card, 'ability', '')} {getattr(card, 'effect', '')}"
+                assert "Recycle" in text
+
+
+class TestHonestAI:
+    def test_easy_does_not_skip_attacks(self):
+        easy = AIPlayer(difficulty="easy")
+        assert easy.skip_attack_chance == 0.0
+        assert easy.poke_face > 0
+
+    def test_recycle_is_scored_on_dead_draw(self):
+        from engine.models import load_cards
+
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        bag = cards["neutral_spell_007"]
+        pawn = cards["templars_char_009"]
+        game = Game.setup([bag] + [pawn] * 29, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 1
+        idx = next(i for i, c in enumerate(game.active_player.hand) if c.id == bag.id)
+        score = score_action(game, {"action": "recycle", "card_index": idx})
+        assert score > -float("inf")
+
+    def test_location_replace_is_legal(self):
+        from engine.card import create_card_instance
+        from engine.models import load_cards
+
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        chapel = cards["templars_loc_001"]
+        pawn = cards["templars_char_009"]
+        game = Game.setup([chapel] + [pawn] * 29, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        game.active_player.location = create_card_instance(chapel, "old", "A")
+        idx = next(i for i, c in enumerate(game.active_player.hand) if c.id == chapel.id)
+        score = score_action(game, {"action": "play", "card_index": idx})
+        assert score > -float("inf")
+
+    def test_face_when_only_stealth_on_board(self):
+        from engine.card import create_card_instance
+        from engine.models import load_cards
+
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        pawn = cards["templars_char_009"]
+        sneak = cards["reptilians_char_001"]
+        game = Game.setup([pawn] * 30, [sneak] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+
+        attacker = create_card_instance(pawn, "a1", "A")
+        attacker.is_exhausted = False
+        game.active_player.board = [attacker]
+        ghost = create_card_instance(sneak, "b1", "B")
+        ghost.is_stealth = True
+        game.inactive_player.board = [ghost]
+        score = score_action(
+            game,
+            {"action": "attack", "attacker_index": 0, "target_index": None},
+        )
+        assert score > -float("inf")
+
+    def test_split_picks_damage_when_board_exists(self):
+        from engine.models import load_cards
+
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        brief = cards["neutral_spell_008"]
+        pawn = cards["templars_char_009"]
+        game = Game.setup([brief] + [pawn] * 29, [pawn] * 30, "A", "B", first_player=0, shuffle=False)
+        game.start_turn()
+        game.active_player.energy = 10
+        from engine.card import create_card_instance
+
+        dummy = create_card_instance(pawn, "e1", "B")
+        dummy.is_exhausted = True
+        game.inactive_player.board = [dummy]
+        idx = next(i for i, c in enumerate(game.active_player.hand) if c.id == brief.id)
+        played = game.play_card(idx)
+        assert played.get("split") is True
+        results = execute_turn(game)
+        assert any(step["action"] == "split" for step in results)
+
+    def test_venom_scores_above_vanilla(self):
+        venom = _char_card("Needle", cost=2, attack=1, health=2, ability="Venom.")
+        vanilla = _char_card("Pawn", cost=2, attack=1, health=2, ability="None")
+        filler = _char_card("Filler", cost=1, attack=1, health=1)
+        game = Game.setup(
+            [venom, vanilla] + [filler] * 28,
+            [filler] * 30,
+            "A",
+            "B",
+            first_player=0,
+            shuffle=False,
+        )
+        game.start_turn()
+        game.active_player.energy = 10
+        venom_idx = next(i for i, c in enumerate(game.active_player.hand) if c.name == "Needle")
+        vanilla_idx = next(i for i, c in enumerate(game.active_player.hand) if c.name == "Pawn")
+        venom_score = score_action(game, {"action": "play", "card_index": venom_idx})
+        vanilla_score = score_action(game, {"action": "play", "card_index": vanilla_idx})
+        assert venom_score > vanilla_score
+
+    def test_discard_scores_above_vanilla_body(self):
+        control = _char_card(
+            "Handler",
+            cost=3,
+            attack=2,
+            health=2,
+            ability="When played, force opponent to discard a random card from their hand.",
+        )
+        vanilla = _char_card("Pawn", cost=3, attack=2, health=2, ability="None")
+        filler = _char_card("Filler", cost=1, attack=1, health=1)
+        game = Game.setup(
+            [control, vanilla] + [filler] * 28,
+            [filler] * 30,
+            "A",
+            "B",
+            first_player=0,
+            shuffle=False,
+        )
+        game.start_turn()
+        game.active_player.energy = 10
+        control_idx = next(i for i, c in enumerate(game.active_player.hand) if c.name == "Handler")
+        vanilla_idx = next(i for i, c in enumerate(game.active_player.hand) if c.name == "Pawn")
+        assert score_action(game, {"action": "play", "card_index": control_idx}) > score_action(
+            game, {"action": "play", "card_index": vanilla_idx}
+        )
 
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+

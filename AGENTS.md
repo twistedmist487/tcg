@@ -32,7 +32,7 @@ around the same engine.
 | 8 | Tutorial + single-player experience + deck builder | COMPLETE |
 | 9 | Polish, Hard AI, replayability | IN PROGRESS |
 
-**Stats:** 286 tests, 240 cards (120 faction + 120 Network), 30 Python source files, vanilla JS frontend + `static/ui/` art kit
+**Stats:** 297 tests, 240 cards (120 faction + 120 Network), 30 Python source files, vanilla JS frontend + `static/ui/` art kit
 
 ## Directory Layout
 
@@ -46,7 +46,7 @@ cli/                 Command-line game runner
 data/                JSON data store
   cards.json         240 game cards (40 per faction + 120 Network)
   decks.json         Curated 30-card faction decks + test/brew presets
-  encounters.json    Tutorial + three showcase matchups
+  encounters.json    Tutorial + Keyword Lab + three showcase matchups
   factions.json      3 faction definitions with energy types and mechanics
 docs/design/         Game design documents
   game_concept.md    Theme, USPs, core gameplay loop
@@ -73,6 +73,7 @@ engine/              Game engine -- NO UI dependencies
   decks.py           Deck validation and construction
   serializer.py      Full game state save/load via JSON
   ai.py              Rule-based AI agent with Easy / Medium difficulty
+                     (Medium scores Recycle, location replace, Split, evergreen verbs)
 server/              FastAPI web server
   __init__.py
   app.py             REST API endpoints + static file serving
@@ -84,7 +85,7 @@ static/              Web frontend (no build step)
   cards/             Faction card front/back plates
   ui/                Table chrome (rails, energy, buttons, hero portraits)
 assets/ui-table/     Authoring copy of the UI kit + preview.html
-tests/               286 tests (models, engine, effects, decks, server, expansion)
+tests/               297 tests (models, engine, effects, decks, server, expansion, AI)
 tools/               Utility scripts
   validate_cards.py  Card schema + new-Network balance lint
   playtest_live.py   AI-vs-AI tutorial and preset matches
@@ -296,7 +297,7 @@ Do not bake names, costs, or rules into generated UI JPEGs. Unaffordable hand ca
 | make validate| Validate all cards against schema    |
 | make balance | Run balance check on all cards       |
 | make lint    | Run ruff linter                      |
-| make test    | Run pytest test suite (218 tests)    |
+| make test    | Run pytest test suite (297 tests)    |
 | make clean   | Clean build artifacts                |
 | make help    | Show all available commands          |
 

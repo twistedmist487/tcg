@@ -22,6 +22,7 @@
       <p class="lede">Learn the rules in a guided match, then take on the AI.</p>
       <div class="menu-actions">
         <button class="primary" onclick="startTutorial()">Play Tutorial</button>
+        <button onclick="startKeywordLab()">Keyword Lab</button>
         <button onclick="showScreen('screen-setup')">Play vs AI</button>
         <button onclick="openEncounters()">Faction Encounters</button>
         <button onclick="openDeckBuilder()">Deck Builder</button>
@@ -142,37 +143,28 @@
       <h2>How to Play</h2>
       <div class="help-copy">
         <p>Conspiracy TCG is a single-player card game. You play against an AI opponent.</p>
+        <h3>A turn</h3>
         <ul>
-          <li><strong>Each turn</strong> — you draw a card and gain +1 energy (max 10). The first player skips that first draw.</li>
-          <li><strong>Deck</strong> — 30 cards, at most 2 copies of any card, one faction plus up to 12 Network.</li>
-          <li><strong>Play cards</strong> — spend energy on characters, spells, or one location.</li>
-          <li><strong>Exhausted</strong> — characters cannot attack the turn they are played, unless they have Charge.</li>
-          <li><strong>Attack</strong> — click a ready character, then click an enemy or Attack Face.</li>
-          <li><strong>Taunt</strong> — you must attack a Taunt character first.</li>
-          <li><strong>Stealth</strong> — cannot be attacked until that character attacks. You may hit face instead.</li>
-          <li><strong>Locations</strong> — stay in play (one at a time) and keep working each turn.</li>
-          <li><strong>Mulligan</strong> — before a normal match you may redraw any number of cards once.</li>
-          <li><strong>Charge / Rush</strong> — Charge can attack anyone the turn it is played. Rush can only attack characters that turn.</li>
-          <li><strong>Shielding</strong> — ignores the next damage, then pops.</li>
-          <li><strong>Enraged</strong> — can attack twice each turn.</li>
-          <li><strong>Assault / Deathrattle</strong> — Assault when played from hand; Deathrattle when it dies.</li>
-          <li><strong>Discovery</strong> — pick 1 of 3 random faction + Network cards.</li>
-          <li><strong>Drain</strong> — combat damage heals your hero. <strong>Venom</strong> — any damage from this is lethal.</li>
-          <li><strong>Recur</strong> — first death leaves it on the board at 1 Health.</li>
-          <li><strong>Stasis</strong> — that character cannot attack until the end of its controller's next turn.</li>
-          <li><strong>Amplify</strong> — your spells deal +1 damage. <strong>Ward</strong> — ignore all damage until end of turn (does not pop).</li>
-          <li><strong>Recycle</strong> — pay 1 energy to shuffle the card into your deck and draw.</li>
-          <li><strong>Chain</strong> — extra effect if you already played a card this turn. <strong>Split</strong> — choose one option.</li>
-          <li><strong>Echo</strong> — a copy stays in hand until end of turn. <strong>Excess</strong> — extra effect if attack exceeds current Health.</li>
-          <li><strong>Retaliate</strong> — once, when this takes damage and lives. <strong>Flash</strong> — resolves when drawn. <strong>Manifest</strong> — enters the board when drawn.</li>
-          <li><strong>Opening</strong> — fires once on your first turn start.</li>
-          <li><strong>The Network</strong> — shared cards any faction can hire (max 12). They are weaker than faction cards but more flexible. A few get stronger if they match your faction.</li>
-          <li><strong>Win</strong> — reduce the opponent from 30 life to 0, or deck them out.</li>
+          <li>Draw a card and gain +1 energy (max 10). The first player skips that first draw.</li>
+          <li>Spend energy to play characters, spells, or one location.</li>
+          <li>Attack with ready characters, then End Turn.</li>
+          <li>Win at 0 life or by decking the opponent out.</li>
         </ul>
-        <p>New here? The tutorial walks through a real match, one idea at a time.</p>
+        <h3>Constructed</h3>
+        <ul>
+          <li>30-card deck, at most 2 copies, one faction plus up to 12 Network cards.</li>
+          <li>Mulligan: before a normal match you may redraw any number of cards once.</li>
+        </ul>
+        <p>New here? Play the tutorial, then the Keyword Lab. The glossary below is the full verb list.</p>
+      </div>
+      <div id="keyword-glossary">
+        <h2>Keyword reference</h2>
+        <input type="search" id="keyword-search" placeholder="Search keywords" oninput="renderKeywordGlossary()">
+        <div id="keyword-list" class="card-grid"></div>
       </div>
       <div class="menu-actions">
         <button class="primary" onclick="startTutorial()">Replay Tutorial</button>
+        <button onclick="startKeywordLab()">Keyword Lab</button>
         <button onclick="showScreen('screen-menu')">Back</button>
       </div>
     </div>
@@ -310,15 +302,19 @@
             <li>Energy grows by 1 each turn (max 10). Spend it or lose it.</li>
             <li>Characters enter exhausted unless they have Charge or Rush.</li>
             <li>Charge can hit face the turn it is played. Rush can only hit characters that turn.</li>
-            <li>Shielding ignores the next damage. Enraged can attack twice.</li>
-            <li>Taunt must be attacked first. Stealth cannot be targeted.</li>
+            <li>Taunt must be attacked first. Stealth cannot be targeted (you may hit face).</li>
+            <li>Deathrattle fires when a character dies — Hatchling Brood summons a Raptor.</li>
+            <li>Recycle: pay 1, shuffle from hand, draw. Split: pick one printed option.</li>
+            <li>Drain heals you for combat damage. Ward ignores all damage this turn and does not pop.</li>
             <li>Spells resolve once. Locations stay until replaced.</li>
           </ul>
+          <p class="lede"><a href="#" onclick="returnToMenu(true); openKeywordGlossary(); return false;">Open the full keyword glossary</a></p>
         </div>
         <div class="menu-actions">
           <button class="primary" onclick="returnToMenu(true)">Main Menu</button>
           <button id="btn-play-vs-ai" onclick="playAfterTutorial()">Play vs AI</button>
           <button id="btn-replay-tutorial" hidden onclick="startTutorial()">Replay Tutorial</button>
+          <button id="btn-replay-lab" hidden onclick="startKeywordLab()">Replay Lab</button>
         </div>
       </div>
     </div>

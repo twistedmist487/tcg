@@ -31,7 +31,7 @@ make test
 pip install fastapi uvicorn httpx  # web server dependencies
 python3 -m uvicorn server.app:app --port 8080
 ```
-Open http://localhost:8080 in your browser. Play the tutorial, fight the AI, run a faction encounter, or build a deck.
+Open http://localhost:8080 in your browser. Play the tutorial, the Keyword Lab, fight the AI, run a faction encounter, or build a deck.
 
 ### CLI (vs AI)
 ```bash
@@ -87,7 +87,7 @@ python3 -m cli/game.py
 │   ├── app.js           # Game UI, Dossier, client-side AI
 │   ├── cards/           # Card front/back plates
 │   └── ui/              # Rails, energy crystals, buttons, heroes
-├── tests/               # 286 tests
+├── tests/               # 297 tests
 │   ├── test_ai.py       # AI behavior (19 tests)
 │   ├── test_card.py     # CardInstance state (23 tests)
 │   ├── test_combat.py   # Combat resolution (9 tests)

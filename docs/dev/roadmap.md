@@ -152,8 +152,7 @@ fixes landed in Phase 9 and were re-checked in Chromium (desktop + 390x844).
 ## Phase 9: Polish & Replayability [IN PROGRESS]
 Goal: Make the solo game feel complete after the tutorial. Onboarding,
 The Network, and the evergreen keyword wave are in. The 240-card pool and 12-Network hire cap are in. Remaining Phase 9
-work is teaching the new verbs, a balance pass on the new lists, and
-Hard AI.
+work is Hard AI.
 
 ### Next 3 steps
 
@@ -164,27 +163,26 @@ Hard AI.
 - [x] Network to 120 (bodies, interaction, card flow, combat keywords, tempo, locations)
 - [x] Refresh curated 30s and brew presets (Silence Toolbox, Recycle Engine)
 
-1. **Teach what we just built (tutorial + keyword reference).**
-   First Contact still stops at Charge / Taunt / spells / locations. Add a
-   short Deathrattle beat (Hatchling Brood → Raptor) and a skippable
-   “keyword lab” encounter that puts Recycle, Split, Drain, and Ward on
-   the board one at a time. Pair that with a static keyword reference
-   (How to Play is already too long) and keep Easy Recruiter poking face
-   so a stalled  board cannot last forever.
+1. **Teach what we just built (tutorial + keyword reference).** DONE.
+   First Contact now includes a Deathrattle beat (Hatchling Brood → Raptor).
+   Keyword Lab (`keyword_lab`) teaches Recycle, Split, Drain, and Ward one
+   at a time. How to Play is a short loop plus a searchable glossary.
+   Easy Recruiter no longer skips attacks and pokes face so a stall cannot
+   last forever.
 
-2. **Rebalance the 240-card pool.**
-   Curated lists and brew presets already hire the new identity cards
-   (4 Network in each curated 30). Run `python tools/playtest_balance.py`
-   across the six matchups and the new presets. Tune Flash / Opening /
-   Venom / Amplify / Recur if they dominate.
+2. **Rebalance the 240-card pool.** DONE.
+   Medium AI scores Recycle, location replace, Stealth-face, Split,
+   Discovery, discard/bounce, and the evergreen verbs. 12-game Medium
+   pass: Illuminati ~44% / Templars ~50% / Reptilians ~56%. Modest
+   curated tune: Shadow Broker 3/3, Ghost Clerk 2/2, Media Blackout 3;
+   Crypt Warden 3/5, Guardian 1/3, Penance heal 2, Relic Courier heal 2.
+   Flash / Opening / Venom / Amplify did not dominate. Recycle Engine
+   and Silence Toolbox brew lists still lose to real curated decks.
 
 3. **Hard AI + challenge encounters.**
-   Medium is a greedy heuristic and does not plan around Recur, Ward, or
-   Split. Add a Hard difficulty with 2-ply look-ahead (or a tighter
-   action scorer that values the new keywords), then ship 2–3 challenge
-   encounters that reuse Hard AI plus themed decks (control Network,
-   aggro Rush/Charge, Recur/Deathrattle swarm). This is the replayability
-   beat Phase 9 was always for.
+   Medium is a greedy heuristic with honest verb scoring. Next is a Hard
+   difficulty with 2-ply look-ahead, then 2–3 challenge encounters
+   (control Network, aggro Rush/Charge, Recur/Deathrattle swarm).
 
 **Play table UI (browser, 2026-08-17):**
 - [x] Conspiracy Table: history (5) + Dossier + locations | oval field | energy / End Turn / deck
@@ -240,18 +238,15 @@ Hard AI.
       are played. Tutorial has a Charge step.
 - [x] Recruiter Taunt wall is Network Contract Guard (not Templar Guardian)
 - [x] Deathrattle is implemented (Hatchling Brood summons a Raptor)
-- Teach Hatchling Brood's on-death summon in First Contact (engine is ready)
-- Easy Recruiter should still poke life so a stalled board cannot last forever
-- Highlight is in place for Squire / Smite / Chapel / Zealot / ready
-      attackers / targetable enemies; keep tuning if a step still feels
-      easy to miss
-- Keyword lab encounter + static keyword reference (see Next 3 steps)
+- [x] First Contact teaches Hatchling Brood's on-death summon
+- [x] Easy Recruiter pokes life (skip_attack_chance 0, face bonus)
+- [x] Keyword lab encounter + searchable keyword glossary
 
 **AI Improvements:**
-- Hard AI with look-ahead (minimax, 2-3 ply) that scores new keywords
+- [x] Medium scores Recycle, location replace, Stealth-face, Split, Discovery, evergreen verbs
+- Hard AI with look-ahead (minimax, 2-3 ply)
 - Aggro / Control / Midrange AI deck preferences
 - Optional challenge encounters that reuse Hard AI plus themed decks
-- Easy Recruiter should still poke life so the tutorial cannot stall forever
 
 **Visual Polish:**
 - Card art placeholders with faction-themed icons
@@ -266,14 +261,14 @@ Hard AI.
 - Undo last action
 - Game speed settings (including AI think time)
 - Card collection browser with search/filter
-- Static rules / keyword reference that complements the live tutorial
+- [x] Static rules / keyword reference that complements the live tutorial
 - Export/import game state for debugging
 - [x] Confirm before abandoning a live match
 
 ---
 
-*Total tests: 286*
+*Total tests: 297*
 *Total cards: 240 (40 per faction + 120 Network, including 1 token)*
 *Constructed: 30-card decks, max 2 copies, energy cap 10, max 12 Network*
 *Curated 30-card faction decks + 10 test/brew presets in data/decks.json*
-*Tutorial + 3 showcase encounters in data/encounters.json*
+*Tutorial + Keyword Lab + 3 showcase encounters in data/encounters.json*

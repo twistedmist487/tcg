@@ -33,6 +33,7 @@ class TestEncounterData:
     def test_tutorial_and_showcases_exist(self):
         encounters = load_encounters()
         assert "tutorial" in encounters
+        assert "keyword_lab" in encounters
         assert "showcase_illuminati" in encounters
         assert "showcase_templars" in encounters
         assert "showcase_reptilians" in encounters
@@ -51,7 +52,35 @@ class TestEncounterData:
     def test_tutorial_has_teaching_steps(self):
         steps = load_encounters()["tutorial"]["steps"]
         ids = {s["id"] for s in steps}
-        assert {"welcome", "exhaustion", "attack", "taunt", "spell", "location", "charge", "free"} <= ids
+        assert {
+            "welcome",
+            "exhaustion",
+            "attack",
+            "deathrattle",
+            "taunt",
+            "spell",
+            "location",
+            "charge",
+            "free",
+        } <= ids
+
+    def test_keyword_lab_has_teaching_steps(self):
+        lab = load_encounters()["keyword_lab"]
+        assert lab["mode"] == "lab"
+        assert len(lab["player_deck"]) == 30
+        assert len(lab["ai_deck"]) == 30
+        ids = {s["id"] for s in lab["steps"]}
+        assert {"recycle", "split", "drain", "drain-attack", "ward", "free"} <= ids
+        assert lab["player_deck"][0] == "neutral_spell_007"
+        assert lab["player_deck"][1] == "neutral_spell_008"
+        assert lab["player_deck"][2] == "neutral_char_013"
+        assert lab["ai_deck"][0] == "reptilians_char_007"
+
+    def test_keyword_lab_cards_exist(self):
+        cards = {c.id for c in load_cards("data/cards.json")}
+        lab = load_encounters()["keyword_lab"]
+        for card_id in lab["player_deck"] + lab["ai_deck"]:
+            assert card_id in cards
 
     def test_recruiter_deck_is_reptilian_or_network(self):
         cards = {c.id: c for c in load_cards("data/cards.json")}
@@ -60,6 +89,7 @@ class TestEncounterData:
             assert cards[card_id].faction.value in ("reptilians", "neutral"), card_id
         assert "templars_char_002" not in tutorial["ai_deck"]
         assert "neutral_char_007" in tutorial["ai_deck"]
+        assert tutorial["ai_deck"][0] == "reptilians_char_007"
 
 
 class TestChargeKeyword:
@@ -186,6 +216,19 @@ class TestTutorialSession:
         assert game.active_player.name == "Recruit"
         assert recruiter.life == 12
 
+    def test_create_keyword_lab_session(self):
+        sid = create_session("Operator", "templars", "reptilians", encounter_id="keyword_lab")
+        info = get_session_info(sid)
+        assert info is not None
+        assert info.mode == "lab"
+        assert info.difficulty == "easy"
+        game = info.game
+        operator = next(p for p in game.players if p.name == "Operator")
+        assert operator.hand[0].name == "Burn Bag"
+        assert operator.hand[1].name == "Forked Brief"
+        assert operator.hand[2].name == "Leech Contact"
+        assert game.active_player.name == "Operator"
+
     def test_location_state_includes_effect(self):
         sid = create_session("Recruit", "templars", "reptilians", encounter_id="tutorial")
         game = get_session(sid)
@@ -307,6 +350,7 @@ class TestEasyAI:
         medium = AIPlayer(faction="reptilians", difficulty="medium")
         assert easy.aggression < medium.aggression
         assert easy.mistake_chance > 0
+        assert easy.skip_attack_chance == 0.0
 
     def test_easy_still_returns_valid_action(self):
         sid = create_session("P", "templars", "reptilians", encounter_id="tutorial")
