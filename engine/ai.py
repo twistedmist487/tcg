@@ -14,6 +14,7 @@ Key design principles:
 
 from __future__ import annotations
 
+import copy
 import math
 import random
 import re
@@ -41,7 +42,15 @@ DIFFICULTY_PRESETS: dict[str, dict[str, float]] = {
         "skip_attack_chance": 0.0,
         "poke_face": 0.0,
     },
+    "hard": {
+        "aggression": 0.65,
+        "mistake_chance": 0.0,
+        "skip_attack_chance": 0.0,
+        "poke_face": 0.0,
+    },
 }
+
+HARD_CANDIDATE_CAP = 6
 
 # ---------------------------------------------------------------------------
 # Faction weight presets
@@ -91,8 +100,8 @@ class AIPlayer:
         name: Display name.
         faction: Faction name (illuminati, templars, reptilians).
         aggression: 0.0 (defensive) to 1.0 (aggressive).
-        difficulty: "easy" or "medium". Easy plays more conservatively
-            and occasionally takes a weaker action (tutorial opponent).
+        difficulty: "easy", "medium", or "hard". Easy fumbles plays.
+            Medium is a greedy heuristic. Hard looks one opponent reply ahead.
         weights: Scoring weight dict for board evaluation.
     """
 
@@ -111,6 +120,7 @@ class AIPlayer:
         self.mistake_chance = float(preset["mistake_chance"])
         self.skip_attack_chance = float(preset["skip_attack_chance"])
         self.poke_face = float(preset.get("poke_face", 0.0))
+        self._in_lookahead = False
         self.weights: dict[str, float] = dict(
             FACTION_WEIGHTS.get(faction, FACTION_WEIGHTS["illuminati"])
         )
@@ -184,6 +194,9 @@ def choose_action(game: Game, ai: AIPlayer | None = None) -> dict[str, Any]:
     candidates.sort(key=lambda item: item[0], reverse=True)
     best_action = candidates[0][1]
 
+    if ai and ai.difficulty == "hard" and not getattr(ai, "_in_lookahead", False):
+        return _pick_with_lookahead(game, ai, candidates)
+
     if ai and ai.mistake_chance > 0 and len(candidates) > 1 and random.random() < ai.mistake_chance:
         # Easy AI: sometimes take the second-best legal action
         best_action = candidates[1][1]
@@ -223,53 +236,20 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
             continue
 
         action = choose_action(game, ai)
+        if action["action"] == "recycle" and recycles >= 2:
+            action = {"action": "end_turn"}
+        result = _perform_action(game, action)
+        results.append({"action": action["action"], "result": result})
 
         if action["action"] == "end_turn":
-            result = game.end_turn()
-            results.append({"action": "end_turn", "result": result})
             break
-        elif action["action"] == "recycle":
-            if recycles >= 2:
-                result = game.end_turn()
-                results.append({"action": "end_turn", "result": result})
-                break
-            result = game.recycle(action["card_index"])
-            results.append({"action": "recycle", "result": result})
+        if action["action"] == "recycle" and result.get("success"):
             recycles += 1
-            if not result.get("success"):
-                result = game.end_turn()
-                results.append({"action": "end_turn", "result": result})
-                break
-        elif action["action"] == "play":
-            card = game.active_player.hand[action["card_index"]]
-            text = f"{getattr(card, 'ability', '')} {getattr(card, 'effect', '')}".lower()
-            if "friendly" in text:
-                target = 0 if game.active_player.board else None
-                result = game.play_card(
-                    action["card_index"],
-                    spell_target_index=target,
-                    target_side="ally",
-                )
-            else:
-                target = action.get("target_index")
-                if target is None and game.inactive_player.board:
-                    target = _best_spell_target_index(game)
-                result = game.play_card(action["card_index"], spell_target_index=target)
-            results.append({"action": "play", "result": result})
-            if not result.get("success"):
-                result = game.end_turn()
-                results.append({"action": "end_turn", "result": result})
-                break
-        elif action["action"] == "attack":
-            result = game.attack(
-                action["attacker_index"],
-                action.get("target_index"),
-            )
-            results.append({"action": "attack", "result": result})
-            if not result.get("success"):
-                result = game.end_turn()
-                results.append({"action": "end_turn", "result": result})
-                break
+        if not result.get("success"):
+            if not game.is_over and game.turn_started:
+                end = game.end_turn()
+                results.append({"action": "end_turn", "result": end})
+            break
 
         if game.is_over:
             break
@@ -279,6 +259,111 @@ def execute_turn(game: Game, ai: AIPlayer | None = None) -> list[dict[str, Any]]
             results.append({"action": "end_turn", "result": result})
 
     return results
+
+
+def _perform_action(game: Game, action: dict[str, Any]) -> dict[str, Any]:
+    """Apply one chosen action on a live game. Does not loop."""
+    kind = action.get("action")
+    if kind == "end_turn":
+        return game.end_turn()
+    if kind == "recycle":
+        return game.recycle(action["card_index"])
+    if kind == "play":
+        card = game.active_player.hand[action["card_index"]]
+        text = f"{getattr(card, 'ability', '')} {getattr(card, 'effect', '')}".lower()
+        if "friendly" in text:
+            target = 0 if game.active_player.board else None
+            return game.play_card(
+                action["card_index"],
+                spell_target_index=target,
+                target_side="ally",
+            )
+        target = action.get("target_index")
+        if target is None and game.inactive_player.board:
+            target = _best_spell_target_index(game)
+        return game.play_card(action["card_index"], spell_target_index=target)
+    if kind == "attack":
+        return game.attack(action["attacker_index"], action.get("target_index"))
+    return {"success": False, "error": f"Unknown action {kind}"}
+
+
+def _greedy_shadow(name: str, faction: str) -> AIPlayer:
+    shadow = AIPlayer(name=name, faction=faction, difficulty="medium")
+    shadow._in_lookahead = True
+    return shadow
+
+
+def _resolve_pending(game: Game) -> None:
+    if getattr(game, "pending_discovery", None):
+        game.choose_discovery(_best_discovery_index(game))
+    if getattr(game, "pending_split", None):
+        pick, target = _best_split_choice(game)
+        game.choose_split(pick, target_index=target)
+
+
+def _pick_with_lookahead(
+    game: Game,
+    ai: AIPlayer,
+    candidates: list[tuple[float, dict[str, Any]]],
+) -> dict[str, Any]:
+    """Score top greedy moves by simulating our rest of turn plus the opponent reply."""
+    legal = [(s, a) for s, a in candidates if s > -math.inf]
+    if not legal:
+        return {"action": "end_turn"}
+    top = legal[:HARD_CANDIDATE_CAP]
+    me = game.active_player.name
+    opp = game.inactive_player
+    best_action = top[0][1]
+    best_value = -math.inf
+    for greedy_score, action in top:
+        future = copy.deepcopy(game)
+        _simulate_self_then_opponent(future, action, ai, me, opp.name, opp.faction)
+        value = _evaluate_state(future, me) + greedy_score * 0.03
+        if value > best_value:
+            best_value = value
+            best_action = action
+    return best_action
+
+
+def _simulate_self_then_opponent(
+    game: Game,
+    first: dict[str, Any],
+    ai: AIPlayer,
+    me: str,
+    opp_name: str,
+    opp_faction: str,
+) -> None:
+    result = _perform_action(game, first)
+    _resolve_pending(game)
+    if first["action"] != "end_turn" and result.get("success") and not game.is_over and game.turn_started:
+        execute_turn(game, _greedy_shadow(ai.name, ai.faction))
+    elif first["action"] != "end_turn" and not result.get("success") and not game.is_over and game.turn_started:
+        game.end_turn()
+    if game.is_over:
+        return
+    if not game.turn_started:
+        game.start_turn()
+    if game.is_over:
+        return
+    # Only let the opponent reply if it is actually their turn.
+    if game.active_player.name == opp_name:
+        execute_turn(game, _greedy_shadow(opp_name, opp_faction))
+
+
+def _evaluate_state(game: Game, name: str) -> float:
+    if game.winner == name:
+        return 10_000.0
+    if game.winner:
+        return -10_000.0
+    me = next(p for p in game.players if p.name == name)
+    opp = next(p for p in game.players if p.name != name)
+    score = _board_power(me) - _board_power(opp)
+    score += (me.life - opp.life) * 0.4
+    if opp.life <= 8:
+        score += (8 - opp.life) * 1.5
+    if me.life <= 8:
+        score -= (8 - me.life) * 1.8
+    return score
 
 
 def score_action(game: Game, action: dict[str, Any], ai: AIPlayer | None = None) -> float:

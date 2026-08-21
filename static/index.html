@@ -44,6 +44,7 @@
       <div class="choice-row">
         <button type="button" class="choice selected" data-difficulty="easy" onclick="selectDifficulty(this)">Easy</button>
         <button type="button" class="choice" data-difficulty="medium" onclick="selectDifficulty(this)">Medium</button>
+        <button type="button" class="choice" data-difficulty="hard" onclick="selectDifficulty(this)">Hard</button>
       </div>
       <h3>Your deck</h3>
       <select id="setup-deck"></select>
@@ -57,8 +58,8 @@
 
     <!-- Showcase encounters -->
     <div id="screen-encounters" class="screen" hidden>
-      <h2>Faction Encounters</h2>
-      <p class="lede">Scripted matchups that show how each faction wants to play.</p>
+      <h2>Encounters</h2>
+      <p class="lede">Faction showcases on Medium, then Hard challenges: control, rush, and swarm.</p>
       <div id="encounter-list" class="card-grid"></div>
       <div class="menu-actions">
         <button onclick="showScreen('screen-menu')">Back</button>

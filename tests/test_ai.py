@@ -418,6 +418,84 @@ class TestHonestAI:
         )
 
 
+class TestHardAI:
+    def test_hard_preset(self):
+        hard = AIPlayer(difficulty="hard")
+        medium = AIPlayer(difficulty="medium")
+        assert hard.mistake_chance == 0.0
+        assert hard.skip_attack_chance == 0.0
+        assert hard.aggression > medium.aggression
+
+    def test_lookahead_does_not_mutate_live_game(self):
+        game = _make_game()
+        game.start_turn()
+        before_hand = len(game.active_player.hand)
+        before_energy = game.active_player.energy
+        before_turn = game.turn_number
+        ai = AIPlayer(faction=game.active_player.faction, difficulty="hard")
+        action = choose_action(game, ai)
+        assert action["action"] in ("play", "attack", "recycle", "end_turn")
+        assert len(game.active_player.hand) == before_hand
+        assert game.active_player.energy == before_energy
+        assert game.turn_number == before_turn
+
+    def test_hard_takes_lethal_face(self):
+        from engine.card import create_card_instance
+
+        game = _make_game()
+        game.start_turn()
+        player = game.active_player
+        opponent = game.inactive_player
+        player.hand.clear()
+        player.board.clear()
+        opponent.board.clear()
+        opponent.life = 2
+        attacker = create_card_instance(_char_card("Closer", attack=3, health=3), "k1", player.name)
+        attacker.is_exhausted = False
+        player.board.append(attacker)
+        ai = AIPlayer(faction=player.faction, difficulty="hard")
+        action = choose_action(game, ai)
+        assert action["action"] == "attack"
+        assert action.get("target_index") is None
+
+    def test_hard_finishes_a_turn(self):
+        game = _make_game()
+        game.start_turn()
+        ai = AIPlayer(name=game.active_player.name, faction=game.active_player.faction, difficulty="hard")
+        execute_turn(game, ai)
+        assert game.turn_started is False or game.is_over
+
+    def test_hard_trades_to_avoid_lethal_reply(self):
+        """2-ply should trade into a lethal attacker instead of poking face."""
+        from engine.card import create_card_instance
+
+        game = _make_game()
+        game.start_turn()
+        player = game.active_player
+        opponent = game.inactive_player
+        player.hand.clear()
+        opponent.hand.clear()
+        opponent.deck.clear()
+        player.board.clear()
+        opponent.board.clear()
+        player.life = 4
+        opponent.life = 20
+        attacker = create_card_instance(_char_card("Trader", attack=3, health=1), "k1", player.name)
+        attacker.is_exhausted = False
+        player.board.append(attacker)
+        threat = create_card_instance(
+            _char_card("Threat", attack=5, health=2, faction="templars"),
+            "k2",
+            opponent.name,
+        )
+        threat.is_exhausted = False
+        opponent.board.append(threat)
+        ai = AIPlayer(faction=player.faction, difficulty="hard")
+        action = choose_action(game, ai)
+        assert action["action"] == "attack"
+        assert action.get("target_index") == 0
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
 

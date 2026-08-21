@@ -37,6 +37,9 @@ class TestEncounterData:
         assert "showcase_illuminati" in encounters
         assert "showcase_templars" in encounters
         assert "showcase_reptilians" in encounters
+        assert "challenge_black_room" in encounters
+        assert "challenge_street_war" in encounters
+        assert "challenge_unquiet" in encounters
 
     def test_tutorial_decks_are_30(self):
         tutorial = load_encounters()["tutorial"]
@@ -90,6 +93,42 @@ class TestEncounterData:
         assert "templars_char_002" not in tutorial["ai_deck"]
         assert "neutral_char_007" in tutorial["ai_deck"]
         assert tutorial["ai_deck"][0] == "reptilians_char_007"
+
+
+class TestChallengeEncounters:
+    def test_challenges_are_hard_and_thirty(self):
+        encounters = load_encounters()
+        cards = {c.id: c for c in load_cards("data/cards.json")}
+        for key in ("challenge_black_room", "challenge_street_war", "challenge_unquiet"):
+            enc = encounters[key]
+            assert enc["mode"] == "challenge"
+            assert enc["difficulty"] == "hard"
+            assert len(enc["ai_deck"]) == 30
+            assert all(card_id in cards for card_id in enc["ai_deck"])
+            checked = validate_deck(enc["ai_deck"], cards, faction=enc["ai_faction"])
+            assert checked["valid"], checked["errors"]
+
+        def blob(enc_id: str) -> str:
+            return " ".join(
+                f"{getattr(cards[i], 'ability', '')} {getattr(cards[i], 'effect', '')}"
+                for i in encounters[enc_id]["ai_deck"]
+            )
+
+        black = blob("challenge_black_room").lower()
+        assert "silence" in black and "discard" in black
+        street = blob("challenge_street_war")
+        assert "Rush" in street and "Charge" in street
+        unquiet = blob("challenge_unquiet")
+        assert "Recur" in unquiet
+        assert "Deathrattle" in unquiet or "When this character dies" in unquiet
+
+    def test_challenge_session_uses_hard(self):
+        sid = create_session("P", "templars", "illuminati", encounter_id="challenge_black_room")
+        info = get_session_info(sid)
+        assert info is not None
+        assert info.difficulty == "hard"
+        assert info.mode == "challenge"
+        assert info.ai_name == "The Censor"
 
 
 class TestChargeKeyword:
