@@ -9,6 +9,7 @@ const FACTIONS = [
   { id: 'reptilians', name: 'Reptilians', energy: 'Psionics', icon: '▲' },
 ];
 const DECK_STORAGE_KEY = 'conspiracy_decks_v1';
+const BOARD_SLOTS = 7;
 
 const KEYWORD_GLOSSARY = [
   { name: 'Taunt', example: 'Squire', text: 'Enemies must attack a Taunt character first.' },
@@ -62,6 +63,19 @@ let dismissedHints = new Set();
 let pendingSpellTarget = false;
 let pendingTargetSide = 'enemy';
 let pendingSplitIndex = null;
+let pendingPowerTarget = false;
+const TURN_LIMIT_MS = 75000;
+const AFK_LIMIT_MS = 10000;
+const turnClock = {
+  running: false,
+  turn: null,
+  startedAt: 0,
+  deadline: 0,
+  acted: false,
+  previousActed: true,
+  interval: null,
+  ending: false,
+};
 let tutorialProgress = {
   playedCharacter: false,
   attacked: false,
@@ -380,8 +394,11 @@ function render() {
 
   document.getElementById('opponent-name').textContent = opp.name;
   paintHeroFrame('opponent-section', opp.faction, 'opponent-portrait');
-  document.getElementById('opponent-stats').innerHTML =
-    `${heroGuard(opp)}<span class="life-num">♥ ${opp.life}</span>`;
+  const oppLife = document.getElementById('opponent-life');
+  if (oppLife) oppLife.textContent = String(opp.life);
+  const oppRole = document.getElementById('opponent-role');
+  if (oppRole) oppRole.textContent = factionLabel(opp.faction);
+  document.getElementById('opponent-stats').innerHTML = heroGuard(opp);
   document.getElementById('opponent-hand-count').textContent = opp.hand_size;
   document.getElementById('opponent-hand').innerHTML = renderHiddenHand(opp.hand_size);
   document.getElementById('opponent-location').innerHTML = renderLocation(opp.location, false);
@@ -390,14 +407,37 @@ function render() {
   document.getElementById('player-name-display').textContent = me ? me.name : '?';
   if (me) {
     paintHeroFrame('player-section', me.faction, 'player-portrait');
-    document.getElementById('player-stats').innerHTML =
-      `${heroGuard(me)}<span class="life-num">♥ ${me.life}</span>`;
+    const myLife = document.getElementById('player-life');
+    if (myLife) myLife.textContent = String(me.life);
+    const myRole = document.getElementById('player-role');
+    if (myRole) myRole.textContent = factionLabel(me.faction);
+    document.getElementById('player-stats').innerHTML = heroGuard(me);
+    const note = document.getElementById('player-plaque-note');
+    const meter = document.getElementById('player-field-meter');
+    const board = me.board || [];
+    const n = board.length;
+    const ready = board.filter((c) => c.attack > 0 && !c.exhausted).length;
+    if (note) {
+      note.textContent = ready ? `${ready} ready` : `${n} / ${BOARD_SLOTS}`;
+    }
+    if (meter) {
+      meter.innerHTML = Array.from({ length: BOARD_SLOTS }, (_, i) => {
+        const c = board[i];
+        const filled = !!c;
+        const isReady = filled && c.attack > 0 && !c.exhausted;
+        const title = filled ? escHtml(c.name) : 'Empty slot';
+        return `<span class="pip${filled ? ' filled' : ''}${isReady ? ' ready' : ''}" title="${title}"></span>`;
+      }).join('');
+    }
     document.getElementById('player-location').innerHTML = renderLocation(me.location, true);
     document.getElementById('player-board').innerHTML = renderBoard(me.board, true);
     document.getElementById('player-hand').innerHTML = renderHand(me.hand || [], me.energy);
     renderEnergyWell(me);
     renderDeckWell(me);
+    paintPowerButton('player-power', me, true);
   }
+  paintPowerButton('opponent-power', opp, false);
+  syncTurnClock();
 
   const pendingChoice = !!(state.pending_discovery || state.pending_split);
   const canAffordCard = isMyTurn && turnStarted && !pendingChoice && me && me.hand && me.hand.some((c) => me.energy >= c.cost);
@@ -411,10 +451,12 @@ function render() {
   // Hearthstone-style face targeting: opponent header becomes a click target
   const oppHeader = document.querySelector('#opponent-section .player-header');
   if (oppHeader) {
-    const faceLegal = attackMode && canFace;
+    const faceLegal = (attackMode && canFace) || pendingPowerTarget;
     oppHeader.classList.toggle('face-targetable', !!faceLegal);
     oppHeader.onclick = faceLegal ? () => attackFace() : null;
-    oppHeader.title = faceLegal ? 'Drag a character here, or click to attack face' : '';
+    oppHeader.title = pendingPowerTarget
+      ? 'Click to Pull Strings the Recruiter'
+      : (faceLegal ? 'Drag a character here, or click to attack face' : '');
   }
   const myHeader = document.querySelector('#player-section .player-header');
   if (myHeader) {
@@ -535,12 +577,14 @@ function heroPortraitUrl(faction) {
 
 function paintHeroFrame(sectionId, faction, portraitId) {
   const header = document.querySelector(`#${sectionId} .player-header`);
-  if (header) {
-    header.classList.remove('illuminati', 'templars', 'reptilians');
+  const plaque = document.querySelector(`#${sectionId} .hero-plaque`);
+  [header, plaque].forEach((el) => {
+    if (!el) return;
+    el.classList.remove('illuminati', 'templars', 'reptilians');
     if (faction === 'illuminati' || faction === 'templars' || faction === 'reptilians') {
-      header.classList.add(faction);
+      el.classList.add(faction);
     }
-  }
+  });
   const portrait = document.getElementById(portraitId);
   if (portrait) portrait.style.backgroundImage = `url('${heroPortraitUrl(faction)}')`;
 }
@@ -667,17 +711,24 @@ function renderLocation(location, isPlayer) {
 }
 
 function renderBoard(board, isPlayer) {
-  if (!board || board.length === 0) {
-    return `<div class="board-empty">${isPlayer ? '<span>Drop characters here</span>' : ''}</div>`;
-  }
+  const list = board || [];
   const opp = getOpponent();
   const me = getMyPlayer();
-  const targetingEnemy = (attackMode || pendingSpellTarget) && pendingTargetSide === 'enemy';
+  const targetingEnemy = (attackMode || pendingSpellTarget || pendingPowerTarget) && pendingTargetSide === 'enemy';
   const targetingAlly = pendingSpellTarget && (pendingTargetSide === 'ally' || pendingTargetSide === 'ally_or_hero');
   const legalEnemies = !isPlayer && targetingEnemy ? targetableEnemies(opp) : [];
   const legalAllies = isPlayer && targetingAlly ? ((me && me.board) || []) : [];
   const step = currentTutorialStep();
-  return board.map((c, i) => {
+  const cells = [];
+  const n = list.length;
+  const padLeft = Math.floor((BOARD_SLOTS - n) / 2);
+  for (let slot = 0; slot < BOARD_SLOTS; slot += 1) {
+    const i = slot - padLeft;
+    const c = (i >= 0 && i < n) ? list[i] : null;
+    if (!c) {
+      cells.push(`<div class="minion-slot ${isPlayer ? 'ally' : 'enemy'}" data-slot="${slot}"></div>`);
+      continue;
+    }
     const canAttack = isPlayer && c.attack > 0 && !c.exhausted && !targetingAlly;
     const validTarget = isPlayer
       ? targetingAlly && legalAllies.includes(c)
@@ -691,8 +742,9 @@ function renderBoard(board, isPlayer) {
     else if (targetingEnemy) onclick = `chooseEnemy(${i})`;
     const extra = `${selected ? 'selected' : ''} ${validTarget ? 'targetable' : ''} ${hintReady || hintTarget ? 'hint-glow' : ''} ${!canAttack && isPlayer && !targetingAlly ? 'disabled' : ''}`;
     const attrs = `data-board-index="${i}" data-board-side="${isPlayer ? 'player' : 'opponent'}"`;
-    return renderMinion(c, extra, onclick, attrs);
-  }).join('');
+    cells.push(renderMinion(c, extra, onclick, attrs));
+  }
+  return cells.join('');
 }
 
 function renderHand(hand, energy) {
@@ -717,6 +769,8 @@ function renderHand(hand, energy) {
 }
 
 function selectCard(index) {
+  noteUserAction();
+  pendingPowerTarget = false;
   const me = getMyPlayer();
   const card = me && me.hand ? me.hand[index] : null;
   if (selectedCardIndex === index) {
@@ -756,6 +810,11 @@ function selectCard(index) {
 }
 
 async function chooseEnemy(targetIndex) {
+  noteUserAction();
+  if (pendingPowerTarget) {
+    await submitHeroPower('enemy', targetIndex);
+    return;
+  }
   if (pendingSplitIndex !== null && pendingSpellTarget) {
     await sendSplit(pendingSplitIndex, targetIndex);
     return;
@@ -785,6 +844,8 @@ function heroGuard(player) {
 }
 
 function selectAttacker(index) {
+  noteUserAction();
+  pendingPowerTarget = false;
   const board = getMyPlayer().board;
   const c = board[index];
   if (!c || c.attack <= 0 || c.exhausted) return;
@@ -801,6 +862,7 @@ function clearSelection() {
   attackMode = false;
   pendingSpellTarget = false;
   pendingTargetSide = 'enemy';
+  pendingPowerTarget = false;
   render();
 }
 
@@ -810,6 +872,11 @@ async function attackTarget(targetIndex) {
 }
 
 async function attackFace() {
+  noteUserAction();
+  if (pendingPowerTarget) {
+    await submitHeroPower('face');
+    return;
+  }
   if (selectedAttackerIndex === null) return;
   const opp = getOpponent();
   if (!canAttackFace(opp)) {
@@ -832,6 +899,10 @@ async function submitAttack() {
 
 async function sendAttack(attackerIndex, targetIndex) {
   try {
+    const atkEl = document.querySelector(`#player-board .card.minion[data-board-index="${attackerIndex}"]`);
+    const tgtEl = (targetIndex === null || targetIndex === undefined)
+      ? document.querySelector('#opponent-section .player-header')
+      : document.querySelector(`#opponent-board .card.minion[data-board-index="${targetIndex}"]`);
     const oppBefore = getOpponent();
     const targetBefore = (targetIndex !== null && targetIndex !== undefined && oppBefore && oppBefore.board)
       ? oppBefore.board[targetIndex]
@@ -850,6 +921,7 @@ async function sendAttack(attackerIndex, targetIndex) {
         tutorialProgress.sawDeathrattle = true;
       }
       if (/Leech Contact/i.test(ar.attacker || '')) tutorialProgress.drainAttacked = true;
+      await animateCombat(atkEl, tgtEl, ar);
     } else {
       addLog(`Cannot attack: ${data.action_result?.error || 'unknown'}`, 'damage');
     }
@@ -926,6 +998,7 @@ async function playSelectedCard(spellTarget, targetSide) {
     const data = await api('POST', path);
     if (data.action_result?.success) {
       addLog(`Played ${data.action_result.card}`, 'play');
+      await animatePlayResult(card, data.action_result);
       if (card && card.type === 'Character') tutorialProgress.playedCharacter = true;
       if (card && card.type === 'Spell') tutorialProgress.playedSpell = true;
       if (card && card.type === 'Location') tutorialProgress.playedLocation = true;
@@ -1086,6 +1159,7 @@ async function submitRecycle(forcedIndex) {
 
 async function submitEndTurn() {
   try {
+    markTurnEnded();
     await api('POST', `/api/game/${sessionId}/end-turn`);
     addLog('Turn ended.', 'turn');
     await loadState();
@@ -1100,19 +1174,23 @@ async function submitEndTurn() {
 
 async function runAITurn() {
   try {
-    const data = await api('POST', `/api/game/${sessionId}/ai-turn`);
-    (data.results || []).forEach((step) => {
-      const result = step.result || {};
-      if (step.action === 'play' && result.card) addLog(`AI plays ${result.card}`, 'play');
-      if (step.action === 'attack' && result.attacker) addLog(`AI: ${result.attacker} attacks ${result.target}`, 'damage');
-      if (step.action === 'end_turn') addLog('AI ends turn.', 'turn');
-      if (step.action === 'discover' && result.card) addLog(`AI discovers ${result.card}`, 'play');
-      if (step.action === 'split' && result.choice) addLog(`AI split: ${result.choice}`, 'play');
-      if (step.action === 'recycle' && result.recycled) addLog(`AI recycles ${result.recycled}`, 'play');
-    });
-    state = data.state;
-    if (data.recap) renderRecap(data.recap);
-    if (!state.is_over) {
+    for (let step = 0; step < 40; step += 1) {
+      const data = await api('POST', `/api/game/${sessionId}/ai-step`);
+      const result = data.result || {};
+      if (data.action === 'play' && result.card) addLog(`AI plays ${result.card}`, 'play');
+      if (data.action === 'attack' && result.attacker) addLog(`AI: ${result.attacker} attacks ${result.target}`, 'damage');
+      if (data.action === 'hero_power' && result.power) addLog(`AI uses ${result.power}`, 'play');
+      if (data.action === 'end_turn') addLog('AI ends turn.', 'turn');
+      if (data.action === 'discover' && result.card) addLog(`AI discovers ${result.card}`, 'play');
+      if (data.action === 'split' && result.choice) addLog(`AI split: ${result.choice}`, 'play');
+      if (data.action === 'recycle' && result.recycled) addLog(`AI recycles ${result.recycled}`, 'play');
+      await animateAIAction(data.action, result);
+      state = data.state;
+      if (data.recap) renderRecap(data.recap);
+      render();
+      if (data.done || !state || state.is_over) break;
+    }
+    if (state && !state.is_over) {
       await ensureMyTurnStarted();
     }
     render();
@@ -1649,6 +1727,7 @@ function onDragPointerDown(e) {
 }
 
 function beginDragTrack(e, kind, index, source) {
+  noteUserAction();
   dragState.tracking = true;
   dragState.active = false;
   dragState.kind = kind;
@@ -1802,6 +1881,16 @@ async function resolveDrop(kind, index, x, y) {
   if (!target) return;
   const me = getMyPlayer();
   if (!me) return;
+  noteUserAction();
+
+  if (pendingPowerTarget && (target.type === 'enemy' || target.type === 'face')) {
+    if (target.type === 'enemy' && !Number.isNaN(target.index)) {
+      await submitHeroPower('enemy', target.index);
+    } else {
+      await submitHeroPower('face');
+    }
+    return;
+  }
 
   if (pendingSplitIndex !== null && pendingSpellTarget && target.type === 'enemy' && !Number.isNaN(target.index)) {
     await sendSplit(pendingSplitIndex, target.index);
@@ -1860,6 +1949,435 @@ async function resolveDrop(kind, index, x, y) {
     selectedCardIndex = null;
     selectCard(index);
   }
+}
+
+function prefersReducedMotion() {
+  return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function sleep(ms) {
+  if (prefersReducedMotion()) return Promise.resolve();
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function noteUserAction() {
+  if (!state || state.active_player !== myPlayerName) return;
+  if (!turnClock.running) return;
+  if (!turnClock.acted && !turnClock.previousActed) {
+    turnClock.deadline = turnClock.startedAt + TURN_LIMIT_MS;
+  }
+  turnClock.acted = true;
+  paintTimer();
+}
+
+function markTurnEnded() {
+  turnClock.previousActed = turnClock.acted;
+  stopTurnClock();
+}
+
+function stopTurnClock() {
+  turnClock.running = false;
+  if (turnClock.interval) {
+    clearInterval(turnClock.interval);
+    turnClock.interval = null;
+  }
+  const el = document.getElementById('turn-timer');
+  if (el) el.hidden = true;
+}
+
+function startTurnClock() {
+  const now = Date.now();
+  turnClock.running = true;
+  turnClock.turn = state && state.turn;
+  turnClock.startedAt = now;
+  turnClock.acted = false;
+  turnClock.ending = false;
+  const limit = turnClock.previousActed ? TURN_LIMIT_MS : AFK_LIMIT_MS;
+  turnClock.deadline = now + limit;
+  if (turnClock.interval) clearInterval(turnClock.interval);
+  turnClock.interval = setInterval(tickTurnClock, 200);
+  const el = document.getElementById('turn-timer');
+  if (el) el.hidden = false;
+  paintTimer();
+}
+
+function syncTurnClock() {
+  const el = document.getElementById('turn-timer');
+  if (!el) return;
+  if (!state || state.is_over) {
+    stopTurnClock();
+    return;
+  }
+  const mine = state.active_player === myPlayerName && state.turn_started;
+  if (!mine) {
+    if (turnClock.running) {
+      turnClock.previousActed = turnClock.acted;
+      stopTurnClock();
+    }
+    el.hidden = true;
+    return;
+  }
+  if (!turnClock.running || turnClock.turn !== state.turn) {
+    startTurnClock();
+  }
+  el.hidden = false;
+  paintTimer();
+}
+
+function paintTimer() {
+  const el = document.getElementById('turn-timer');
+  const count = document.getElementById('timer-count');
+  if (!el || !count || !turnClock.running) return;
+  const left = Math.max(0, turnClock.deadline - Date.now());
+  const secs = Math.ceil(left / 1000);
+  count.textContent = String(secs);
+  el.classList.toggle('urgent', secs <= 10);
+}
+
+function tickTurnClock() {
+  if (!turnClock.running) return;
+  paintTimer();
+  if (turnClock.deadline - Date.now() > 0) return;
+  if (turnClock.ending) return;
+  turnClock.ending = true;
+  addLog('Time. The turn ends.', 'turn');
+  submitEndTurn();
+}
+
+function powerArtUrl(faction, on) {
+  const id = (faction || '').toLowerCase();
+  if (!['illuminati', 'templars', 'reptilians'].includes(id)) return '';
+  return `/static/ui/powers/${id}-${on ? 'on' : 'off'}.jpg`;
+}
+
+function paintPowerButton(btnId, player, clickable) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  const hp = player && player.hero_power;
+  if (!hp) {
+    btn.hidden = true;
+    return;
+  }
+  btn.hidden = false;
+  const ready = clickable && hp.available;
+  const lit = clickable ? hp.available : !hp.used;
+  const img = btn.querySelector('img');
+  if (img) {
+    img.src = powerArtUrl(player.faction, lit);
+    img.alt = hp.name;
+  }
+  const cost = btn.querySelector('.power-cost');
+  if (cost) cost.textContent = String(hp.cost);
+  btn.classList.toggle('is-off', !lit);
+  btn.classList.toggle('is-ready', !!ready);
+  btn.disabled = false;
+  btn.setAttribute('aria-disabled', ready ? 'false' : 'true');
+  btn.title = `${hp.name} (${hp.cost}) — ${hp.effect}`;
+  btn.onmouseenter = () => showDossier({
+    name: hp.name,
+    type: 'Faction Power',
+    faction: player.faction,
+    cost: hp.cost,
+    ability: hp.effect,
+    lore: hp.lore,
+  });
+}
+
+function onPlayerPower() {
+  const me = getMyPlayer();
+  const hp = me && me.hero_power;
+  if (!hp) return;
+  showDossier({
+    name: hp.name,
+    type: 'Faction Power',
+    faction: me.faction,
+    cost: hp.cost,
+    ability: hp.effect,
+    lore: hp.lore,
+  });
+  if (!hp.available) return;
+  noteUserAction();
+  if (hp.target === 'any') {
+    pendingPowerTarget = true;
+    pendingSpellTarget = false;
+    pendingTargetSide = 'enemy';
+    selectedAttackerIndex = null;
+    attackMode = false;
+    addLog(`${hp.name}: click an enemy or their hero.`, 'turn');
+    render();
+    return;
+  }
+  submitHeroPower('face');
+}
+
+async function submitHeroPower(side, index) {
+  try {
+    const body = { target_side: side || 'face' };
+    if (index !== null && index !== undefined) body.target_index = index;
+    const data = await api('POST', `/api/game/${sessionId}/hero-power`, body);
+    pendingPowerTarget = false;
+    const ar = data.action_result || {};
+    addLog(`Faction power: ${ar.power || 'used'}`, 'play');
+    const btn = document.getElementById('player-power');
+    if (btn) {
+      btn.classList.add('pulse');
+      setTimeout(() => btn.classList.remove('pulse'), 500);
+    }
+    await animateFxList(ar.fx, ar);
+    await loadState();
+  } catch (e) {
+    pendingPowerTarget = false;
+    addLog('Faction power: ' + e.message, 'damage');
+    render();
+  }
+}
+
+function floatText(el, text, kind) {
+  if (!el || !text) return;
+  const r = el.getBoundingClientRect();
+  const node = document.createElement('div');
+  node.className = `fx-float ${kind || 'bad'}`;
+  node.textContent = text;
+  node.style.left = `${r.left + r.width / 2}px`;
+  node.style.top = `${r.top + r.height * 0.2}px`;
+  document.body.appendChild(node);
+  setTimeout(() => node.remove(), 900);
+}
+
+function flashEl(el, cls) {
+  if (!el) return;
+  el.classList.add(cls);
+  setTimeout(() => el.classList.remove(cls), 450);
+}
+
+async function animateCombat(atkEl, tgtEl, result) {
+  if (prefersReducedMotion() || !atkEl) {
+    if (tgtEl && result && result.damage_dealt) {
+      flashEl(tgtEl, 'fx-flash-red');
+      floatText(tgtEl, `-${result.damage_dealt}`, 'bad');
+    }
+    return sleep(120);
+  }
+  const a = atkEl.getBoundingClientRect();
+  const t = (tgtEl || atkEl).getBoundingClientRect();
+  const dx = (t.left + t.width / 2) - (a.left + a.width / 2);
+  const dy = (t.top + t.height / 2) - (a.top + a.height / 2);
+  atkEl.classList.add('lunging');
+  atkEl.style.transition = 'transform 0.28s cubic-bezier(.2,.85,.2,1)';
+  atkEl.style.zIndex = '24';
+  atkEl.style.transform = `translate(${dx * 0.72}px, ${dy * 0.72}px) scale(1.05)`;
+  await sleep(280);
+  flashEl(tgtEl, 'fx-flash-red');
+  flashEl(atkEl, 'fx-flash-red');
+  if (result && result.damage_dealt) floatText(tgtEl || atkEl, `-${result.damage_dealt}`, 'bad');
+  if (result && result.damage_taken) floatText(atkEl, `-${result.damage_taken}`, 'bad');
+  if (result && result.killed_target && tgtEl) tgtEl.classList.add('dying');
+  await sleep(160);
+  if (result && result.killed_attacker) {
+    atkEl.classList.add('dying');
+    await sleep(280);
+    atkEl.classList.remove('lunging');
+    return;
+  }
+  atkEl.style.transform = '';
+  await sleep(240);
+  atkEl.style.transition = '';
+  atkEl.style.zIndex = '';
+  atkEl.classList.remove('lunging');
+}
+
+async function animatePlayResult(card, result) {
+  if (!card) return sleep(80);
+  const type = card.type || result.action || '';
+  if (/Character/i.test(type) || result.action === 'play_character') {
+    flashEl(document.getElementById('player-board'), 'fx-flash-green');
+    await sleep(220);
+    return;
+  }
+  if (/Spell/i.test(type) || result.action === 'play_spell') {
+    await animateFxFromEffect(result.effect);
+    return;
+  }
+  await sleep(80);
+}
+
+function findUnitEl(name) {
+  if (!name) return null;
+  const safe = CSS.escape(name);
+  return document.querySelector(`#table-surface .card.minion[data-card-name="${safe}"]`)
+    || document.querySelector(`#table-surface .card.frame[data-card-name="${safe}"]`);
+}
+
+function faceEl(side) {
+  if (side === 'enemy') return document.querySelector('#opponent-section .player-header');
+  if (side === 'ally') return document.querySelector('#player-section .player-header');
+  const me = getMyPlayer();
+  const opp = getOpponent();
+  if (me && me.name === side) return document.querySelector('#player-section .player-header');
+  if (opp && opp.name === side) return document.querySelector('#opponent-section .player-header');
+  return null;
+}
+
+async function animateFxFromEffect(effect) {
+  if (!effect) return sleep(80);
+  const desc = `${effect.description || ''}`.toLowerCase();
+  let did = false;
+  const dmg = effect.damage_dealt || {};
+  Object.keys(dmg).forEach((name) => {
+    const el = findUnitEl(name) || faceEl(name) || document.querySelector('#opponent-section .player-header');
+    flashEl(el, 'fx-flash-red');
+    if (dmg[name]) floatText(el, `-${dmg[name]}`, 'bad');
+    did = true;
+  });
+  const heal = effect.healing_done || {};
+  Object.keys(heal).forEach((name) => {
+    const el = findUnitEl(name) || faceEl(name) || document.querySelector('#player-section .player-header');
+    flashEl(el, 'fx-flash-green');
+    if (heal[name]) floatText(el, `+${heal[name]}`, 'good');
+    did = true;
+  });
+  const buffs = effect.buffs_applied || [];
+  (Array.isArray(buffs) ? buffs : Object.keys(buffs)).forEach((name) => {
+    const el = findUnitEl(name) || document.querySelector('#player-board .card.minion');
+    flashEl(el, 'fx-flash-green');
+    floatText(el, '+ATK', 'good');
+    did = true;
+  });
+  const debuffs = effect.debuffs_applied;
+  const debuffNames = Array.isArray(debuffs)
+    ? debuffs
+    : (debuffs && typeof debuffs === 'object' ? Object.keys(debuffs) : []);
+  debuffNames.forEach((name) => {
+    const el = findUnitEl(name) || document.querySelector('#opponent-board .card.minion');
+    flashEl(el, 'fx-flash-red');
+    floatText(el, '-ATK', 'bad');
+    did = true;
+  });
+  const atkDrop = desc.match(/([+-]\d+)\s*(?:attack|atk)/i);
+  if (atkDrop && !did) {
+    const el = document.querySelector('#opponent-board .card.minion')
+      || document.querySelector('#player-board .card.minion');
+    if (el) {
+      const good = atkDrop[1].startsWith('+');
+      flashEl(el, good ? 'fx-flash-green' : 'fx-flash-red');
+      floatText(el, `${atkDrop[1]} ATK`, good ? 'good' : 'bad');
+      did = true;
+    }
+  }
+  if (did) {
+    await sleep(360);
+    return;
+  }
+  if (/heal|restore/.test(desc)) {
+    const hero = document.querySelector('#player-section .player-header');
+    flashEl(hero, 'fx-flash-green');
+    floatText(hero, 'HEAL', 'good');
+  } else if (/damage|deal/.test(desc)) {
+    flashEl(document.querySelector('#opponent-section .player-header'), 'fx-flash-red');
+  }
+  await sleep(280);
+}
+
+async function animateFxList(fx, result) {
+  const list = fx || [];
+  if (!list.length) {
+    if (result && result.summoned) flashEl(document.getElementById('player-board'), 'fx-flash-green');
+    if (result && result.target === 'opponent') {
+      const face = document.querySelector('#opponent-section .player-header');
+      flashEl(face, 'fx-flash-red');
+      if (result.damage_dealt) floatText(face, `-${result.damage_dealt}`, 'bad');
+    }
+    await sleep(280);
+    return;
+  }
+  for (const item of list) {
+    if (item.kind === 'damage' && item.target === 'face') {
+      const sel = item.side === 'enemy' ? '#opponent-section .player-header' : '#player-section .player-header';
+      const el = document.querySelector(sel);
+      flashEl(el, 'fx-flash-red');
+      floatText(el, `-${item.amount || 0}`, 'bad');
+    } else if (item.kind === 'damage') {
+      const root = item.side === 'enemy' ? '#opponent-board' : '#player-board';
+      const el = document.querySelector(`${root} .card.minion[data-board-index="${item.index}"]`)
+        || document.querySelector(`${root} .card.minion[data-card-name="${CSS.escape(item.name || '')}"]`);
+      flashEl(el, 'fx-flash-red');
+      floatText(el, `-${item.amount || 0}`, 'bad');
+    } else if (item.kind === 'summon') {
+      flashEl(document.getElementById(item.side === 'enemy' ? 'opponent-board' : 'player-board'), 'fx-flash-green');
+    }
+  }
+  await sleep(320);
+}
+
+async function animateAIAction(action, result) {
+  if (action === 'play') {
+    await flyFromOpponentHand(result.card);
+    if (result.effect) await animateFxFromEffect(result.effect);
+    return;
+  }
+  if (action === 'attack') {
+    const atkEl = document.querySelector(`#opponent-board .card.minion[data-card-name="${CSS.escape(result.attacker || '')}"]`);
+    let tgtEl = null;
+    if (!result.target || result.target === 'opponent' || /recruit|player|face/i.test(result.target)) {
+      tgtEl = document.querySelector('#player-section .player-header');
+    } else {
+      tgtEl = document.querySelector(`#player-board .card.minion[data-card-name="${CSS.escape(result.target || '')}"]`);
+    }
+    await animateCombat(atkEl, tgtEl, result);
+    return;
+  }
+  if (action === 'hero_power') {
+    const btn = document.getElementById('opponent-power');
+    if (btn) {
+      btn.classList.add('pulse');
+      setTimeout(() => btn.classList.remove('pulse'), 500);
+    }
+    await animateFxList(result.fx, result);
+  }
+}
+
+async function flyFromOpponentHand(cardName) {
+  const hand = document.getElementById('opponent-hand');
+  const board = document.getElementById('opponent-board');
+  if (!hand || !board || prefersReducedMotion()) return sleep(160);
+  const src = hand.querySelector('.card.frame') || hand;
+  src.style.transition = 'transform 0.16s ease';
+  src.style.transform = 'translateY(-16px)';
+  await sleep(160);
+  const origin = src.getBoundingClientRect();
+  const dest = board.getBoundingClientRect();
+  const card = (allCards || []).find((c) => c.name === cardName);
+  const ghost = document.createElement('div');
+  ghost.style.position = 'fixed';
+  ghost.style.left = `${origin.left}px`;
+  ghost.style.top = `${origin.top}px`;
+  ghost.style.margin = '0';
+  ghost.style.zIndex = '85';
+  ghost.style.pointerEvents = 'none';
+  ghost.style.transition = 'transform 0.48s cubic-bezier(.2,.8,.2,1), opacity 0.48s ease';
+  if (card) {
+    ghost.innerHTML = renderCardFace(card, 'ai-fly', '', '', '');
+    const face = ghost.querySelector('.card');
+    if (face) {
+      face.style.width = '110px';
+      face.style.height = '154px';
+      face.style.margin = '0';
+    }
+  } else {
+    ghost.appendChild(src.cloneNode(true));
+  }
+  document.body.appendChild(ghost);
+  src.style.transform = '';
+  src.style.transition = '';
+  const dx = dest.left + dest.width / 2 - origin.left - origin.width / 2;
+  const dy = dest.top + dest.height / 2 - origin.top - origin.height / 2;
+  requestAnimationFrame(() => {
+    ghost.style.transform = `translate(${dx}px, ${dy}px) scale(1.2)`;
+    ghost.style.opacity = '0.12';
+  });
+  await sleep(500);
+  ghost.remove();
+  if (cardName) floatText(board, cardName, 'good');
 }
 
 document.addEventListener('DOMContentLoaded', () => {

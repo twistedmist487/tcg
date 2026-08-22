@@ -30,7 +30,7 @@ from engine.keywords import (
     is_exhausted,
     is_silenced,
 )
-from engine.models import Card, CharacterCard, Faction, LocationCard, SpellCard
+from engine.models import Card, CharacterCard, Faction, HeroPower, LocationCard, SpellCard
 from engine.player import Player
 from engine.serializer import deserialize_game, serialize_game
 
@@ -43,6 +43,7 @@ __all__ = [
     "EffectResult",
     "Faction",
     "Game",
+    "HeroPower",
     "LocationCard",
     "Player",
     "SpellCard",

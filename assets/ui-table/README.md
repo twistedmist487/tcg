@@ -15,6 +15,8 @@ Full product write-up: [docs/wiki/entities/conspiracy-tcg-ui.md](../../docs/wiki
 | `energy/empty.jpg` | Spent or locked socket |
 | `buttons/end-turn-*.jpg` | Hourglass states |
 | `heroes/portrait-*.jpg` | Commander busts in the circular hero frames |
+| `chrome/hourglass.jpg` | Occult 75s turn clock |
+| `powers/{faction}-on.jpg` / `-off.jpg` | Faction power buttons |
 
 `heroes/hero-frame.jpg` is the ornate badge reference. The live match draws the gold ring in CSS and composites the portrait, name, and `♥` life in HTML.
 

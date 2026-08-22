@@ -1502,6 +1502,7 @@ def summon_token(
     attack: int,
     health: int,
     charge: bool = False,
+    ability: str | None = None,
 ) -> CardInstance | None:
     """Summon a token character (no Assault)."""
     from engine.card import create_card_instance
@@ -1510,6 +1511,7 @@ def summon_token(
 
     lookup = load_card_lookup()
     card = lookup.get(RAPTOR_TOKEN_ID)
+    printed = ability or ("Token. Charge." if charge else "Token.")
     if card is None or name.lower() != "raptor":
         energy = {
             "illuminati": "Influence",
@@ -1528,7 +1530,7 @@ def summon_token(
             lore="A summoned token.",
             attack=attack,
             health=health,
-            ability="Token. Charge." if charge else "Token.",
+            ability=printed,
         )
     inst = create_card_instance(card, player._generate_instance_id(), player.name)
     if charge:

@@ -148,7 +148,9 @@
         <ul>
           <li>Draw a card and gain +1 energy (max 10). The first player skips that first draw.</li>
           <li>Spend energy to play characters, spells, or one location. Drag a card onto the table to play it, or click it then Play Card.</li>
+          <li>Each conspiracy has a faction power (cost 2, once per turn): Illuminati Pull Strings, Templars Call Initiate, Reptilians Psi Lash.</li>
           <li>Attack by dragging a ready character onto an enemy or their hero. Click still works.</li>
+          <li>Turns last 75 seconds. If you pass without acting, your next turn only gets 10 seconds until you touch a card.</li>
           <li>Win at 0 life or by decking the opponent out.</li>
         </ul>
         <h3>Constructed</h3>
@@ -230,32 +232,78 @@
         <!-- CENTER: The table surface — opponent hero, two minion rows, your hero -->
         <div id="table-surface">
           <div class="player-section" id="opponent-section">
-            <div class="hero-cluster">
-              <div class="opp-hand-stack">
-                <div class="hand-label"><span id="opponent-hand-count">0</span></div>
-                <div class="hand" id="opponent-hand"></div>
+            <div class="hero-plaque" id="opponent-plaque">
+              <div class="plaque-wing left">
+                <div class="opp-hand-stack">
+                  <div class="hand-label">Hand <span id="opponent-hand-count">0</span></div>
+                  <div class="hand" id="opponent-hand"></div>
+                </div>
               </div>
-              <div class="player-header hero-frame" data-drop="face">
-                <div class="hero-portrait" id="opponent-portrait"></div>
-                <span class="player-name" id="opponent-name"></span>
-                <div class="player-stats" id="opponent-stats"></div>
+              <div class="hero-stack">
+                <div class="player-header hero-frame" data-drop="face">
+                  <div class="hero-portrait" id="opponent-portrait"></div>
+                </div>
+                <div class="nameplate">
+                  <div class="player-name" id="opponent-name"></div>
+                </div>
+              </div>
+              <div class="plaque-wing right">
+                <button type="button" class="hero-power" id="opponent-power" aria-label="Opponent faction power">
+                  <img id="opponent-power-art" alt="">
+                  <span class="power-cost">2</span>
+                </button>
+                <div class="life-cluster">
+                  <div class="life-orb" id="opponent-life">30</div>
+                  <span class="life-caption">Life</span>
+                </div>
+                <div class="plaque-copy">
+                  <div class="player-role" id="opponent-role"></div>
+                  <div class="player-stats" id="opponent-stats"></div>
+                </div>
               </div>
             </div>
             <div class="board minion-row enemy" id="opponent-board" data-drop="enemy-row"></div>
           </div>
 
-          <div class="combat-gutter" aria-hidden="true"></div>
+          <div class="combat-gutter">
+            <div id="turn-timer" hidden>
+              <img id="timer-hourglass" src="/static/ui/chrome/hourglass.jpg" alt="Turn timer">
+              <div id="timer-count" aria-live="polite">75</div>
+            </div>
+          </div>
 
           <div class="player-section active" id="player-section">
             <div class="board minion-row ally" id="player-board" data-drop="board"></div>
-            <div class="hero-cluster">
-              <div class="player-header hero-frame" data-drop="hero">
-                <div class="hero-portrait" id="player-portrait"></div>
-                <span class="player-name" id="player-name-display"></span>
-                <div class="player-stats" id="player-stats"></div>
+            <div class="hero-plaque" id="player-plaque">
+              <div class="plaque-wing left">
+                <div class="life-cluster">
+                  <div class="life-orb" id="player-life">30</div>
+                  <span class="life-caption">Life</span>
+                </div>
+                <button type="button" class="hero-power" id="player-power" aria-label="Faction power" onclick="onPlayerPower()">
+                  <img id="player-power-art" alt="">
+                  <span class="power-cost">2</span>
+                </button>
+                <div class="plaque-copy">
+                  <div class="player-role" id="player-role"></div>
+                  <div class="player-stats" id="player-stats"></div>
+                </div>
+              </div>
+              <div class="hero-stack">
+                <div class="player-header hero-frame" data-drop="hero">
+                  <div class="hero-portrait" id="player-portrait"></div>
+                </div>
+                <div class="nameplate">
+                  <div class="player-name" id="player-name-display"></div>
+                </div>
+              </div>
+              <div class="plaque-wing right">
+                <div class="field-meter" id="player-field-meter" aria-hidden="true"></div>
+                <div class="plaque-note" id="player-plaque-note">Field</div>
               </div>
             </div>
           </div>
+          <div id="fx-layer" aria-hidden="true"></div>
         </div>
 
         <!-- RIGHT RAIL: Controls -->

@@ -40,6 +40,7 @@ def serialize_game(game: Game, indent: int | None = 2) -> str:
             "energy": player.energy,
             "max_energy": player.max_energy,
             "fatigue_damage": player.fatigue_damage,
+            "hero_power_used": getattr(player, "hero_power_used", False),
             "hand": [card_to_dict(c) for c in player.hand],
             "board": [card_instance_to_dict(c) for c in player.board],
             "deck": [card_to_dict(c) for c in player.deck],
@@ -82,6 +83,7 @@ def deserialize_game(json_str: str) -> Game:
         player.energy = ps["energy"]
         player.max_energy = ps["max_energy"]
         player.fatigue_damage = ps["fatigue_damage"]
+        player.hero_power_used = bool(ps.get("hero_power_used", False))
 
         # Restore hand
         player.hand = [dict_to_card(d) for d in ps["hand"]]

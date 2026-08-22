@@ -322,3 +322,60 @@ class TestFullGameFlow:
         # End turn
         end_resp = client.post(f"/api/game/{session_id}/end-turn")
         assert end_resp.status_code == 200
+
+
+class TestHeroPowerEndpoint:
+    def test_state_includes_power(self, client):
+        resp = client.post("/api/game/new?player_name=Test&player_faction=templars")
+        session_id = resp.json()["session_id"]
+        state = client.get(f"/api/game/{session_id}/state").json()
+        player = next(p for p in state["players"] if p["name"] == "Test")
+        assert player["hero_power"]["name"] == "Call Initiate"
+        assert player["hero_power"]["cost"] == 2
+        assert player["hero_power"]["target"] == "none"
+
+    def test_use_power_on_turn_two(self, client):
+        resp = client.post("/api/game/new?player_name=Test&player_faction=reptilians")
+        session_id = resp.json()["session_id"]
+        for _ in range(6):
+            state = client.get(f"/api/game/{session_id}/state").json()
+            if state["is_over"]:
+                break
+            if state["active_player"] == "Test":
+                if not state["turn_started"]:
+                    client.post(f"/api/game/{session_id}/start-turn")
+                    state = client.get(f"/api/game/{session_id}/state").json()
+                me = next(p for p in state["players"] if p["name"] == "Test")
+                if me["energy"] >= 2:
+                    break
+                client.post(f"/api/game/{session_id}/end-turn")
+            else:
+                client.post(f"/api/game/{session_id}/ai-turn")
+        fired = client.post(f"/api/game/{session_id}/hero-power", json={"target_side": "face"})
+        assert fired.status_code == 200, fired.text
+        assert fired.json()["action_result"]["power"] == "Psi Lash"
+
+    def test_ai_step_returns_one_action(self, client):
+        resp = client.post(
+            "/api/game/new?player_name=Test&player_faction=templars&difficulty=easy"
+        )
+        session_id = resp.json()["session_id"]
+        stepped = False
+        for _ in range(8):
+            state = client.get(f"/api/game/{session_id}/state").json()
+            if state["is_over"]:
+                break
+            if state["active_player"] == "Test":
+                if not state["turn_started"]:
+                    client.post(f"/api/game/{session_id}/start-turn")
+                client.post(f"/api/game/{session_id}/end-turn")
+                continue
+            step = client.post(f"/api/game/{session_id}/ai-step")
+            assert step.status_code == 200, step.text
+            data = step.json()
+            assert "action" in data
+            assert "state" in data
+            assert "done" in data
+            stepped = True
+            break
+        assert stepped

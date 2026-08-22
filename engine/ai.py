@@ -23,7 +23,8 @@ from typing import Any
 from engine.card import CardInstance, prefix_keywords
 from engine.combat import can_attack_player_directly
 from engine.game import Game
-from engine.keywords import get_valid_attack_targets, has_taunt
+from engine.hero_power import power_for
+from engine.keywords import get_valid_attack_targets, has_taunt, has_stealth
 from engine.models import Card
 from engine.player import Player
 
@@ -164,6 +165,12 @@ def choose_action(game: Game, ai: AIPlayer | None = None) -> dict[str, Any]:
 
     skip_attacks = bool(ai and random.random() < ai.skip_attack_chance)
 
+    if not (ai and ai.difficulty == "easy"):
+        for power_action in _hero_power_candidates(game):
+            score = score_action(game, power_action, ai)
+            if score > -math.inf:
+                candidates.append((score, power_action))
+
     if not skip_attacks:
         for attacker_idx, attacker in enumerate(player.board):
             if not attacker.can_attack:
@@ -284,6 +291,11 @@ def _perform_action(game: Game, action: dict[str, Any]) -> dict[str, Any]:
         return game.play_card(action["card_index"], spell_target_index=target)
     if kind == "attack":
         return game.attack(action["attacker_index"], action.get("target_index"))
+    if kind == "hero_power":
+        return game.use_hero_power(
+            target_index=action.get("target_index"),
+            target_side=action.get("target_side", "face"),
+        )
     return {"success": False, "error": f"Unknown action {kind}"}
 
 
@@ -380,6 +392,8 @@ def score_action(game: Game, action: dict[str, Any], ai: AIPlayer | None = None)
         return _score_recycle(game, action["card_index"])
     if action["action"] == "attack":
         return _score_attack(game, action["attacker_index"], action.get("target_index"), ai)
+    if action["action"] == "hero_power":
+        return _score_hero_power(game, action, ai)
     return -math.inf
 
 
@@ -451,6 +465,82 @@ def _score_end_turn(game: Game) -> float:
         score += 0.5
 
     return score
+
+
+def _hero_power_candidates(game: Game) -> list[dict[str, Any]]:
+    """Legal faction-power actions for the active player."""
+    player = game.active_player
+    opponent = game.inactive_player
+    power = power_for(player.faction)
+    if power is None or player.hero_power_used or player.energy < power.cost:
+        return []
+    if not game.turn_started:
+        return []
+    if power.id == "call_initiate":
+        if len(player.board) >= Player.MAX_BOARD_SIZE:
+            return []
+        return [{"action": "hero_power", "target_side": "face"}]
+    if power.id == "psi_lash":
+        return [{"action": "hero_power", "target_side": "face"}]
+    if power.id == "pull_strings":
+        actions: list[dict[str, Any]] = [{"action": "hero_power", "target_side": "face"}]
+        for i, char in enumerate(opponent.board):
+            if has_stealth(char):
+                continue
+            actions.append({
+                "action": "hero_power",
+                "target_side": "enemy",
+                "target_index": i,
+            })
+        return actions
+    return []
+
+
+def _score_hero_power(game: Game, action: dict[str, Any], ai: AIPlayer | None) -> float:
+    player = game.active_player
+    opponent = game.inactive_player
+    power = power_for(player.faction)
+    if power is None or player.hero_power_used or player.energy < power.cost:
+        return -math.inf
+    weights = (ai.weights if ai else None) or FACTION_WEIGHTS.get(
+        player.faction, FACTION_WEIGHTS["illuminati"]
+    )
+    score = 1.0
+    if power.id == "call_initiate":
+        if len(player.board) >= Player.MAX_BOARD_SIZE:
+            return -math.inf
+        score += weights.get("board_presence", 1.0) * 1.6
+        score += weights.get("taunt_value", 1.0) * 1.4
+        if len(player.board) < 3:
+            score += 1.2
+        return score
+    if power.id == "psi_lash":
+        score += weights.get("face_damage", 1.0) * 2.2
+        if opponent.life <= 8:
+            score += (8 - opponent.life) * 0.8
+        if opponent.life <= 2:
+            score += 8.0
+        return score
+    if power.id == "pull_strings":
+        side = action.get("target_side", "face")
+        if side == "enemy":
+            idx = action.get("target_index")
+            if idx is None or idx < 0 or idx >= len(opponent.board):
+                return -math.inf
+            target = opponent.board[idx]
+            if has_stealth(target):
+                return -math.inf
+            score += weights.get("enemy_removal", 1.0) * 0.8
+            if target.current_health <= 1:
+                score += 4.0 + target.current_attack
+            else:
+                score += 0.4
+            return score
+        score += weights.get("face_damage", 1.0) * 0.9
+        if opponent.life <= 4:
+            score += 3.0
+        return score
+    return -math.inf
 
 
 def _score_play_card(game: Game, card_index: int, ai: AIPlayer | None = None) -> float:

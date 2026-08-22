@@ -112,8 +112,9 @@ Test/brew: Templar Charge, Templar Walls, Illuminati Denial, Reptilian Swarm, Ne
 1. **Teach what we just built** — DONE (Deathrattle in First Contact, Keyword Lab, glossary, Recruiter pokes face).
 2. **Rebalance the 240-card pool** — Medium AI now scores the new verbs. Run `python tools/playtest_balance.py` and tune anything that dominates.
 3. **Hard AI + challenge encounters** — DONE (2-ply Hard; Black Room / Street War / Unquiet).
+4. **Faction powers + 75s clock + combat juice** — DONE (Pull Strings / Call Initiate / Psi Lash; hourglass; AI fly-ins).
 
-Out of product scope: multiplayer, matchmaking, Secrets, Quests, hero powers.
+Out of product scope: multiplayer, matchmaking, Secrets, Quests.
 
 ## Related
 

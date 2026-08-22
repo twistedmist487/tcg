@@ -131,6 +131,16 @@ Returned by `game.get_state()` -- fully JSON-serializable:
       "life": 25,
       "energy": 3,
       "max_energy": 4,
+      "hero_power_used": false,
+      "hero_power": {
+        "id": "call_initiate",
+        "name": "Call Initiate",
+        "cost": 2,
+        "effect": "Summon a 1/1 Initiate with Taunt.",
+        "target": "none",
+        "used": false,
+        "available": true
+      },
       "hand_size": 4,
       "deck_size": 19,
       "hand": [

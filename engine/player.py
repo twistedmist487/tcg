@@ -73,6 +73,7 @@ class Player:
         self.echo_expiry: dict[int, int] = {}
         self.opening_fired: bool = False
         self.hand_cost_bonus: dict[int, int] = {}
+        self.hero_power_used: bool = False
 
     @staticmethod
     def infer_faction(deck: list[Card]) -> str:
