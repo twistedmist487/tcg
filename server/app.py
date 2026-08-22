@@ -381,6 +381,123 @@ async def attack(session_id: str, request: Request) -> dict[str, Any]:
     return {"action_result": result, "state": game.get_state()}
 
 
+@app.post("/api/game/{session_id}/hero-power")
+async def hero_power(session_id: str, request: Request) -> dict[str, Any]:
+    """Use the active player's faction power."""
+    game = get_session(session_id)
+    if game is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    target_index: int | None = None
+    target_side = "face"
+    raw = await request.body()
+    if raw:
+        import json as json_lib
+
+        parsed = json_lib.loads(raw)
+        if isinstance(parsed, dict):
+            target_side = str(parsed.get("target_side") or "face")
+            if parsed.get("target_index") is not None:
+                target_index = int(parsed["target_index"])
+    result = game.use_hero_power(target_index=target_index, target_side=target_side)
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Faction power failed"))
+    payload: dict[str, Any] = {"action_result": result, "state": game.get_state()}
+    info = get_session_info(session_id)
+    if game.is_over and info is not None:
+        payload["recap"] = game.get_recap(info.player_name)
+    return payload
+
+
+@app.post("/api/game/{session_id}/ai-step")
+def ai_step(session_id: str) -> dict[str, Any]:
+    """Execute a single AI action so the client can animate between them."""
+    from engine.ai import choose_action, _perform_action, _best_discovery_index, _best_split_choice
+
+    info = get_session_info(session_id)
+    if info is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    game = info.game
+    if game.is_over:
+        return {"done": True, "action": None, "result": None, "state": game.get_state()}
+    if game.active_player.name == info.player_name:
+        raise HTTPException(status_code=400, detail="Not the AI's turn")
+
+    started = False
+    start_result = None
+    if not game.turn_started:
+        start_result = game.start_turn()
+        started = True
+        if game.is_over:
+            return {
+                "done": True,
+                "action": "start_turn",
+                "result": start_result,
+                "state": game.get_state(),
+                "recap": game.get_recap(info.player_name),
+            }
+
+    if getattr(game, "pending_discovery", None):
+        pick = _best_discovery_index(game)
+        result = game.choose_discovery(pick)
+        payload = {
+            "done": False,
+            "action": "discover",
+            "result": result,
+            "state": game.get_state(),
+            "started": started,
+            "start_result": start_result,
+        }
+        if game.is_over:
+            payload["done"] = True
+            payload["recap"] = game.get_recap(info.player_name)
+        return payload
+
+    if getattr(game, "pending_split", None):
+        pick, target = _best_split_choice(game)
+        result = game.choose_split(pick, target_index=target)
+        payload = {
+            "done": False,
+            "action": "split",
+            "result": result,
+            "state": game.get_state(),
+            "started": started,
+            "start_result": start_result,
+        }
+        if game.is_over:
+            payload["done"] = True
+            payload["recap"] = game.get_recap(info.player_name)
+        return payload
+
+    ai = AIPlayer(name=info.ai_name, faction=info.ai_faction, difficulty=info.difficulty)
+    action = choose_action(game, ai)
+    result = _perform_action(game, action)
+    done = action.get("action") == "end_turn" or game.is_over or not result.get("success")
+    if not result.get("success") and not game.is_over and game.turn_started:
+        end = game.end_turn()
+        payload = {
+            "done": True,
+            "action": "end_turn",
+            "result": end,
+            "failed": result,
+            "state": game.get_state(),
+        }
+        if game.is_over:
+            payload["recap"] = game.get_recap(info.player_name)
+        return payload
+    payload = {
+        "done": done,
+        "action": action.get("action"),
+        "chosen": action,
+        "result": result,
+        "state": game.get_state(),
+        "started": started,
+        "start_result": start_result,
+    }
+    if game.is_over:
+        payload["recap"] = game.get_recap(info.player_name)
+    return payload
+
+
 @app.post("/api/game/{session_id}/end-turn")
 def end_turn(session_id: str) -> dict[str, Any]:
     """End the current turn."""

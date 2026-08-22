@@ -32,7 +32,7 @@ around the same engine.
 | 8 | Tutorial + single-player experience + deck builder | COMPLETE |
 | 9 | Polish, Hard AI, replayability | IN PROGRESS |
 
-**Stats:** 306 tests, 240 cards (120 faction + 120 Network), 30 Python source files, vanilla JS frontend + `static/ui/` art kit
+**Stats:** 324 tests, 240 cards (120 faction + 120 Network), 31 Python source files, vanilla JS frontend + `static/ui/` art kit
 
 ## Directory Layout
 
@@ -73,7 +73,8 @@ engine/              Game engine -- NO UI dependencies
   decks.py           Deck validation and construction
   serializer.py      Full game state save/load via JSON
   ai.py              Rule-based AI: Easy / Medium / Hard (Hard is 2-ply look-ahead)
-                     (Medium/Hard score Recycle, location replace, Split, evergreen verbs)
+                     (Medium/Hard score Recycle, location replace, Split, evergreen verbs, faction powers)
+  hero_power.py      Faction power lookup (Pull Strings / Call Initiate / Psi Lash)
 server/              FastAPI web server
   __init__.py
   app.py             REST API endpoints + static file serving
@@ -85,7 +86,7 @@ static/              Web frontend (no build step)
   cards/             Faction card front/back plates
   ui/                Table chrome (rails, energy, buttons, hero portraits)
 assets/ui-table/     Authoring copy of the UI kit + preview.html
-tests/               306 tests (models, engine, effects, decks, server, expansion, AI)
+tests/               324 tests (models, engine, effects, decks, server, expansion, AI, hero powers)
 tools/               Utility scripts
   validate_cards.py  Card schema + new-Network balance lint
   playtest_live.py   AI-vs-AI tutorial and preset matches
@@ -124,6 +125,8 @@ Examples: `illuminati_char_001`, `templars_spell_002`, `reptilians_loc_002`
     "life": 25,
     "energy": 3,
     "max_energy": 4,
+    "hero_power": {"id": "call_initiate", "name": "Call Initiate", "cost": 2,
+                   "used": false, "available": true},
     "hand_size": 4,
     "deck_size": 19,
     "hand": [{"name": ..., "cost": ..., "faction": ..., "type": ..., ...}],
@@ -163,10 +166,11 @@ game = Game.setup(deck1, deck2, "Alice", "Bob")
 
 # Turn loop
 while not game.is_over:
-    game.start_turn()          # Draw, gain energy, clear exhaustion
+    game.start_turn()          # Draw, gain energy, clear exhaustion, reset faction power
     game.play_card(0)          # Play hand card by index
     game.attack(0, None)       # Attack face
     game.attack(0, 1)          # Attack enemy board[1]
+    game.use_hero_power()      # Faction power (cost 2, once per turn)
     game.end_turn()            # Cleanup, switch player
 
 # State
@@ -248,6 +252,8 @@ game = deserialize_game(json_str)   # Reconstruct game from JSON
 | POST | /api/game/{id}/start-turn | Start turn (draw, energy) |
 | POST | /api/game/{id}/play?card_index=N | Play card |
 | POST | /api/game/{id}/attack | Attack with body |
+| POST | /api/game/{id}/hero-power | Use faction power (JSON target_side / target_index) |
+| POST | /api/game/{id}/ai-step | One AI action (for combat / play animations) |
 | POST | /api/game/{id}/discover | Choose a Discovered card |
 | POST | /api/game/{id}/recycle | Recycle a hand card (pay 1, shuffle, draw) |
 | POST | /api/game/{id}/split | Choose a Split option |
@@ -265,11 +271,12 @@ The match screen is the **Conspiracy Table**: history (5 lines) + Dossier + loca
 - `beginMatch()` — creates a session (tutorial, vs AI, or encounter)
 - `loadState()` / `render()` — fetch state and paint the table
 - `selectCard(index)` / `selectAttacker(index)` — selection
-- `submitStartTurn()` / `submitPlay()` / `submitAttack()` / `submitEndTurn()` — actions
+- `submitStartTurn()` / `submitPlay()` / `submitAttack()` / `submitEndTurn()` / `onPlayerPower()` — actions
+- `runAITurn()` — `/ai-step` loop with play/attack/power animations
+- `syncTurnClock()` — 75s player clock, 10s AFK penalty, auto-end
 - `showDossier()` / `setupDossierInteractions()` — hover/pin card inspector
 - `renderEnergyWell()` / `renderDeckWell()` / `paintHeroFrame()` — right rail and heroes
 - `formatRulesHtml()` — bold printed keywords in card text
-- `autoPlayAI()` — client-side AI turn loop
 - `renderHand()` / `renderBoard()` / `renderHiddenHand(count)` — cards
 
 **CSS Theme:** Dark background (#0f0f14), gold accent (#c8a84e). Body type is Source Sans 3; titles use Cinzel. Faction colors:

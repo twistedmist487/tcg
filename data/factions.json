@@ -3,19 +3,43 @@
     "name": "The Illuminati",
     "energy_type": "Influence",
     "lore_summary": "Ancient secret society controlling world events from shadows.",
-    "key_mechanics": ["Control & Manipulation", "Resource Generation", "Stealth/Infiltration"]
+    "key_mechanics": ["Control & Manipulation", "Resource Generation", "Stealth/Infiltration"],
+    "hero_power": {
+      "id": "pull_strings",
+      "name": "Pull Strings",
+      "cost": 2,
+      "effect": "Deal 1 damage to a target (character or hero).",
+      "target": "any",
+      "lore": "A phone call. An accident. A name erased from the minutes."
+    }
   },
   "templars": {
     "name": "The Templars",
     "energy_type": "Faith",
     "lore_summary": "Re-emerged order protecting ancient relics and maintaining stability.",
-    "key_mechanics": ["Defense & Resilience", "Direct Damage/Removal", "Buffs & Auras"]
+    "key_mechanics": ["Defense & Resilience", "Direct Damage/Removal", "Buffs & Auras"],
+    "hero_power": {
+      "id": "call_initiate",
+      "name": "Call Initiate",
+      "cost": 2,
+      "effect": "Summon a 1/1 Initiate with Taunt.",
+      "target": "none",
+      "lore": "Every chapel still keeps a spare oath and a spare sword."
+    }
   },
   "reptilians": {
     "name": "The Reptilians",
     "energy_type": "Psionics",
     "lore_summary": "Shape-shifting reptilian beings infiltrating humanity.",
-    "key_mechanics": ["Disruption & Debuffs", "Stealth/Evasion", "Transformation/Adaptation", "Mind Control"]
+    "key_mechanics": ["Disruption & Debuffs", "Stealth/Evasion", "Transformation/Adaptation", "Mind Control"],
+    "hero_power": {
+      "id": "psi_lash",
+      "name": "Psi Lash",
+      "cost": 2,
+      "effect": "Deal 2 damage to the enemy hero.",
+      "target": "none",
+      "lore": "A thought like a whip. The skull remembers the hive."
+    }
   },
   "neutral": {
     "name": "The Network",

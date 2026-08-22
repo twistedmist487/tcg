@@ -44,6 +44,10 @@ The active player can perform these actions as long as they have sufficient ener
 *   **Play a Character Card:** Pay the card's energy cost to put a Character from your hand onto the field. Characters enter "exhausted" (cannot attack this turn). Max 7 characters on board.
 *   **Play a Spell Card:** Pay the card's energy cost to resolve its effect immediately, then discard it.
 *   **Play a Location Card:** Pay the card's energy cost to put a Location onto the field. Replaces any existing location. Max 1 per player.
+*   **Use Faction Power:** Pay 2 energy, once per turn. Unique to the starting identity:
+    *   **Illuminati — Pull Strings:** Deal 1 damage to a character or hero.
+    *   **Templars — Call Initiate:** Summon a 1/1 Initiate with Taunt.
+    *   **Reptilians — Psi Lash:** Deal 2 damage to the enemy hero.
 *   **Declare Attacks:** Choose an active (non-exhausted) Character you control to attack.
     *   **Target:** You may attack an enemy Character or the opponent directly (if no enemy characters on board).
     *   **Combat Resolution:**
@@ -194,6 +198,8 @@ Base URL: `http://localhost:8080`
 | POST | `/api/game/{id}/start-turn` | - | Start turn (draw + energy) |
 | POST | `/api/game/{id}/play` | Query: `card_index` | Play card from hand |
 | POST | `/api/game/{id}/attack` | JSON: `{attacker_index, target_index?}` | Declare attack |
+| POST | `/api/game/{id}/hero-power` | JSON: `{target_side, target_index?}` | Use faction power |
+| POST | `/api/game/{id}/ai-step` | - | One AI action (for animations) |
 | POST | `/api/game/{id}/end-turn` | - | End turn |
 | DELETE | `/api/game/{id}` | - | Delete session |
 | GET | `/api/cards` | - | All 27 card definitions |

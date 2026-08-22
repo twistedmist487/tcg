@@ -1,7 +1,7 @@
 ---
 title: Conspiracy TCG — Play table UI
 created: 2026-08-17
-updated: 2026-08-21
+updated: 2026-08-22
 type: entity
 tags: [project, gaming, conspiracy, status]
 sources: []
@@ -33,11 +33,11 @@ Browser match HUD for [[conspiracy-tcg]]. Vanilla JS, no build step. The engine 
 
 ```
 ┌──────────────┬──────────────────────────────────┬─────────────────┐
-│ HISTORY      │  OPPONENT TRAY (hand | hero | ♥) │ ENERGY WELL     │
+│ HISTORY      │  OPPONENT TRAY (hand | hero | ⚡♥)│ ENERGY WELL     │
 │ last 5 lines │  enemy minions (7 oval slots)    │ 10 sockets      │
-│              │  ──────── combat line ────────   │                 │
+│              │  ──── hourglass 75s clock ────   │                 │
 │ DOSSIER      │  your minions (7 oval slots)     │ PLAY / START    │
-│ hover/click  │  YOUR TRAY (♥ | hero | field)    │ END TURN        │
+│ hover/click  │  YOUR TRAY (♥⚡ | hero | field)   │ END TURN        │
 │ art+effect   │                                  │ DECK + count    │
 │ + flavor     │                                  │ (Recycle drop)  │
 │ LOCATIONS    │                                  │ MENU            │
@@ -49,9 +49,12 @@ Browser match HUD for [[conspiracy-tcg]]. Vanilla JS, no build step. The engine 
 
 - **Drag** — drag a hand card onto the table (or a target) to play. Drag a ready character onto an enemy minion or the enemy hero to attack. Click still works (tutorial, mobile tap). Recycle: drag onto the deck well.
 - **History** — newest five log lines (`addLog` drops older).
-- **Dossier** — hover previews a card; click or Play pins it. Art, cost, name, type, stats, effect (keywords **bold**), italic lore. Opponent backs do not inspect.
+- **Dossier** — hover previews a card; click or Play pins it. Art, cost, name, type, stats, effect (keywords **bold**), italic lore. Opponent backs do not inspect. Faction powers use the same inspector.
 - **Locations** — one plaque per player on the left rail (`Yours` / `Enemy`). Empty slots still use the plaque.
-- **Hero frames** — each commander sits in a wide wooden HUD tray that spans the oval: hand (or life) on one wing, framed portrait on a faction nameplate in the center, life orb + role on the other. The player tray also shows a 7-pip field meter. Face targeting still uses `.player-header`.
+- **Hero frames** — each commander sits in a wide wooden HUD tray that spans the oval: hand (or life) on one wing, framed portrait on a faction nameplate in the center, life orb + **faction power button** + role on the other. The player tray also shows a 7-pip field meter. Face targeting still uses `.player-header`.
+- **Faction powers** — cost 2, once per turn. Active/inactive JPEGs in `static/ui/powers/`. Grey until you can afford it. Illuminati Pull Strings (1 to any), Templars Call Initiate (1/1 Taunt), Reptilians Psi Lash (2 face).
+- **Turn clock** — 75 seconds on your turn (`#turn-timer` + occult hourglass). At 10s the count goes red and larger than the glass. At 0 the turn ends. Skip a turn with no card/board touch and the next clock starts at 10s until you interact, then the remaining 75s from this turn’s start resume.
+- **Combat juice** — attackers lunge, damage/heal numbers float, buffs flash green, debuffs flash red, deaths fade, leftover minions pack to the center. AI plays flip face-up from the hand onto the field (`POST /ai-step`).
 - **Energy** — ten sockets for the human player's type. Lit = unspent, dark unlocked = spent, dim locked = not yet gained.
 - **Hand** — fan, max 10. Unaffordable cards stay opaque and only desaturate (not 42% fade). Lifted card scales up. Drag onto the table to play.
 - **Board minions** — oval portraits with large attack (left) and health (right). Empty boards still show 7 dashed slot silhouettes so the battlefield fills the occult oval.
@@ -86,6 +89,9 @@ Browser match HUD for [[conspiracy-tcg]]. Vanilla JS, no build step. The engine 
 | `heroes/portrait-illuminati.jpg` | Hooded commander |
 | `heroes/portrait-templars.jpg` | Knight commander |
 | `heroes/portrait-reptilians.jpg` | Reptilian commander |
+| `chrome/hourglass.jpg` | 75s turn clock |
+| `powers/{faction}-on.jpg` | Ready faction power |
+| `powers/{faction}-off.jpg` | Spent / unaffordable faction power |
 | `static/cards/fronts/{faction}-front.jpg` | Card art plate |
 | `static/cards/backs/{faction}-back.jpg` | Deck pile and opponent hand |
 
@@ -108,6 +114,9 @@ Change JSON, not the art files.
 | `renderLocation()` | Left-rail plaques |
 | `renderEnergyWell()` / `renderDeckWell()` | Right rail |
 | `paintHeroFrame()` | Faction class + portrait |
+| `paintPowerButton()` | Active / inactive faction power |
+| `syncTurnClock()` | 75s / 10s AFK hourglass |
+| `animateCombat()` / `flyFromOpponentHand()` | Lunges, pops, AI fly-ins |
 | `showDossier()` / `setupDossierInteractions()` | Hover / pin |
 | `addLog()` | History, cap 5 |
 

@@ -121,6 +121,23 @@ Card = CharacterCard | SpellCard | LocationCard
 # Faction Model
 # ---------------------------------------------------------------------------
 
+class HeroPower(BaseModel):
+    """Once-per-turn faction power (Hearthstone-style hero power)."""
+
+    id: str = Field(..., min_length=1, max_length=40)
+    name: str = Field(..., min_length=1, max_length=40)
+    cost: int = Field(default=2, ge=0, le=10)
+    effect: str = Field(..., min_length=1, max_length=200)
+    target: str = Field(default="none")
+    lore: str = Field(default="", max_length=200)
+
+    @model_validator(mode="after")
+    def _target_ok(self) -> HeroPower:
+        if self.target not in ("none", "any"):
+            raise ValueError("hero_power.target must be 'none' or 'any'")
+        return self
+
+
 class Faction(BaseModel):
     """A playable faction."""
 
@@ -128,6 +145,7 @@ class Faction(BaseModel):
     energy_type: EnergyType
     lore_summary: str = Field(..., min_length=1, max_length=200)
     key_mechanics: list[str] = Field(default_factory=list)
+    hero_power: HeroPower | None = None
 
 
 # ---------------------------------------------------------------------------

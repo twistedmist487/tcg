@@ -37,7 +37,9 @@ from engine.effects import (
     resolve_on_play_ability,
     resolve_spell_effect,
     resolve_start_of_turn_locations,
+    summon_token,
 )
+from engine.hero_power import power_dict, power_for
 from engine.keywords import clear_all_exhaustion, get_valid_attack_targets, has_stealth
 from engine.models import Card
 from engine.player import Player
@@ -222,6 +224,7 @@ class Game:
         # Energy increases each turn (up to max)
         player.max_energy = min(Player.MAX_ENERGY, player.max_energy + 1)
         player.energy = player.max_energy
+        player.hero_power_used = False
 
         # First player's first turn: don't draw
         drew_card = None
@@ -537,6 +540,114 @@ class Game:
         # Check win condition
         self._check_win_condition()
 
+        return result
+
+    def use_hero_power(
+        self,
+        target_index: int | None = None,
+        target_side: str = "face",
+    ) -> dict[str, Any]:
+        """
+        Use the active player's faction power. Once per turn, costs 2.
+
+        target_side: "face" (enemy hero) or "enemy" (character at target_index).
+        Only Illuminati Pull Strings needs a target; others ignore it.
+        """
+        player = self.active_player
+        opponent = self.inactive_player
+
+        if self.pending_discovery or self.pending_split:
+            return {"success": False, "error": "Choose a pending card effect first"}
+        if not self.turn_started:
+            return {"success": False, "error": "Turn has not started"}
+        if player.hero_power_used:
+            return {"success": False, "error": "Faction power already used this turn"}
+
+        power = power_for(player.faction)
+        if power is None:
+            return {"success": False, "error": "This identity has no faction power"}
+        if player.energy < power.cost:
+            return {
+                "success": False,
+                "error": f"Not enough energy (need {power.cost}, have {player.energy})",
+            }
+
+        result: dict[str, Any] = {
+            "success": True,
+            "action": "hero_power",
+            "power": power.name,
+            "power_id": power.id,
+            "faction": player.faction,
+            "fx": [],
+        }
+
+        if power.id == "call_initiate":
+            if len(player.board) >= Player.MAX_BOARD_SIZE:
+                return {"success": False, "error": "Board is full"}
+            player.spend_energy(power.cost)
+            player.hero_power_used = True
+            inst = summon_token(
+                self,
+                player,
+                name="Initiate",
+                attack=1,
+                health=1,
+                ability="Taunt. Token.",
+            )
+            if inst is None:
+                player.energy += power.cost
+                player.hero_power_used = False
+                return {"success": False, "error": "Could not summon Initiate"}
+            result["summoned"] = inst.name
+            result["fx"].append({"kind": "summon", "name": inst.name, "side": "ally"})
+
+        elif power.id == "psi_lash":
+            player.spend_energy(power.cost)
+            player.hero_power_used = True
+            dealt = opponent.direct_damage(2)
+            result["damage_dealt"] = dealt
+            result["target"] = "opponent"
+            result["fx"].append({"kind": "damage", "amount": dealt, "target": "face", "side": "enemy"})
+
+        elif power.id == "pull_strings":
+            side = (target_side or "face").lower()
+            if side == "enemy":
+                if target_index is None or target_index < 0 or target_index >= len(opponent.board):
+                    return {"success": False, "error": "Pull Strings needs a target"}
+                defender = opponent.board[target_index]
+                if has_stealth(defender):
+                    return {"success": False, "error": f"{defender.name} has Stealth and cannot be targeted"}
+                player.spend_energy(power.cost)
+                player.hero_power_used = True
+                dealt = defender.take_damage(1)
+                result["damage_dealt"] = dealt
+                result["target"] = defender.name
+                result["fx"].append({
+                    "kind": "damage",
+                    "amount": dealt,
+                    "target": "character",
+                    "index": target_index,
+                    "side": "enemy",
+                    "name": defender.name,
+                })
+            else:
+                player.spend_energy(power.cost)
+                player.hero_power_used = True
+                dealt = opponent.direct_damage(1)
+                result["damage_dealt"] = dealt
+                result["target"] = "opponent"
+                result["fx"].append({"kind": "damage", "amount": dealt, "target": "face", "side": "enemy"})
+        else:
+            return {"success": False, "error": f"Unknown faction power {power.id}"}
+
+        deaths = self._resolve_deaths()
+        if deaths["player_slain"] or deaths["opponent_slain"]:
+            result["slain"] = deaths
+        if deaths.get("player_slain") or deaths.get("opponent_slain") or deaths.get("deathrattles"):
+            result["deathrattles"] = deaths.get("deathrattles", [])
+
+        self._log_action("hero_power", result)
+        self._check_win_condition()
         return result
 
     def end_turn(self) -> dict[str, Any]:
@@ -896,6 +1007,13 @@ class Game:
                     "life": p.life,
                     "energy": p.energy,
                     "max_energy": p.max_energy,
+                    "hero_power_used": getattr(p, "hero_power_used", False),
+                    "hero_power": power_dict(
+                        getattr(p, "faction", ""),
+                        used=getattr(p, "hero_power_used", False),
+                        energy=p.energy,
+                        turn_started=self.turn_started and p.name == self.active_player.name,
+                    ),
                     "hand_size": p.hand_size,
                     "deck_size": p.deck_size,
                     "board": [

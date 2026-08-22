@@ -251,11 +251,13 @@ work is visual polish and QoL.
 - [x] Card art placeholders with faction-themed icons (faction plates)
 - [x] Hearthstone-style battlefield: opponent hero, two minion rows, your hero
 - [x] Drag to play from hand; drag to attack onto enemies or face
-- Damage animations, play effects, turn transitions
+- [x] Damage animations, play fly-ins, HP/ATK pop, death fade, center-packed board
 - Sound effects (optional, browser-based)
 - [x] Responsive mobile-friendly layout (action bar must stay reachable)
 - [x] Visible location slot; targetable-enemy outline used in attack and
       spell-target mode
+- [x] Faction powers (cost 2, once per turn) in commander frames
+- [x] 75s player turn clock with occult hourglass and 10s AFK penalty
 
 **Quality of Life:**
 - Keyboard shortcuts
@@ -268,7 +270,7 @@ work is visual polish and QoL.
 
 ---
 
-*Total tests: 306*
+*Total tests: 324*
 *Total cards: 240 (40 per faction + 120 Network, including 1 token)*
 *Constructed: 30-card decks, max 2 copies, energy cap 10, max 12 Network*
 *Curated 30-card faction decks + 10 test/brew presets in data/decks.json*
