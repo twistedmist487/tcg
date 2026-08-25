@@ -40,6 +40,7 @@ class SessionInfo:
     mode: str
     encounter_id: str | None = None
     encounter: dict[str, Any] | None = None
+    campaign: dict[str, Any] | None = None
 
 
 _sessions: dict[str, SessionInfo] = {}
@@ -68,8 +69,11 @@ def create_session(
     player_deck_spec: list[dict[str, Any]] | list[str] | None = None,
     player_deck_id: str | None = None,
     ai_deck_id: str | None = None,
+    ai_deck_spec: list[dict[str, Any]] | list[str] | None = None,
     first_player: int | None = None,
     shuffle: bool = True,
+    match_options: dict[str, Any] | None = None,
+    campaign_meta: dict[str, Any] | None = None,
 ) -> str:
     """Create a new game session. Returns the session ID."""
     cards_by_id = load_card_lookup()
@@ -116,18 +120,24 @@ def create_session(
         if not check["valid"]:
             raise ValueError("; ".join(check["errors"]))
         player_deck = build_deck(player_deck_spec, cards_by_id)
-        ai_deck = (
-            build_named_deck(ai_deck_id, cards_by_id) if ai_deck_id else _load_deck(ai_faction)
-        )
+        if ai_deck_spec:
+            ai_deck = build_deck(ai_deck_spec, cards_by_id)
+        else:
+            ai_deck = (
+                build_named_deck(ai_deck_id, cards_by_id) if ai_deck_id else _load_deck(ai_faction)
+            )
     else:
         player_deck = (
             build_named_deck(player_deck_id, cards_by_id)
             if player_deck_id
             else _load_deck(player_faction)
         )
-        ai_deck = (
-            build_named_deck(ai_deck_id, cards_by_id) if ai_deck_id else _load_deck(ai_faction)
-        )
+        if ai_deck_spec:
+            ai_deck = build_deck(ai_deck_spec, cards_by_id)
+        else:
+            ai_deck = (
+                build_named_deck(ai_deck_id, cards_by_id) if ai_deck_id else _load_deck(ai_faction)
+            )
 
     if not player_deck or not ai_deck:
         raise ValueError("Invalid faction selection")
@@ -153,6 +163,35 @@ def create_session(
         for player in game.players:
             if player.name == ai_name:
                 player.life = int(encounter["ai_starting_life"])
+
+    opts = dict(match_options or {})
+    if opts.get("ai_starting_life") is not None:
+        for player in game.players:
+            if player.name == ai_name:
+                player.life = int(opts["ai_starting_life"])
+    if opts.get("player_starting_life") is not None:
+        for player in game.players:
+            if player.name == player_name:
+                player.life = int(opts["player_starting_life"])
+
+    if opts:
+        mods = dict(opts.get("match_modifiers") or {})
+        if opts.get("win_condition") == "survive_turns" or mods.get(
+            "enemy_character_health_bonus"
+        ):
+            mods.setdefault("enemy_player_name", ai_name)
+        game.configure_match(
+            win_condition=opts.get("win_condition", "standard"),
+            survive_turns=int(opts.get("survive_turns") or 0),
+            survive_defender=opts.get("survive_defender") or player_name,
+            match_modifiers=mods,
+            crisis_label=opts.get("crisis_label"),
+            twist_label=opts.get("twist_label"),
+            twist_description=opts.get("twist_description"),
+            lesson_win=opts.get("lesson_win"),
+            lesson_loss=opts.get("lesson_loss"),
+        )
+
     session_id = str(uuid.uuid4())[:8]
     _sessions[session_id] = SessionInfo(
         game=game,
@@ -164,6 +203,7 @@ def create_session(
         mode=mode,
         encounter_id=encounter_id,
         encounter=encounter,
+        campaign=campaign_meta,
     )
     return session_id
 

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/campaign.css">
 </head>
 <body>
   <div id="app">
@@ -19,14 +20,71 @@
     <!-- Main menu -->
     <div id="screen-menu" class="screen lodge-panel">
       <h2>Single Player</h2>
-      <p class="lede">Learn the rules in a guided match, then take on the AI.</p>
+      <p class="lede">Learn the conspiracy. Survive the city. Free play anytime.</p>
       <div class="menu-actions">
+<<<<<<< HEAD
         <button class="primary" onclick="startTutorial()">Play Tutorial</button>
         <button onclick="startKeywordLab()">Keyword Lab</button>
+=======
+        <button class="primary" onclick="openCampaignHub()">Campaign</button>
+>>>>>>> 1125ac3 (feat: Illuminati campaign SP (City + HQ reverse) and agent team)
         <button onclick="showScreen('screen-setup')">Play vs AI</button>
         <button onclick="openEncounters()">Faction Encounters</button>
         <button onclick="openDeckBuilder()">Deck Builder</button>
+        <button onclick="startKeywordLab()">Keyword Lab</button>
         <button onclick="showScreen('screen-help')">How to Play</button>
+      </div>
+    </div>
+
+    <!-- Campaign hub -->
+    <div id="screen-campaign" class="screen lodge-panel" hidden>
+      <h2>Investigation Board</h2>
+      <p class="lede">Narrative chapters. Mechanics taught node by node. Currency packs come later.</p>
+      <div id="campaign-chapter-list" class="card-grid"></div>
+      <div id="campaign-ledger-hub" class="campaign-ledger"></div>
+      <div class="menu-actions">
+        <button id="btn-campaign-continue" class="primary" hidden onclick="continueCampaignRun()">Continue Run</button>
+        <button onclick="showScreen('screen-menu')">Back</button>
+      </div>
+    </div>
+
+    <!-- Campaign board map -->
+    <div id="screen-campaign-map" class="screen lodge-panel" hidden>
+      <h2 id="campaign-board-title">City Initiation</h2>
+      <p class="lede" id="campaign-board-hint"></p>
+      <div id="campaign-map" class="campaign-map"></div>
+      <div id="campaign-node-detail" class="campaign-node-detail" hidden>
+        <h3 id="campaign-node-title"></h3>
+        <p id="campaign-node-blurb"></p>
+        <p id="campaign-node-dialogue" class="lede"></p>
+        <div class="menu-actions">
+          <button class="primary" id="btn-campaign-node-go" onclick="activateSelectedCampaignNode()">Enter</button>
+          <button onclick="clearCampaignNodeSelection()">Close</button>
+        </div>
+      </div>
+      <div id="campaign-ledger-map" class="campaign-ledger"></div>
+      <div class="menu-actions">
+        <button onclick="openCampaignHub()">Campaign Hub</button>
+        <button onclick="abandonCampaignRun()">Abandon Run</button>
+      </div>
+    </div>
+
+    <!-- Story panels -->
+    <div id="screen-story" class="screen lodge-panel" hidden>
+      <h2 id="story-title">Briefing</h2>
+      <div id="story-panel-text" class="story-panel"></div>
+      <div class="menu-actions">
+        <button class="primary" id="btn-story-next" onclick="advanceStoryPanel()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Safehouse pick -->
+    <div id="screen-safehouse" class="screen lodge-panel" hidden>
+      <h2 id="safehouse-title">Safehouse</h2>
+      <p class="lede" id="safehouse-text"></p>
+      <div id="safehouse-choices" class="card-grid"></div>
+      <div class="menu-actions">
+        <button onclick="showScreen('screen-campaign-map')">Back</button>
       </div>
     </div>
 
@@ -195,6 +253,10 @@
         </div>
       </div>
       <div id="turn-info"></div>
+      <div id="match-banner" class="match-banner" hidden>
+        <div id="match-banner-twist"></div>
+        <div id="match-banner-crisis"></div>
+      </div>
 
       <!-- NEW: Conspiracy Table layout (Option 3) -->
       <div id="game-board" class="conspiracy-table">
@@ -368,6 +430,7 @@
           <p class="lede"><a href="#" onclick="returnToMenu(true); openKeywordGlossary(); return false;">Open the full keyword glossary</a></p>
         </div>
         <div class="menu-actions">
+          <button class="primary" id="btn-campaign-return" hidden onclick="returnToCampaignMap(true)">Back to Map</button>
           <button class="primary" onclick="returnToMenu(true)">Main Menu</button>
           <button id="btn-play-vs-ai" onclick="playAfterTutorial()">Play vs AI</button>
           <button id="btn-replay-tutorial" hidden onclick="startTutorial()">Replay Tutorial</button>
@@ -378,5 +441,6 @@
   </div>
 
   <script src="/static/app.js"></script>
+  <script src="/static/campaign.js"></script>
 </body>
 </html>

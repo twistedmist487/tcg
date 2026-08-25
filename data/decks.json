@@ -889,6 +889,510 @@
           "copies": 2
         }
       ]
+    },
+    {
+      "id": "illuminati_shadow_mandate",
+      "name": "Shadow Mandate",
+      "faction": "illuminati",
+      "archetype": "control_attrition",
+      "description": "Attrition control: hand attack, discards, card advantage, fatigue. Notebook Shadow Mandate.",
+      "cards": [
+        {
+          "id": "illuminati_char_006",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_009",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_015",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_001",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_014",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_008",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_002",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_013",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_014",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_loc_007",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_004",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_014",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_035",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "illuminati_puppet_gambit",
+      "name": "Puppet Master's Gambit",
+      "faction": "illuminati",
+      "archetype": "control_theft",
+      "description": "Survive with silence/bounce, finish by stealing boards. Notebook Puppet Master / Memory Thief steal lane.",
+      "cards": [
+        {
+          "id": "illuminati_char_008",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_016",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_017",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_018",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_005",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_003",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_010",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_003",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_009",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_loc_003",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_004",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_015",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_002",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "templars_iron_cathedral",
+      "name": "Iron Cathedral",
+      "faction": "templars",
+      "archetype": "control_walls",
+      "description": "Taunt fortress and sustain. Notebook Iron Cathedral / Shield of Order walls.",
+      "cards": [
+        {
+          "id": "templars_char_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_015",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_002",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_006",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_004",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_007",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_014",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_018",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_010",
+          "copies": 1
+        },
+        {
+          "id": "templars_char_001",
+          "copies": 1
+        },
+        {
+          "id": "templars_spell_003",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_005",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_loc_001",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_005",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "templars_divine_retribution",
+      "name": "Divine Retribution",
+      "faction": "templars",
+      "archetype": "control_reactive_aoe",
+      "description": "Stall then clear. Notebook Divine Retribution reactive/AoE control.",
+      "cards": [
+        {
+          "id": "templars_char_009",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_002",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_006",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_011",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_char_008",
+          "copies": 1
+        },
+        {
+          "id": "templars_spell_004",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_002",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_006",
+          "copies": 2
+        },
+        {
+          "id": "templars_spell_010",
+          "copies": 2
+        },
+        {
+          "id": "templars_loc_001",
+          "copies": 2
+        },
+        {
+          "id": "templars_loc_008",
+          "copies": 1
+        },
+        {
+          "id": "neutral_spell_038",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_031",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "reptilians_neural_static",
+      "name": "Neural Static",
+      "faction": "reptilians",
+      "archetype": "control_disruption",
+      "description": "Tempo deny: debuff, bounce, stasis, soft steal. Notebook Neural Static / Stasis.",
+      "cards": [
+        {
+          "id": "reptilians_char_009",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_001",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_008",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_004",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_002",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_011",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_004",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_008",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_006",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_002",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_loc_003",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_006",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_019",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "reptilians_ancient_hive",
+      "name": "Ancient Hive",
+      "faction": "reptilians",
+      "archetype": "control_stealth_finisher",
+      "description": "Early disrupt bodies, stealthed finishers. Notebook Ancient Hive.",
+      "cards": [
+        {
+          "id": "reptilians_char_007",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_009",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_001",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_006",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_011",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_018",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_013",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_char_014",
+          "copies": 1
+        },
+        {
+          "id": "reptilians_char_010",
+          "copies": 1
+        },
+        {
+          "id": "reptilians_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_012",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_005",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_spell_001",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_loc_001",
+          "copies": 2
+        },
+        {
+          "id": "reptilians_loc_004",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_040",
+          "copies": 2
+        }
+      ]
+    },
+    {
+      "id": "campaign_illuminati_city_starter",
+      "name": "City Initiation Starter",
+      "faction": "illuminati",
+      "archetype": "campaign_starter",
+      "description": "Illuminati-lite hybrid for Board 1: core loop, Taunt, light hand interaction. Network teaches generic tools.",
+      "campaign": "illuminati_city",
+      "cards": [
+        {
+          "id": "illuminati_char_009",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_006",
+          "copies": 1
+        },
+        {
+          "id": "illuminati_char_002",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_004",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_char_001",
+          "copies": 1
+        },
+        {
+          "id": "illuminati_char_015",
+          "copies": 1
+        },
+        {
+          "id": "illuminati_spell_011",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_008",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_004",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_spell_009",
+          "copies": 2
+        },
+        {
+          "id": "illuminati_loc_006",
+          "copies": 1
+        },
+        {
+          "id": "neutral_char_007",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_022",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_001",
+          "copies": 2
+        },
+        {
+          "id": "neutral_char_028",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_003",
+          "copies": 2
+        },
+        {
+          "id": "neutral_spell_022",
+          "copies": 2
+        }
+      ]
     }
   ]
 }

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "chapters": [
+    {
+      "id": "illuminati",
+      "name": "The Inner Circle",
+      "faction": "illuminati",
+      "description": "City initiation, then HQ. Learn Influence by doing.",
+      "status": "available",
+      "starter_board": "city"
+    }
+  ]
+}

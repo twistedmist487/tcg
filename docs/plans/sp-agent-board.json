@@ -1,0 +1,283 @@
+{
+  "version": 2,
+  "project": "Conspiracy TCG",
+  "initiative": "campaign single-player (notebook-driven)",
+  "updated": "2026-08-25",
+  "north_star": "Narrative Investigation Board: Illuminati City+HQ vertical slice; organic teaching; control archetypes; ledger lore; economy later.",
+  "hard_constraints": [
+    "single-player only",
+    "no accounts/matchmaking/WebSockets/PvP",
+    "engine stays UI-free",
+    "currency/packs deferred (stubs OK)",
+    "prefer existing card pool before new cards",
+    "Illuminati slice before other factions"
+  ],
+  "notebook_brief_path": "docs/plans/notebook-sp-brief.md",
+  "notebook_raw_path": "docs/plans/notebook-sp-raw.md",
+  "design_path": "docs/design/sp_campaign.md",
+  "workstreams": {
+    "design": {
+      "owner": "orchestrator",
+      "status": "done",
+      "items": [
+        {
+          "id": "ingest-notebook",
+          "title": "Structure notebook into brief + sp_campaign.md",
+          "status": "done",
+          "priority": 0
+        },
+        {
+          "id": "human-open-questions",
+          "title": "Resolve: comics fidelity, First Contact role, QoL vs campaign priority",
+          "status": "done",
+          "priority": 0
+        },
+        {
+          "id": "design-freeze-signoff",
+          "title": "Human sign-off on Illuminati v1 acceptance in sp_campaign.md",
+          "status": "done",
+          "priority": 0
+        }
+      ]
+    },
+    "content_archetypes": {
+      "owner": "content",
+      "status": "done",
+      "items": [
+        {
+          "id": "archetype-map",
+          "title": "Map 6 control archetypes + Memory Thief/Shield/Stasis to existing card IDs",
+          "status": "done",
+          "priority": 1
+        },
+        {
+          "id": "constructed-presets",
+          "title": "Add archetype deck presets to decks.json from existing IDs",
+          "status": "done",
+          "priority": 1
+        },
+        {
+          "id": "tier-a-gap-list",
+          "title": "Write Tier A new-card gap list only where pool cannot fake the fantasy",
+          "status": "done",
+          "priority": 2
+        },
+        {
+          "id": "starter-city-deck",
+          "title": "Define Board 1 starter deck (Network-heavy teach list)",
+          "status": "done",
+          "priority": 2
+        }
+      ]
+    },
+    "campaign_data": {
+      "owner": "encounter",
+      "status": "done",
+      "items": [
+        {
+          "id": "campaign-schema",
+          "title": "Create data/campaign schema + illuminati board_city/board_hq JSON stubs",
+          "status": "done",
+          "priority": 2
+        },
+        {
+          "id": "board1-nodes",
+          "title": "Fill City Initiation nodes, dialogue, enemy decks, escape crisis",
+          "status": "done",
+          "priority": 3
+        },
+        {
+          "id": "board2-nodes",
+          "title": "Fill HQ training + reverse graph + Grandmaster boss",
+          "status": "done",
+          "priority": 5
+        },
+        {
+          "id": "ledger-files",
+          "title": "Author ledger entry copy tied to node rewards",
+          "status": "done",
+          "priority": 5
+        }
+      ]
+    },
+    "engine_hooks": {
+      "owner": "balance",
+      "status": "pending",
+      "items": [
+        {
+          "id": "survive-turns",
+          "title": "Engine/session: survive_N_turns crisis win condition",
+          "status": "done",
+          "priority": 3
+        },
+        {
+          "id": "twist-enemy-hp",
+          "title": "Match modifier: enemy characters +1 Health on enter",
+          "status": "done",
+          "priority": 3
+        },
+        {
+          "id": "boss-smoke",
+          "title": "AI-vs fixed boss decks smoke + notes",
+          "status": "pending",
+          "priority": 6
+        }
+      ]
+    },
+    "frontend_campaign": {
+      "owner": "frontend",
+      "status": "done",
+      "items": [
+        {
+          "id": "campaign-menu",
+          "title": "Main menu Campaign entry + difficulty select + continue",
+          "status": "done",
+          "priority": 4
+        },
+        {
+          "id": "board-map-ui",
+          "title": "Investigation board node map UI (Board 1)",
+          "status": "done",
+          "priority": 4
+        },
+        {
+          "id": "story-panels",
+          "title": "Text comic/story panel sequence component",
+          "status": "done",
+          "priority": 4
+        },
+        {
+          "id": "match-overlay",
+          "title": "Table overlay: twist banner + crisis turn counter",
+          "status": "done",
+          "priority": 4
+        },
+        {
+          "id": "run-persistence",
+          "title": "localStorage run state save/load",
+          "status": "done",
+          "priority": 4
+        },
+        {
+          "id": "ledger-ui",
+          "title": "Dossier Investigation ledger unlocked entries",
+          "status": "done",
+          "priority": 5
+        },
+        {
+          "id": "safehouse-ui",
+          "title": "Minimal Safe House: remove 1 / pick 1 of 3",
+          "status": "done",
+          "priority": 5
+        }
+      ]
+    },
+    "qol_parallel": {
+      "owner": "frontend",
+      "status": "pending",
+      "items": [
+        {
+          "id": "keyboard",
+          "title": "Keyboard shortcuts (only if not blocking campaign)",
+          "status": "pending",
+          "priority": 9
+        },
+        {
+          "id": "speed",
+          "title": "Game / AI animation speed setting",
+          "status": "pending",
+          "priority": 9
+        },
+        {
+          "id": "collection",
+          "title": "Read-only card collection browser",
+          "status": "pending",
+          "priority": 9
+        }
+      ]
+    },
+    "qa": {
+      "owner": "qa",
+      "status": "pending",
+      "items": [
+        {
+          "id": "pytest-hooks",
+          "title": "Tests for survive_turns + twist modifier",
+          "status": "done",
+          "priority": 3
+        },
+        {
+          "id": "path-board1",
+          "title": "Manual or scripted path: menu\u2192Board1\u2192escape\u2192save",
+          "status": "pending",
+          "priority": 4
+        },
+        {
+          "id": "path-board2",
+          "title": "Manual path: reverse HQ + boss",
+          "status": "done",
+          "priority": 6
+        },
+        {
+          "id": "regression-freeplay",
+          "title": "Confirm tutorial/vs AI/builder still work",
+          "status": "pending",
+          "priority": 4
+        }
+      ]
+    }
+  },
+  "milestones": [
+    {
+      "id": "M0",
+      "title": "Design freeze",
+      "requires": [
+        "ingest-notebook",
+        "human-open-questions",
+        "design-freeze-signoff"
+      ]
+    },
+    {
+      "id": "M1",
+      "title": "Archetypes from existing pool",
+      "requires": [
+        "archetype-map",
+        "constructed-presets",
+        "starter-city-deck"
+      ]
+    },
+    {
+      "id": "M2",
+      "title": "Board 1 playable",
+      "requires": [
+        "campaign-schema",
+        "board1-nodes",
+        "survive-turns",
+        "campaign-menu",
+        "board-map-ui",
+        "story-panels",
+        "match-overlay",
+        "run-persistence",
+        "path-board1"
+      ]
+    },
+    {
+      "id": "M3",
+      "title": "Illuminati chapter complete",
+      "requires": [
+        "board2-nodes",
+        "twist-enemy-hp",
+        "ledger-files",
+        "ledger-ui",
+        "safehouse-ui",
+        "path-board2",
+        "boss-smoke"
+      ]
+    }
+  ],
+  "notes": [
+    "M3 HQ reverse siege + Fortitude twist + Grandmaster + ledger UI + armory pick shipped.",
+    "City escape hands off to HQ. Abandon run if testing fresh.",
+    "Human play of full City\u2192HQ still recommended."
+  ]
+}

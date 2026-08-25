@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from engine.ai import AIPlayer, execute_turn
+from engine.campaign import list_campaign_summaries, load_chapter
 from engine.decks import load_curated_decks, load_encounters, validate_deck
 from engine.models import load_cards
 from server.session import (
@@ -147,9 +148,31 @@ def _session_payload(session_id: str) -> dict[str, Any]:
             "description": info.encounter.get("description"),
             "steps": info.encounter.get("steps", []),
         }
+    if info.campaign:
+        payload["campaign"] = info.campaign
     if game.is_over:
         payload["recap"] = game.get_recap(info.player_name)
     return payload
+
+
+@app.get("/api/campaign")
+def get_campaign_list() -> list[dict[str, Any]]:
+    """List available campaign chapters."""
+    try:
+        return list_campaign_summaries()
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Campaign data missing") from exc
+
+
+@app.get("/api/campaign/{chapter_id}")
+def get_campaign_chapter(chapter_id: str) -> dict[str, Any]:
+    """Return full chapter + board node data."""
+    try:
+        return load_chapter(chapter_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown chapter: {chapter_id}") from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @app.post("/api/game/new")
@@ -183,6 +206,13 @@ async def new_game(
     player_deck = body.get("player_deck")
     player_deck_id = body.get("player_deck_id")
     ai_deck_id = body.get("ai_deck_id")
+    ai_deck = body.get("ai_deck")
+    match_options = body.get("match_options")
+    campaign_meta = body.get("campaign")
+    first_player = body.get("first_player")
+    shuffle = body.get("shuffle")
+    if shuffle is None:
+        shuffle = True
 
     if player_faction == ai_faction and not encounter_id and not player_deck and not player_deck_id:
         factions = ["illuminati", "templars", "reptilians"]
@@ -204,6 +234,11 @@ async def new_game(
             player_deck_spec=player_deck,
             player_deck_id=player_deck_id,
             ai_deck_id=ai_deck_id,
+            ai_deck_spec=ai_deck,
+            first_player=first_player,
+            shuffle=bool(shuffle),
+            match_options=match_options,
+            campaign_meta=campaign_meta,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

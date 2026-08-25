@@ -268,6 +268,16 @@ work is visual polish and QoL.
 - Export/import game state for debugging
 - [x] Confirm before abandoning a live match
 
+**Agent team (design tooling → campaign delivery):**
+- [x] Orchestrator + specialist role packs
+      (`docs/plans/phase9-sp-agent-team.md`, `python -m agents.orchestrator`)
+- [x] NotebookLM brief ingested → `docs/design/sp_campaign.md`
+- [x] M1: Control archetype decks from existing pool
+- [x] M2: Illuminati Board 1 (City + Escape crisis) playable (data + engine + UI)
+- [x] M3: Illuminati Board 2 (HQ reverse + boss + ledger UI)
+- [ ] Deferred: currency/packs UI; Templar/Reptilian full chapters
+
+
 ---
 
 *Total tests: 324*

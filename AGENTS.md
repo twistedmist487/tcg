@@ -37,7 +37,10 @@ around the same engine.
 ## Directory Layout
 
 ```
-agents/              AI helper agents (lore gen, balance checking)
+agents/              AI helper agents + SP orchestrator team
+  orchestrator.py    CLI: status/plan/brief/run/checklist for SP agent team
+  board.py           Load/save docs/plans/sp-agent-board.json
+  roles/             Role briefs (orchestrator, experience, encounter, ...)
   base_agent.py      Base class with data CRUD and JSON loading
   lore_agent.py      Generates card lore from faction data
   rules_agent.py     Evaluates card balance with stat-to-cost heuristics
@@ -307,6 +310,24 @@ Do not bake names, costs, or rules into generated UI JPEGs. Unaffordable hand ca
 | make test    | Run pytest test suite (306 tests)    |
 | make clean   | Clean build artifacts                |
 | make help    | Show all available commands          |
+
+## SP agent team (orchestrator)
+
+Campaign-first single-player (NotebookLM investigation boards) is driven by a
+thin orchestrator + specialist roles. Canonical design:
+`docs/design/sp_campaign.md`. Board: `docs/plans/sp-agent-board.json`.
+
+```bash
+python -m agents.orchestrator status
+python -m agents.orchestrator plan
+python -m agents.orchestrator brief content
+python -m agents.orchestrator run --role content --task "Map control archetypes to card IDs" --mark archetype-map
+python -m agents.orchestrator set-status archetype-map done
+python -m agents.orchestrator gates
+```
+
+Milestones: **M0** design freeze → **M1** archetype decks → **M2** Illuminati
+Board 1 → **M3** Board 2 + ledger. Currency/packs later.
 
 ## Running the Game
 

@@ -79,6 +79,18 @@ class Game:
         self.cards_played_this_turn: int = 0
         self.opening_done: bool = False
         self._draw_depth: int = 0
+        # Campaign / crisis options (standard games leave defaults)
+        self.win_condition: str = "standard"  # standard | survive_turns
+        self.survive_turns: int = 0
+        self.survive_defender: str | None = None
+        self.defender_turns_completed: int = 0
+        self.match_modifiers: dict[str, Any] = {}
+        self.win_reason: str | None = None
+        self.crisis_label: str | None = None
+        self.twist_label: str | None = None
+        self.twist_description: str | None = None
+        self.lesson_win: str | None = None
+        self.lesson_loss: str | None = None
 
     @classmethod
     def setup(
@@ -359,6 +371,7 @@ class Game:
                 ready = instance.has_charge or instance.has_rush
                 instance.is_exhausted = not ready
                 instance.rush_locked = instance.has_rush and not instance.has_charge
+                self._apply_enter_modifiers(player, instance)
 
             result = {
                 "success": True,
@@ -691,7 +704,21 @@ class Game:
         self.active_player_index = 1 - self.active_player_index
         self.turn_started = False
 
+        # Crisis: count completed turns by the defender after they end their turn
+        if (
+            self.win_condition == "survive_turns"
+            and self.winner is None
+            and self.survive_defender
+            and player.name == self.survive_defender
+        ):
+            self.defender_turns_completed += 1
+            if self.defender_turns_completed >= self.survive_turns:
+                self.winner = self.survive_defender
+                self.win_reason = "survive_turns"
+                end_result["crisis_won"] = True
+
         end_result["location_effects"] = [r.to_dict() for r in loc_results]
+        end_result["defender_turns_completed"] = self.defender_turns_completed
         return end_result
 
     def _begin_discovery(self, player: Player) -> None:
@@ -899,12 +926,52 @@ class Game:
             slain["deathrattles"] = rattles
         return slain
 
+    def _apply_enter_modifiers(self, player: Player, instance: CardInstance) -> None:
+        """Apply match-wide twists when a character enters play."""
+        mods = self.match_modifiers or {}
+        bonus = int(mods.get("enemy_character_health_bonus") or 0)
+        enemy_name = mods.get("enemy_player_name")
+        if bonus and enemy_name and player.name == enemy_name:
+            instance.health_bonus += bonus
+
+    def configure_match(
+        self,
+        *,
+        win_condition: str = "standard",
+        survive_turns: int = 0,
+        survive_defender: str | None = None,
+        match_modifiers: dict[str, Any] | None = None,
+        crisis_label: str | None = None,
+        twist_label: str | None = None,
+        twist_description: str | None = None,
+        lesson_win: str | None = None,
+        lesson_loss: str | None = None,
+    ) -> None:
+        """Attach campaign/crisis options after setup."""
+        self.win_condition = win_condition or "standard"
+        self.survive_turns = int(survive_turns or 0)
+        self.survive_defender = survive_defender
+        self.match_modifiers = dict(match_modifiers or {})
+        self.crisis_label = crisis_label
+        self.twist_label = twist_label
+        self.twist_description = twist_description
+        self.lesson_win = lesson_win
+        self.lesson_loss = lesson_loss
+        self.defender_turns_completed = 0
+        self.win_reason = None
+
     def _check_win_condition(self) -> None:
-        """Check if either player has lost."""
+        """Check if either player has lost (life / fatigue)."""
+        if self.winner is not None:
+            return
         for player in self.players:
             if player.is_dead:
                 other = self.inactive_player if player == self.active_player else self.active_player
                 self.winner = other.name
+                if self.win_condition == "survive_turns" and player.name == self.survive_defender:
+                    self.win_reason = "defender_died"
+                else:
+                    self.win_reason = "hero_killed"
                 return
 
     def _log_action(self, action: str, data: dict[str, Any]) -> None:
@@ -961,8 +1028,14 @@ class Game:
 
         you_won = self.winner == player_name
         lesson = None
-        if self.is_over and not you_won:
-            if taunt_blocks > 0:
+        if self.is_over and you_won and self.lesson_win:
+            lesson = self.lesson_win
+        elif self.is_over and not you_won and self.lesson_loss:
+            lesson = self.lesson_loss
+        elif self.is_over and not you_won:
+            if self.win_reason == "defender_died":
+                lesson = "You needed to survive longer. Use Taunt and heals, and don't race if the clock is the win condition."
+            elif taunt_blocks > 0:
                 lesson = "Taunt blocked some of your attacks — clear Taunt characters first."
             elif me and opponent and opponent.life >= 15:
                 lesson = "The opponent outlasted you. Look for more face damage or removal."
@@ -986,6 +1059,8 @@ class Game:
                 p.name: p.life for p in self.players
             },
             "lesson": lesson,
+            "win_reason": self.win_reason,
+            "win_condition": self.win_condition,
         }
 
     def get_state(self) -> dict[str, Any]:
@@ -1101,6 +1176,26 @@ class Game:
             ],
             "is_over": self.is_over,
             "winner": self.winner,
+            "win_condition": self.win_condition,
+            "win_reason": self.win_reason,
+            "crisis": (
+                None
+                if self.win_condition != "survive_turns"
+                else {
+                    "label": self.crisis_label or "Survive",
+                    "turns_required": self.survive_turns,
+                    "turns_completed": self.defender_turns_completed,
+                    "defender": self.survive_defender,
+                }
+            ),
+            "twist": (
+                None
+                if not self.twist_label
+                else {
+                    "label": self.twist_label,
+                    "description": self.twist_description or "",
+                }
+            ),
             "turn_started": self.turn_started,
             "mulligan_done": sorted(self.mulligan_done),
             "pending_discovery": (
