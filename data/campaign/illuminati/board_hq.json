@@ -3,7 +3,7 @@
   "name": "Illuminati HQ",
   "chapter_id": "illuminati",
   "start_node": "hq_arrival",
-  "map_hint": "Train in the sanctum. When the breach hits, fight back out under Fortitude.",
+  "map_hint": "Train in the sanctum with your kit. When the breach hits, fight back out under Fortitude.",
   "reverse_order": [
     "train_bounce",
     "train_discard",
@@ -26,17 +26,26 @@
       ],
       "story_panels": [
         {
-          "text": "Below the city, marble and server racks share the same halls. Someone pins a new clearance badge to your coat."
+          "text": "They pull you through a service door under the city. Someone is already feeding the Recruiter's badge into a burn bag."
         },
         {
-          "text": "\"City lessons were the street. Here we teach Influence properly \u2014 silence, discard, denial. Then you earn the right to leave.\""
+          "text": "A colder voice on the interior radio: \"Ops. Condolences later. Here we teach Influence properly \u2014 silence, discard, denial. Then you earn the right to leave.\""
         }
       ],
       "rewards": {
         "ledger_ids": [
           "file_hq_arrival"
         ]
-      }
+      },
+      "story_panels_reckless": [
+        {
+          "text": "They pull you through a service door. The Recruiter's badge is already ash. Ops does not mention the drop you skipped."
+        },
+        {
+          "text": "\"Reckless on the street, reckless in my halls. We will work with the kit you kept. Silence. Discard. Denial. Then you leave.\""
+        }
+      ],
+      "coach": "ops"
     },
     {
       "id": "train_silence",
@@ -156,7 +165,7 @@
         },
         "ai_starting_life": 14,
         "player_goes_first": true,
-        "shuffle": false,
+        "shuffle": true,
         "player_deck": [
           "illuminati_char_009",
           "illuminati_spell_001",
@@ -234,8 +243,21 @@
             "speaker": "Ops",
             "text": "Twist active: Templar bodies are tougher (+1 Health on enter)."
           }
-        ]
-      }
+        ],
+        "player_deck_mode": "run",
+        "coach": "ops"
+      },
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": [
+        "illuminati_spell_001"
+      ],
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Mute the room. Media Blackout is on loan if you did not pack it. Keywords die. Walls go quiet."
+        }
+      ]
     },
     {
       "id": "train_discard",
@@ -355,7 +377,7 @@
         },
         "ai_starting_life": 14,
         "player_goes_first": true,
-        "shuffle": false,
+        "shuffle": true,
         "player_deck": [
           "illuminati_char_009",
           "illuminati_spell_001",
@@ -433,8 +455,21 @@
             "speaker": "Ops",
             "text": "Twist active: Templar bodies are tougher (+1 Health on enter)."
           }
-        ]
-      }
+        ],
+        "player_deck_mode": "run",
+        "coach": "ops"
+      },
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": [
+        "illuminati_char_001"
+      ],
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Empty their options. Shadow Broker if you still carry one. Attrition is a victory condition."
+        }
+      ]
     },
     {
       "id": "train_bounce",
@@ -554,7 +589,7 @@
         },
         "ai_starting_life": 14,
         "player_goes_first": true,
-        "shuffle": false,
+        "shuffle": true,
         "player_deck": [
           "illuminati_char_009",
           "illuminati_spell_001",
@@ -632,8 +667,22 @@
             "speaker": "Ops",
             "text": "Twist active: Templar bodies are tougher (+1 Health on enter)."
           }
-        ]
-      }
+        ],
+        "player_deck_mode": "run",
+        "coach": "ops",
+        "skip_blurb": "Service elevator. Soft Exile stays behind you. The Gate Warden never sees your face."
+      },
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": [
+        "illuminati_spell_012"
+      ],
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Send it home. Quiet Extradition resets a body. Tempo is also control."
+        }
+      ]
     },
     {
       "id": "hq_armory",
@@ -651,22 +700,44 @@
         "hq_breach"
       ],
       "safehouse": {
-        "text": "Choose one. It is logged in your Investigation Ledger.",
+        "text": "Choose one. It is logged, then sleeved into your kit for the breach.",
         "pick_one_of": [
           {
             "id": "illuminati_spell_013",
             "label": "Leak Dump",
-            "blurb": "Draw 2. Opponent discards 2."
+            "blurb": "Draw 2. Opponent discards 2. Sleeved into your kit.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001"
+            ]
           },
           {
             "id": "illuminati_spell_001",
             "label": "Media Blackout",
-            "blurb": "Silence all enemy characters this turn."
+            "blurb": "Silence all enemy characters this turn. Sleeved into your kit.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001"
+            ]
           },
           {
             "id": "illuminati_char_005",
             "label": "Puppet Master",
-            "blurb": "Late steal \u2014 take a small enemy and draw."
+            "blurb": "Late steal. Also opens the service elevator \u2014 skip Soft Exile on the way out.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001"
+            ],
+            "skip_reverse_node": "train_bounce"
           }
         ]
       },
@@ -674,7 +745,14 @@
         "ledger_ids": [
           "file_armory"
         ]
-      }
+      },
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Black budget. Pick a tool you will actually play. Puppet Master knows a back stair."
+        }
+      ]
     },
     {
       "id": "hq_breach",
@@ -695,10 +773,10 @@
           "text": "Alarms smear gold across the marble. \"Templars in the sanctum \u2014 they knew the routes.\""
         },
         {
-          "text": "Previous halls light red on the board. You will fight back the way you came. Righteous Fortitude hardens every Templar body."
+          "text": "Previous halls light red on the board. Fight back the way you came. Righteous Fortitude hardens every Templar body."
         },
         {
-          "text": "Reach the entrance. The Grandmaster is waiting in the smoke."
+          "text": "Reach the entrance. The Grandmaster is waiting in the smoke. Your kit is the one you built."
         }
       ],
       "rewards": {
@@ -708,7 +786,8 @@
         "flags": {
           "hq_breached": true
         }
-      }
+      },
+      "coach": "ops"
     },
     {
       "id": "grandmaster",
@@ -728,7 +807,7 @@
         "faction": "templars"
       },
       "player_goes_first": true,
-      "shuffle": false,
+      "shuffle": true,
       "ai_starting_life": 16,
       "player_deck": [
         "illuminati_char_009",
@@ -802,15 +881,7 @@
           "enemy_character_health_bonus": 1
         }
       },
-      "teach": true,
-      "steps": [
-        {
-          "id": "boss",
-          "title": "Grandmaster",
-          "text": "Fortitude still applies. Break Taunt walls, respect Wrath-style clears, finish at 16 life.",
-          "require": "free"
-        }
-      ],
+      "teach": false,
       "rewards": {
         "ledger_ids": [
           "file_grandmaster",
@@ -823,7 +894,15 @@
         }
       },
       "lesson_win": "HQ holds. The Inner Circle marks your file complete \u2014 for now.",
-      "lesson_loss": "Walls and AoE punish greed. Chip Taunt, then close."
+      "lesson_loss": "Walls and AoE punish greed. Chip Taunt, then close.",
+      "player_deck_mode": "run",
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Fortitude still applies. Break the walls. Do not die in my doorway."
+        }
+      ]
     }
   ],
   "ledger": {
@@ -858,6 +937,14 @@
     "file_chapter_complete": {
       "title": "File: Inner Circle \u2014 Closed",
       "text": "City and HQ survived. Other wings remain sealed."
+    },
+    "file_reckless_ops": {
+      "title": "File: Reckless \u2014 Lodge Note",
+      "text": "The recruit skipped the city drop. Ops filed it. The kit was not rebuilt."
+    },
+    "file_elevator": {
+      "title": "File: Service Elevator",
+      "text": "Puppet Master knew a back stair. Soft Exile was never contested."
     }
   }
 }

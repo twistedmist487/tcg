@@ -1,9 +1,20 @@
-"""Tests for campaign crisis win condition and twist modifiers."""
+"""Tests for campaign crisis, twists, and run-deck mutation."""
 
-from engine.card import create_card_instance
+from engine.campaign import (
+    add_card,
+    apply_safehouse_pick,
+    campaign_coach,
+    count_copies,
+    get_node,
+    list_campaign_summaries,
+    load_chapter,
+    player_deck_mode,
+    reverse_queue,
+    seed_teach_front,
+    starter_deck_ids,
+)
 from engine.game import Game
 from engine.models import load_cards
-from engine.player import Player
 
 
 def _tiny_game():
@@ -90,8 +101,6 @@ def test_enemy_health_bonus_on_enter():
 
 
 def test_campaign_data_loads():
-    from engine.campaign import get_node, list_campaign_summaries, load_chapter
-
     summaries = list_campaign_summaries()
     assert any(s["id"] == "illuminati" for s in summaries)
     chapter = load_chapter("illuminati")
@@ -103,6 +112,7 @@ def test_campaign_data_loads():
     assert alley.get("shuffle") is False
     assert alley.get("steps")
     assert len(alley.get("player_deck") or []) == 30
+    assert alley.get("player_deck_mode") == "scripted"
 
 
 def test_match_options_ai_starting_life():
@@ -122,8 +132,6 @@ def test_match_options_ai_starting_life():
 
 
 def test_hq_board_loads_and_reverse_order():
-    from engine.campaign import get_node, load_chapter
-
     chapter = load_chapter("illuminati")
     assert "hq" in chapter.get("boards", [])
     assert "hq" in (chapter.get("board_data") or {})
@@ -136,6 +144,8 @@ def test_hq_board_loads_and_reverse_order():
     boss = get_node(chapter, "hq", "grandmaster")
     assert boss.get("boss_requires_reverse_clear") is True
     assert boss.get("ai_starting_life") == 16
+    assert boss.get("player_deck_mode") == "run"
+    assert silence.get("player_deck_mode") == "run_teach"
 
 
 def test_twist_modifier_via_match_options():
@@ -161,3 +171,99 @@ def test_twist_modifier_via_match_options():
     assert game.twist_label == "Righteous Fortitude"
     ai = next(p for p in game.players if p.name == "Gate Warden")
     assert ai.life == 14
+
+
+def test_starter_deck_is_thirty():
+    ids = starter_deck_ids("campaign_illuminati_city_starter")
+    assert len(ids) == 30
+    assert count_copies(ids, "illuminati_char_009") == 2
+    assert count_copies(ids, "illuminati_char_001") == 1
+    assert "neutral_char_010" not in ids
+
+
+def test_safe_drop_take_the_bag():
+    deck = starter_deck_ids("campaign_illuminati_city_starter")
+    pick = {
+        "id": "neutral_char_010",
+        "action": "add",
+        "copies": 1,
+        "trim": ["neutral_char_028", "neutral_spell_022", "neutral_char_001"],
+        "label": "Take the bag",
+    }
+    before_trim = count_copies(deck, "neutral_char_028")
+    out, flags = apply_safehouse_pick(deck, pick)
+    assert len(out) == 30
+    assert count_copies(out, "neutral_char_010") == 1
+    assert count_copies(out, "neutral_char_028") == before_trim - 1
+    assert flags["last_deck_change"] == "added:neutral_char_010"
+
+
+def test_safe_drop_prune_lobbyist():
+    deck = starter_deck_ids("campaign_illuminati_city_starter")
+    pick = {"id": "illuminati_char_009", "action": "prune", "prune_id": "illuminati_char_009"}
+    out, flags = apply_safehouse_pick(deck, pick)
+    assert count_copies(out, "illuminati_char_009") == 1
+    assert len(out) == 29
+    assert "pruned" in flags["last_deck_change"]
+
+
+def test_safe_drop_keep_walking():
+    deck = starter_deck_ids("campaign_illuminati_city_starter")
+    out, flags = apply_safehouse_pick(deck, {"id": "walk", "action": "skip"})
+    assert out == deck
+    assert flags["skipped_safe_drop"] is True
+
+
+def test_armory_inject_and_puppet_skip():
+    deck = starter_deck_ids("campaign_illuminati_city_starter")
+    pick = {
+        "id": "illuminati_char_005",
+        "action": "inject",
+        "copies": 1,
+        "skip_reverse_node": "train_bounce",
+        "label": "Puppet Master",
+        "trim": ["neutral_char_028"],
+    }
+    out, flags = apply_safehouse_pick(deck, pick)
+    assert count_copies(out, "illuminati_char_005") == 1
+    assert len(out) == 30
+    assert flags["skip_reverse_node"] == "train_bounce"
+    assert flags["last_armory_pick"] == "Puppet Master"
+    board = load_chapter("illuminati")["board_data"]["hq"]
+    q = reverse_queue(board, flags)
+    assert "train_bounce" not in q
+    assert q == ["train_discard", "train_silence"]
+
+
+def test_seed_teach_loans_missing_card():
+    deck = ["illuminati_char_009"] * 2 + ["neutral_char_001"] * 28
+    seeded = seed_teach_front(deck, ["illuminati_spell_001"])
+    assert seeded[0] == "illuminati_spell_001"
+    assert len(seeded) == 31
+
+
+def test_coach_swaps_after_recruiter_dies():
+    assert campaign_coach({}, "city") == "recruiter"
+    assert campaign_coach({"recruiter_dead": True}, "city") == "ops"
+    assert campaign_coach({}, "hq") == "ops"
+
+
+def test_city_safe_drop_and_initiation_modes():
+    chapter = load_chapter("illuminati")
+    drop = get_node(chapter, "city", "safe_drop")
+    picks = (drop.get("safehouse") or {}).get("pick_one_of") or []
+    assert len(picks) == 3
+    assert {p["action"] for p in picks} == {"add", "prune", "skip"}
+    initiation = get_node(chapter, "city", "initiation")
+    assert player_deck_mode(initiation) == "run_teach"
+    escape = get_node(chapter, "city", "escape")
+    assert player_deck_mode(escape) == "run"
+    assert escape.get("coach") == "silent"
+
+
+def test_add_respects_copy_cap():
+    deck = starter_deck_ids("campaign_illuminati_city_starter")
+    # starter already has 2 Burn Notice
+    out = add_card(deck, "neutral_spell_003", copies=1)
+    assert count_copies(out, "neutral_spell_003") == 2
+    assert len(out) == 30

@@ -3,7 +3,7 @@
   "name": "City Initiation",
   "chapter_id": "illuminati",
   "start_node": "story_intro",
-  "map_hint": "Short fights. New verbs are scripted when they appear.",
+  "map_hint": "They walk you. After the drop, the kit is yours.",
   "nodes": [
     {
       "id": "story_intro",
@@ -161,7 +161,9 @@
           "file_energy"
         ]
       },
-      "lesson_loss": "Play on curve and poke face \u2014 they only had 10 life."
+      "lesson_loss": "Play on curve and poke face \u2014 they only had 10 life.",
+      "player_deck_mode": "scripted",
+      "coach": "recruiter"
     },
     {
       "id": "archives",
@@ -281,7 +283,9 @@
         "ledger_ids": [
           "file_taunt"
         ]
-      }
+      },
+      "player_deck_mode": "scripted",
+      "coach": "recruiter"
     },
     {
       "id": "safe_drop",
@@ -299,14 +303,47 @@
         "rooftop"
       ],
       "safehouse": {
-        "text": "Next lesson is tempo \u2014 Rush and Charge ignore the usual wait.",
-        "auto_continue": true
+        "text": "A contact waits in the stairwell. Take a tool, dump dead weight, or keep walking. This is the first time the kit is yours.",
+        "pick_one_of": [
+          {
+            "id": "neutral_char_010",
+            "label": "Take the bag",
+            "blurb": "Street Runner (Rush). One spare Network card is cut to stay at 30.",
+            "action": "add",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001"
+            ]
+          },
+          {
+            "id": "illuminati_char_009",
+            "label": "Dump a Lobbyist",
+            "blurb": "Cut one Lobbyist. Leaner hand for the duel and the escape.",
+            "action": "prune",
+            "prune_id": "illuminati_char_009"
+          },
+          {
+            "id": "walk",
+            "label": "Keep walking",
+            "blurb": "No change. Ops will log you as reckless.",
+            "action": "skip"
+          }
+        ]
       },
       "rewards": {
         "ledger_ids": [
           "file_safehouse"
         ]
-      }
+      },
+      "coach": "recruiter",
+      "dialogue": [
+        {
+          "speaker": "Recruiter",
+          "text": "A bag, a cut, or pride. Choose. After this, I stop stacking your deck."
+        }
+      ]
     },
     {
       "id": "rooftop",
@@ -427,7 +464,9 @@
         "ledger_ids": [
           "file_tempo"
         ]
-      }
+      },
+      "player_deck_mode": "scripted",
+      "coach": "recruiter"
     },
     {
       "id": "initiation",
@@ -450,7 +489,7 @@
         "faction": "illuminati"
       },
       "player_goes_first": true,
-      "shuffle": false,
+      "shuffle": true,
       "ai_starting_life": 14,
       "player_deck": [
         "illuminati_char_001",
@@ -535,7 +574,7 @@
       "dialogue": [
         {
           "speaker": "Recruiter",
-          "text": "Illuminati win by starving options. Discard is a knife."
+          "text": "This is the real test. Your kit, your calls. Illuminati starve options."
         }
       ],
       "rewards": {
@@ -544,7 +583,12 @@
         ]
       },
       "lesson_win": "You passed initiation. Something else is watching.",
-      "lesson_loss": "Hand attack hurts both ways. Keep draw and don't overextend into silence."
+      "lesson_loss": "Hand attack hurts both ways. Keep draw and don't overextend into silence.",
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": [
+        "illuminati_char_001"
+      ],
+      "coach": "recruiter"
     },
     {
       "id": "escape",
@@ -565,7 +609,7 @@
         "faction": "templars"
       },
       "player_goes_first": true,
-      "shuffle": false,
+      "shuffle": true,
       "ai_starting_life": 18,
       "player_deck": [
         "illuminati_char_009",
@@ -650,7 +694,7 @@
           "text": "Gold tabards smash the windows. The Recruiter shoves you toward the fire escape \u2014 then falls."
         },
         {
-          "text": "\"Run. Survive. The Lodge will find you.\" Five turns. Live."
+          "text": "\"Run. Survive. The Lodge will find you.\" The radio dies. Five turns. Live."
         }
       ],
       "rewards": {
@@ -665,7 +709,10 @@
         "next_board": "hq"
       },
       "lesson_win": "You escaped. The Templars will not forget. HQ awaits.",
-      "lesson_loss": "Stall with Taunt and healing. Face damage only if it keeps you alive."
+      "lesson_loss": "Stall with Taunt and healing. Face damage only if it keeps you alive.",
+      "player_deck_mode": "run",
+      "coach": "silent",
+      "dialogue": []
     }
   ],
   "ledger": {
@@ -700,6 +747,10 @@
     "file_escape": {
       "title": "File: Escape",
       "text": "Sometimes the win condition is the clock, not the corpse."
+    },
+    "file_reckless": {
+      "title": "File: Reckless",
+      "text": "You skipped the drop. Ops noticed. The kit stayed as-issued."
     }
   }
 }

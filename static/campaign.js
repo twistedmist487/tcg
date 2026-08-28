@@ -1,8 +1,10 @@
 /**
  * Campaign — Investigation Board (M2 City + M3 HQ reverse / ledger).
+ * Run deck, Safe Drop fork, Armory injection, Recruiter / Ops voice.
  * Loaded after app.js
  */
-const CAMPAIGN_RUN_KEY = 'conspiracy_campaign_run_v1';
+const CAMPAIGN_RUN_KEY = 'conspiracy_campaign_run_v2';
+const DEFAULT_TRIM = ['neutral_char_028', 'neutral_spell_022', 'neutral_char_001', 'illuminati_char_009'];
 let campaignSummaries = [];
 let campaignChapter = null;
 let campaignRun = null;
@@ -13,6 +15,123 @@ let storyOnDone = null;
 let pendingCampaignNode = null;
 let pendingSafehouseNode = null;
 let campaignTeachDone = new Set();
+let campaignCoachLine = null;
+
+function cardNameById(id) {
+  const card = (typeof allCards !== 'undefined' ? allCards : []).find((c) => c.id === id);
+  return card ? card.name : id;
+}
+
+function expandPresetIds(presetId) {
+  const presets = (typeof curatedDecks !== 'undefined' && curatedDecks.presets) || [];
+  const preset = presets.find((p) => p.id === presetId);
+  if (!preset) return [];
+  const ids = [];
+  (preset.cards || []).forEach((entry) => {
+    const copies = entry.copies || 1;
+    for (let i = 0; i < copies; i += 1) ids.push(entry.id);
+  });
+  return ids;
+}
+
+function countCopies(deck, cardId) {
+  return (deck || []).filter((id) => id === cardId).length;
+}
+
+function trimDeck(deck, size, preferRemove) {
+  const out = (deck || []).slice();
+  const prefer = preferRemove && preferRemove.length ? preferRemove : DEFAULT_TRIM;
+  while (out.length > size) {
+    let removed = false;
+    for (const cardId of prefer) {
+      const idx = out.lastIndexOf(cardId);
+      if (idx >= 0) {
+        out.splice(idx, 1);
+        removed = true;
+        break;
+      }
+    }
+    if (!removed) out.pop();
+  }
+  return out;
+}
+
+function addCardToDeck(deck, cardId, copies, preferRemove) {
+  const out = (deck || []).slice();
+  const n = copies || 1;
+  for (let i = 0; i < n; i += 1) {
+    if (countCopies(out, cardId) >= 2) break;
+    out.push(cardId);
+  }
+  return trimDeck(out, 30, preferRemove);
+}
+
+function pruneCardFromDeck(deck, cardId) {
+  const out = (deck || []).slice();
+  const idx = out.indexOf(cardId);
+  if (idx >= 0) out.splice(idx, 1);
+  return out;
+}
+
+function applySafehousePickToRun(pick) {
+  if (!campaignRun || !pick) return;
+  const action = (pick.action || pick.op || '').toLowerCase();
+  const trim = pick.trim || DEFAULT_TRIM;
+  campaignRun.flags = campaignRun.flags || {};
+  if (action === 'add' || action === 'inject') {
+    campaignRun.deck = addCardToDeck(campaignRun.deck || [], pick.id, pick.copies || 1, trim);
+    campaignRun.flags.last_deck_change = `added:${pick.id}`;
+    campaignRun.flags.last_armory_pick = pick.label || pick.id;
+    campaignRun.deck_live = true;
+  } else if (action === 'prune') {
+    campaignRun.deck = pruneCardFromDeck(campaignRun.deck || [], pick.prune_id || pick.id);
+    campaignRun.flags.last_deck_change = `pruned:${pick.prune_id || pick.id}`;
+    campaignRun.deck_live = true;
+  } else if (action === 'skip') {
+    campaignRun.flags.skipped_safe_drop = true;
+    campaignRun.flags.last_deck_change = 'skipped';
+    if (!(campaignRun.ledger || []).includes('file_reckless')) {
+      campaignRun.ledger = campaignRun.ledger || [];
+      campaignRun.ledger.push('file_reckless');
+    }
+  }
+  if (pick.skip_reverse_node) {
+    campaignRun.flags.skip_reverse_node = pick.skip_reverse_node;
+  }
+}
+
+function seedTeachFront(deck, seedIds) {
+  const out = (deck || []).slice();
+  const front = [];
+  (seedIds || []).forEach((cardId) => {
+    const idx = out.indexOf(cardId);
+    if (idx >= 0) out.splice(idx, 1);
+    front.push(cardId);
+  });
+  return front.concat(out);
+}
+
+function campaignCoachId() {
+  if (!campaignRun) return 'recruiter';
+  const flags = campaignRun.flags || {};
+  if (flags.recruiter_dead || campaignRun.board_id === 'hq') return 'ops';
+  return 'recruiter';
+}
+
+function campaignCoachName() {
+  const id = campaignCoachId();
+  if (id === 'ops') return 'Ops';
+  if (id === 'silent') return '';
+  return 'Recruiter';
+}
+
+function nodeCoach(node) {
+  if (!node) return campaignCoachId();
+  if (node.coach === 'silent') return 'silent';
+  if (campaignRun && (campaignRun.flags || {}).recruiter_dead) return 'ops';
+  if (node.coach) return node.coach;
+  return campaignCoachId();
+}
 
 function loadCampaignRun() {
   try {
@@ -28,6 +147,7 @@ function loadCampaignRun() {
     campaignRun.reverse_cleared = campaignRun.reverse_cleared || [];
     campaignRun.phase = campaignRun.phase || 'forward';
     campaignRun.armory_picks = campaignRun.armory_picks || [];
+    campaignRun.deck = campaignRun.deck || [];
   }
   return campaignRun;
 }
@@ -83,6 +203,28 @@ async function ensureCampaignChapter(chapterId) {
   return campaignChapter;
 }
 
+async function ensureStarterDeck(starterId) {
+  if (typeof curatedDecks === 'undefined' || !curatedDecks || !curatedDecks.presets) {
+    try {
+      curatedDecks = await api('GET', '/api/decks');
+    } catch (e) {
+      curatedDecks = { presets: [] };
+    }
+  }
+  if (typeof allCards === 'undefined' || !allCards || !allCards.length) {
+    try {
+      allCards = await api('GET', '/api/cards');
+    } catch (e) { /* names stay as ids */ }
+  }
+  let ids = expandPresetIds(starterId);
+  if (!ids.length) {
+    const city = (campaignChapter.board_data || {}).city;
+    const alley = (city && city.nodes || []).find((n) => n.id === 'alley_contact');
+    ids = (alley && alley.player_deck) ? alley.player_deck.slice() : [];
+  }
+  return ids;
+}
+
 async function startCampaignChapter(chapterId) {
   await ensureCampaignChapter(chapterId);
   const starterId = campaignChapter.starter_deck_id || 'campaign_illuminati_city_starter';
@@ -92,6 +234,7 @@ async function startCampaignChapter(chapterId) {
     alert('Board missing for chapter');
     return;
   }
+  const starter = await ensureStarterDeck(starterId);
   campaignRun = {
     chapter_id: chapterId,
     board_id: boardId,
@@ -103,6 +246,8 @@ async function startCampaignChapter(chapterId) {
     flags: {},
     armory_picks: [],
     deck_id: starterId,
+    deck: starter.slice(),
+    deck_live: false,
     player_name: 'Recruit',
   };
   saveCampaignRun();
@@ -153,7 +298,10 @@ function currentCampaignBoard() {
 
 function reverseQueue() {
   const board = currentCampaignBoard();
-  return (board && board.reverse_order) || [];
+  let q = (board && board.reverse_order) || [];
+  const skip = campaignRun && campaignRun.flags && campaignRun.flags.skip_reverse_node;
+  if (skip) q = q.filter((id) => id !== skip);
+  return q;
 }
 
 function reverseAllClear() {
@@ -174,18 +322,15 @@ function isCampaignNodeUnlocked(node) {
     if (!q.includes(node.id)) return false;
     const cleared = campaignRun.reverse_cleared || [];
     if (cleared.includes(node.id)) return true; // replay
-    // next uncleared in reverse order
     const next = q.find((id) => !cleared.includes(id));
     return node.id === next;
   }
 
   if (phase === 'boss' || phase === 'done') {
     if (node.boss_requires_reverse_clear) return true;
-    // allow revisiting forward nodes as cleared
     return (campaignRun.cleared || []).includes(node.id);
   }
 
-  // forward
   const req = node.requires || [];
   return req.every((id) => (campaignRun.cleared || []).includes(id));
 }
@@ -198,6 +343,7 @@ function nodeDisplay(node) {
       type: node.reverse.type || 'combat',
       blurb: node.reverse.blurb || node.blurb,
       dialogue: node.reverse.dialogue || node.dialogue,
+      coach: node.reverse.coach || 'ops',
     };
   }
   return {
@@ -205,6 +351,7 @@ function nodeDisplay(node) {
     type: node.type,
     blurb: node.blurb,
     dialogue: node.dialogue,
+    coach: node.coach,
   };
 }
 
@@ -214,11 +361,32 @@ function isNodeClearedDisplay(node) {
     return !!(campaignRun.flags && campaignRun.flags.illuminati_chapter_complete);
   }
   if (phase === 'reverse' || phase === 'boss' || phase === 'done') {
-    if (reverseQueue().includes(node.id)) {
+    if (reverseQueue().includes(node.id) || (campaignRun.flags && campaignRun.flags.skip_reverse_node === node.id)) {
+      if (campaignRun.flags && campaignRun.flags.skip_reverse_node === node.id) return true;
       return (campaignRun.reverse_cleared || []).includes(node.id);
     }
   }
   return (campaignRun.cleared || []).includes(node.id);
+}
+
+function renderRunKit() {
+  const el = document.getElementById('campaign-run-kit');
+  if (!el || !campaignRun) return;
+  const deck = campaignRun.deck || [];
+  const counts = {};
+  deck.forEach((id) => { counts[id] = (counts[id] || 0) + 1; });
+  const note = campaignRun.flags && campaignRun.flags.last_deck_change
+    ? campaignRun.flags.last_deck_change.replace('added:', 'Added ').replace('pruned:', 'Cut ').replace('skipped', 'Kept walking')
+    : (campaignRun.deck_live ? 'Kit is live.' : 'Issued kit. The drop makes it yours.');
+  const noteEl = document.getElementById('campaign-run-kit-note');
+  const listEl = document.getElementById('campaign-run-kit-list');
+  if (noteEl) noteEl.textContent = `${deck.length} cards · ${note}`;
+  if (listEl) {
+    listEl.innerHTML = Object.keys(counts).map((id) => {
+      const name = cardNameById(id);
+      return `<span class="kit-chip">${name} ×${counts[id]}</span>`;
+    }).join('');
+  }
 }
 
 function renderCampaignMap() {
@@ -229,10 +397,10 @@ function renderCampaignMap() {
   let hint = board.map_hint || '';
   if (phase === 'reverse') {
     title += ' — Breach';
-    hint = 'Fight back through the halls. Righteous Fortitude is active on Templar nodes.';
+    hint = 'Fight back through the halls. Righteous Fortitude is active. Your kit is the one you built.';
   } else if (phase === 'boss') {
     title += ' — Exit';
-    hint = 'The Grandmaster holds the entrance.';
+    hint = 'The Grandmaster holds the entrance. Ops is on the radio.';
   } else if (phase === 'done') {
     title += ' — Secure';
     hint = 'Chapter complete. Review the ledger or abandon to restart.';
@@ -242,35 +410,37 @@ function renderCampaignMap() {
   const map = document.getElementById('campaign-map');
   map.innerHTML = '';
   map.classList.toggle('phase-reverse', phase === 'reverse');
+  map.classList.toggle('board-hq', campaignRun.board_id === 'hq');
+  map.classList.toggle('board-city', campaignRun.board_id === 'city');
 
   (board.nodes || []).forEach((node) => {
-    // Hide pure forward-only story gates during reverse? keep visible.
     const disp = nodeDisplay(node);
     const cleared = isNodeClearedDisplay(node);
     const unlocked = isCampaignNodeUnlocked(node);
-    // During reverse, skip nodes not in reverse path except boss
-    if (phase === 'reverse' && !reverseQueue().includes(node.id) && !node.boss_requires_reverse_clear && node.type === 'story') {
-      // keep breach story visible as cleared
-    }
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.dataset.nodeId = node.id;
     const inReversePath = reverseQueue().includes(node.id);
+    const skipped = campaignRun.flags && campaignRun.flags.skip_reverse_node === node.id && phase !== 'forward';
     btn.className = 'campaign-node'
-      + (cleared ? ' cleared' : '')
-      + (!unlocked && !cleared ? ' locked' : '')
+      + (cleared || skipped ? ' cleared' : '')
+      + (!unlocked && !cleared && !skipped ? ' locked' : '')
       + (unlocked && !cleared ? ' available' : '')
       + (selectedCampaignNodeId === node.id ? ' selected' : '')
-      + (phase === 'reverse' && inReversePath ? ' reverse-node' : '');
+      + (phase === 'reverse' && inReversePath ? ' reverse-node' : '')
+      + (skipped ? ' skipped-node' : '');
     btn.style.left = `${((node.map && node.map.x != null) ? node.map.x : 0.5) * 100}%`;
     btn.style.top = `${((node.map && node.map.y != null) ? node.map.y : 0.5) * 100}%`;
-    btn.disabled = !unlocked && !cleared;
-    const typeLabel = phase === 'reverse' && inReversePath && !cleared ? 'breach' : (disp.type || 'node');
+    btn.disabled = !unlocked && !cleared && !skipped;
+    const typeLabel = skipped
+      ? 'elevator'
+      : (phase === 'reverse' && inReversePath && !cleared ? 'breach' : (disp.type || 'node'));
     btn.innerHTML = `<span class="node-type">${typeLabel}</span>${disp.title || node.id}`;
     btn.onclick = () => selectCampaignNode(node.id);
     map.appendChild(btn);
   });
   renderCampaignLedgerPanel(false);
+  renderRunKit();
 }
 
 function selectCampaignNode(nodeId) {
@@ -284,14 +454,21 @@ function selectCampaignNode(nodeId) {
   detail.hidden = false;
   document.getElementById('campaign-node-title').textContent = disp.title || node.id;
   document.getElementById('campaign-node-blurb').textContent = disp.blurb || '';
-  const line = (disp.dialogue && disp.dialogue[0])
-    ? `${disp.dialogue[0].speaker || ''}: ${disp.dialogue[0].text || ''}`
-    : '';
+  const coach = nodeCoach({ ...node, coach: disp.coach });
+  let line = '';
+  if (coach === 'silent') {
+    line = 'Radio dead.';
+  } else if (disp.dialogue && disp.dialogue[0]) {
+    const speaker = disp.dialogue[0].speaker || (coach === 'ops' ? 'Ops' : 'Recruiter');
+    line = `${speaker}: ${disp.dialogue[0].text || ''}`;
+  }
   document.getElementById('campaign-node-dialogue').textContent = line;
   const go = document.getElementById('btn-campaign-node-go');
+  const skipped = campaignRun.flags && campaignRun.flags.skip_reverse_node === node.id
+    && (campaignRun.phase === 'reverse' || campaignRun.phase === 'boss' || campaignRun.phase === 'done');
   const cleared = isNodeClearedDisplay(node);
-  go.textContent = cleared ? 'Replay' : 'Enter';
-  go.disabled = !isCampaignNodeUnlocked(node) && !cleared;
+  go.textContent = skipped ? 'Skipped' : (cleared ? 'Replay' : 'Enter');
+  go.disabled = skipped || (!isCampaignNodeUnlocked(node) && !cleared);
 }
 
 function clearCampaignNodeSelection() {
@@ -301,8 +478,17 @@ function clearCampaignNodeSelection() {
   renderCampaignMap();
 }
 
+function storyPanelsForNode(node) {
+  if (!node) return [];
+  const flags = (campaignRun && campaignRun.flags) || {};
+  if (flags.skipped_safe_drop && node.story_panels_reckless && node.story_panels_reckless.length) {
+    return node.story_panels_reckless.slice();
+  }
+  return (node.story_panels || node.story_panels_on_enter || []).slice();
+}
+
 function playCampaignStory(node, onDone) {
-  storyQueue = (node.story_panels || node.story_panels_on_enter || []).slice();
+  storyQueue = storyPanelsForNode(node);
   if (!storyQueue.length) {
     if (onDone) onDone();
     return;
@@ -354,6 +540,14 @@ function markCampaignNodeCleared(node) {
   if (node.triggers_reverse) {
     campaignRun.phase = 'reverse';
     campaignRun.reverse_cleared = campaignRun.reverse_cleared || [];
+    const skip = campaignRun.flags.skip_reverse_node;
+    if (skip && !campaignRun.reverse_cleared.includes(skip)) {
+      campaignRun.reverse_cleared.push(skip);
+      if (!campaignRun.ledger.includes('file_elevator')) {
+        campaignRun.ledger.push('file_elevator');
+      }
+    }
+    if (reverseAllClear()) campaignRun.phase = 'boss';
   }
 
   if (rewards.flags && rewards.flags.illuminati_chapter_complete) {
@@ -362,14 +556,13 @@ function markCampaignNodeCleared(node) {
 
   saveCampaignRun();
 
-  // Board handoff (City → HQ)
   if (rewards.next_board && rewards.next_board !== campaignRun.board_id) {
     const next = rewards.next_board;
+    const note = (campaignRun.flags && campaignRun.flags.skipped_safe_drop)
+      ? 'You reach the Lodge beneath the city. Ops is already on the radio. Reckless on the street, they say.'
+      : 'You reach the Lodge beneath the city. The Recruiter\'s badge is already in a burn bag. Ops takes the channel.';
     setTimeout(() => {
-      transitionToBoard(
-        next,
-        'You reach the Lodge beneath the city. Training continues — until it doesn\'t.'
-      );
+      transitionToBoard(next, note);
     }, 50);
   }
 }
@@ -382,6 +575,45 @@ function resolveMatchConfig(node) {
   return node;
 }
 
+function matchPlayerDeck(raw, resolved) {
+  const mode = resolved.player_deck_mode || raw.player_deck_mode || 'scripted';
+  if (mode === 'scripted' && resolved.player_deck && resolved.player_deck.length) {
+    return { player_deck: resolved.player_deck, shuffle: resolved.shuffle !== false };
+  }
+  let deck = (campaignRun.deck || []).slice();
+  if (!deck.length) deck = expandPresetIds(campaignRun.deck_id || 'campaign_illuminati_city_starter');
+  if (mode === 'run_teach') {
+    const seeds = resolved.teach_seed_ids || raw.teach_seed_ids || [];
+    deck = seedTeachFront(deck, seeds);
+    return { player_deck: deck, shuffle: false };
+  }
+  return { player_deck: deck, shuffle: resolved.shuffle !== false };
+}
+
+function setCoachRadio(node, resolved) {
+  const coach = nodeCoach(resolved || node);
+  campaignCoachLine = null;
+  const el = document.getElementById('match-banner-coach');
+  if (coach === 'silent') {
+    campaignCoachLine = { speaker: '', text: 'Radio dead. Survive.' };
+  } else {
+    const dialogue = (resolved && resolved.dialogue) || node.dialogue || [];
+    if (dialogue[0]) {
+      campaignCoachLine = {
+        speaker: dialogue[0].speaker || (coach === 'ops' ? 'Ops' : 'Recruiter'),
+        text: dialogue[0].text || '',
+      };
+    }
+  }
+  if (el) {
+    if (campaignCoachLine) {
+      el.textContent = campaignCoachLine.speaker
+        ? `${campaignCoachLine.speaker}: ${campaignCoachLine.text}`
+        : campaignCoachLine.text;
+    } else el.textContent = '';
+  }
+}
+
 async function activateSelectedCampaignNode() {
   const board = currentCampaignBoard();
   if (!board || !selectedCampaignNodeId) return;
@@ -390,9 +622,25 @@ async function activateSelectedCampaignNode() {
   const node = resolveMatchConfig(raw);
   pendingCampaignNode = raw;
 
+  if (campaignRun.flags && campaignRun.flags.skip_reverse_node === raw.id
+      && (campaignRun.phase === 'reverse' || campaignRun.phase === 'boss')) {
+    return;
+  }
+
   if (raw.type === 'story' || node.type === 'story') {
     playCampaignStory(node, () => {
       markCampaignNodeCleared(raw);
+      if (raw.triggers_reverse && campaignRun.flags && campaignRun.flags.skip_reverse_node) {
+        const skipId = campaignRun.flags.skip_reverse_node;
+        const skipNode = (board.nodes || []).find((n) => n.id === skipId);
+        const blurb = (skipNode && skipNode.reverse && skipNode.reverse.skip_blurb)
+          || 'Service elevator. That hall stays behind you.';
+        playCampaignStory({ title: 'Back stair', story_panels: [{ text: blurb }] }, () => {
+          renderCampaignMap();
+          showScreen('screen-campaign-map');
+        });
+        return;
+      }
       renderCampaignMap();
       showScreen('screen-campaign-map');
     });
@@ -407,7 +655,7 @@ async function activateSelectedCampaignNode() {
   const startMatch = async () => {
     const ai = node.ai || {};
     let aiFaction = ai.faction || 'templars';
-    if (aiFaction === 'neutral' || aiFaction === 'network') aiFaction = 'reptilians';
+    if (aiFaction === 'neutral' || aiFaction === 'network') aiFaction = 'illuminati';
     const matchOptions = {
       lesson_win: node.lesson_win || raw.lesson_win,
       lesson_loss: node.lesson_loss || raw.lesson_loss,
@@ -429,6 +677,7 @@ async function activateSelectedCampaignNode() {
       matchOptions.twist_description = node.twist.description;
     }
 
+    const deckPayload = matchPlayerDeck(raw, node);
     const payload = {
       player_name: (campaignRun && campaignRun.player_name) || 'Recruit',
       player_faction: (campaignChapter && campaignChapter.faction) || 'illuminati',
@@ -437,7 +686,7 @@ async function activateSelectedCampaignNode() {
       difficulty: ai.difficulty || 'easy',
       mode: 'campaign',
       first_player: node.player_goes_first === false ? 1 : 0,
-      shuffle: node.shuffle !== false,
+      shuffle: deckPayload.shuffle,
       campaign: {
         chapter_id: campaignRun.chapter_id,
         board_id: campaignRun.board_id,
@@ -445,22 +694,40 @@ async function activateSelectedCampaignNode() {
         node_title: node.title || raw.title,
         phase: campaignRun.phase,
         teach: !!node.teach,
+        coach: nodeCoach(node),
       },
       match_options: matchOptions,
+      player_deck: deckPayload.player_deck,
     };
-    if (node.player_deck && node.player_deck.length) payload.player_deck = node.player_deck;
-    else payload.player_deck_id = campaignRun.deck_id || campaignChapter.starter_deck_id;
     if (node.ai_deck && node.ai_deck.length) payload.ai_deck = node.ai_deck;
 
     await beginMatch(payload, { skipMulligan: true });
-    if (node.steps && node.steps.length) {
-      encounter = { id: raw.id, name: node.title, steps: node.steps, teach: true };
+    setCoachRadio(raw, node);
+    let steps = node.steps && node.steps.length ? node.steps.slice() : null;
+    if (steps && (node.player_deck_mode === 'run_teach' || raw.player_deck_mode === 'run_teach')) {
+      const seeds = node.teach_seed_ids || raw.teach_seed_ids || [];
+      const kit = campaignRun.deck || [];
+      steps = steps.map((step) => {
+        const req = step.require || '';
+        if (!req.startsWith('play_named:')) return step;
+        const want = req.slice('play_named:'.length);
+        const seedId = seeds[0];
+        const seedName = seedId ? cardNameById(seedId) : want;
+        if (want !== seedName && !kit.some((id) => cardNameById(id) === want) && !seeds.length) {
+          return { ...step, require: 'free' };
+        }
+        return step;
+      });
+    }
+    if (steps && steps.length && node.teach !== false) {
+      encounter = { id: raw.id, name: node.title, steps, teach: true };
       resetCampaignTeach();
       if (typeof renderTutorialHint === 'function') renderTutorialHint();
       if (typeof render === 'function') render();
     } else {
       encounter = null;
     }
+    if (typeof updateMatchBanner === 'function') updateMatchBanner();
   };
 
   if (node.story_panels_on_enter && node.story_panels_on_enter.length) {
@@ -500,19 +767,20 @@ function confirmSafehousePick(index) {
   const picks = (node.safehouse && node.safehouse.pick_one_of) || [];
   const pick = picks[index];
   if (pick) {
+    applySafehousePickToRun(pick);
     campaignRun.armory_picks = campaignRun.armory_picks || [];
     campaignRun.armory_picks.push({
       id: pick.id,
       label: pick.label,
+      action: pick.action,
       node: node.id,
       board: campaignRun.board_id,
     });
-    if (!campaignRun.ledger.includes('file_armory_pick')) {
-      // dynamic ledger line
-      campaignRun.ledger.push('file_armory_pick');
+    if (pick.action === 'inject' || pick.action === 'add') {
+      if (!campaignRun.ledger.includes('file_armory_pick') && node.id === 'hq_armory') {
+        campaignRun.ledger.push('file_armory_pick');
+      }
     }
-    campaignRun.flags = campaignRun.flags || {};
-    campaignRun.flags.last_armory_pick = pick.label || pick.id;
   }
   markCampaignNodeCleared(node);
   pendingSafehouseNode = null;
@@ -527,12 +795,15 @@ function ledgerCatalog() {
   Object.values(boards).forEach((b) => {
     Object.assign(cat, b.ledger || {});
   });
-  // dynamic pick
   cat.file_armory_pick = {
     title: 'File: Armory Selection',
     text: campaignRun && campaignRun.flags && campaignRun.flags.last_armory_pick
-      ? `You took: ${campaignRun.flags.last_armory_pick}.`
+      ? `Sleeved into the kit: ${campaignRun.flags.last_armory_pick}.`
       : 'You claimed a black-budget tool.',
+  };
+  cat.file_elevator = {
+    title: 'File: Service Elevator',
+    text: 'Puppet Master knew a back stair. Soft Exile was never contested.',
   };
   return cat;
 }
@@ -562,15 +833,24 @@ function updateMatchBanner() {
   }
   const twistEl = document.getElementById('match-banner-twist');
   const crisisEl = document.getElementById('match-banner-crisis');
+  const coachEl = document.getElementById('match-banner-coach');
   let show = false;
   if (state.twist && state.twist.label) {
     twistEl.textContent = `Twist: ${state.twist.label}${state.twist.description ? ' — ' + state.twist.description : ''}`;
     show = true;
-  } else twistEl.textContent = '';
+  } else if (twistEl) twistEl.textContent = '';
   if (state.crisis) {
     crisisEl.textContent = `${state.crisis.label || 'Survive'}: ${state.crisis.turns_completed || 0} / ${state.crisis.turns_required || '?'} turns`;
     show = true;
-  } else crisisEl.textContent = '';
+  } else if (crisisEl) crisisEl.textContent = '';
+  if (coachEl) {
+    if (campaignCoachLine) {
+      coachEl.textContent = campaignCoachLine.speaker
+        ? `${campaignCoachLine.speaker}: ${campaignCoachLine.text}`
+        : campaignCoachLine.text;
+      show = true;
+    } else coachEl.textContent = '';
+  }
   banner.hidden = !show;
 }
 
@@ -581,6 +861,7 @@ function returnToCampaignMap() {
   sessionId = null;
   state = null;
   pendingCampaignNode = null;
+  campaignCoachLine = null;
   document.getElementById('game-over').hidden = true;
   loadCampaignRun();
   ensureCampaignChapter(campaignRun.chapter_id).then(() => {
