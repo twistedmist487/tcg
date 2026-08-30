@@ -47,6 +47,11 @@ export type CardInst = {
   silenced: boolean;
   enraged: boolean;
   attackedThisTurn: number;
+  eotAtk: number;
+  eotHp: number;
+  eotTaunt: boolean;
+  innateTaunt: boolean;
+  recurUsed: boolean;
 };
 
 export type SideId = "player" | "ai";
@@ -90,6 +95,7 @@ export type MatchState = {
   difficulty: "easy" | "medium" | "hard";
   encounterId: string;
   playerGoesFirst: boolean;
+  tutorialStep: string | null;
 };
 
 export type DeckList = {
@@ -99,6 +105,12 @@ export type DeckList = {
   description: string;
   cards: { id: string; copies: number }[];
   custom?: boolean;
+};
+
+export type EncounterStep = {
+  id: string;
+  title: string;
+  text: string;
 };
 
 export type EncounterDef = {
@@ -118,6 +130,7 @@ export type EncounterDef = {
   ai_deck_faction?: string;
   player_goes_first?: boolean;
   shuffle?: boolean;
+  steps?: EncounterStep[];
 };
 
 export const FACTION_META: Record<

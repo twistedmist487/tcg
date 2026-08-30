@@ -75,21 +75,24 @@ export function navActive(pathname: string) {
 export function TerminalFrame({
   children,
   section,
+  compact,
 }: {
   children: ReactNode;
   section?: string;
+  compact?: boolean;
 }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const agent = useArchive();
   const active = section ?? navActive(pathname);
   const home = pathname === "/";
+  const match = compact || pathname === "/match";
 
   return (
     <div className="relative h-dvh overflow-hidden bg-void text-ink">
       <MatrixRain />
       <div className="scan-mask absolute inset-0 z-10 opacity-40" />
       <div className="relative z-20 mx-auto flex h-dvh max-w-[1440px] flex-col px-2 py-2 sm:px-3 sm:py-3">
-        <header className="panel mb-2 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg px-3 py-2 sm:px-4">
+        <header className={cn("panel mb-2 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg px-3 py-2 sm:px-4", match && "mb-1 py-1.5")}>
           <Link to="/" className="flex items-center gap-3 no-underline">
             <img
               src="/art/eye.jpg"
@@ -123,13 +126,14 @@ export function TerminalFrame({
           </div>
         </header>
 
-        {!home && pathname !== "/match" && (
+        {!home && !match && (
           <div className="mb-2 lg:hidden">
             <NavButtons active={active} stacked={false} />
           </div>
         )}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">{children}</div>
 
+        {!match && (
         <footer className="panel mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted sm:px-4">
           <Link
             to="/"
@@ -154,6 +158,7 @@ export function TerminalFrame({
             </span>
           </span>
         </footer>
+        )}
       </div>
       <span className="sr-only">
         Agent {agent.agentId} level {agent.level} {formatXp(agent.xp)} xp

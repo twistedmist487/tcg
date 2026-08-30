@@ -14,7 +14,7 @@ export function matchFromEncounter(
   const aiIds = enc?.ai_deck ?? expandDeck(curatedAi.cards);
 
   return startMatch({
-    playerName: opts?.playerName ?? enc?.player_name ?? "ARCHIVE_7",
+    playerName: enc?.player_name ?? opts?.playerName ?? "ARCHIVE_7",
     aiName: enc?.ai_name ?? "Handler",
     playerFaction: enc?.player_faction ?? playerDeck.faction,
     aiFaction: enc?.ai_faction ?? curatedAi.faction,

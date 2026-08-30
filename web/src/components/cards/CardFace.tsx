@@ -1,6 +1,7 @@
 import { FACTION_META, type CardDef, type FactionId } from "@/lib/game/types";
-import { keywordsOf, plateFor, rarityOf, rulesText } from "@/lib/game/catalog";
+import { artFor, keywordsOf, plateFor, rarityOf, rulesText } from "@/lib/game/catalog";
 import { cn } from "@/lib/utils";
+import type { PointerEvent } from "react";
 
 const FACTION_TEXT: Record<FactionId, string> = {
   illuminati: "text-illuminati",
@@ -16,16 +17,6 @@ const FACTION_RING: Record<FactionId, string> = {
   neutral: "outline-network/40",
 };
 
-function artOffset(id: string) {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 33 + id.charCodeAt(i)) >>> 0;
-  return {
-    x: 20 + (h % 55),
-    y: 18 + ((h >> 6) % 50),
-    src: ["/art/hero.jpg", "/art/cam-alley.jpg", "/art/cam-garage.jpg", "/art/eye.jpg"][h % 4]!,
-  };
-}
-
 export function CardFace({
   card,
   copies,
@@ -39,7 +30,7 @@ export function CardFace({
   compact?: boolean;
   onClick?: () => void;
 }) {
-  const art = artOffset(card.id);
+  const art = artFor(card.id);
   const kws = keywordsOf(card);
   const rare = rarityOf(card);
   const Comp: "button" | "div" = onClick ? "button" : "div";
@@ -59,6 +50,7 @@ export function CardFace({
         src={plateFor(card.faction).front}
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
+        draggable={false}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-void/40 via-transparent to-void/75" />
       <div className="relative z-10 flex h-full flex-col p-1.5 sm:p-2">
@@ -76,6 +68,7 @@ export function CardFace({
             alt=""
             className="h-full w-full scale-125 object-cover"
             style={{ objectPosition: `${art.x}% ${art.y}%` }}
+            draggable={false}
           />
           {locked && (
             <div className="absolute inset-0 flex items-center justify-center bg-void/70 font-mono text-[10px] tracking-[0.2em] text-threat">
@@ -136,7 +129,7 @@ export function CardBack({ faction, className }: { faction: FactionId; className
         className,
       )}
     >
-      <img src={plateFor(faction).back} alt="" className="h-full w-full object-cover" />
+      <img src={plateFor(faction).back} alt="" className="h-full w-full object-cover" draggable={false} />
     </div>
   );
 }
@@ -149,7 +142,14 @@ export function MiniMinion({
   taunt,
   stealth,
   selected,
+  targetable,
+  ready,
+  coached,
+  cardId,
+  iid,
+  faction,
   onClick,
+  onPointerDown,
 }: {
   name: string;
   atk: number;
@@ -158,29 +158,47 @@ export function MiniMinion({
   taunt?: boolean;
   stealth?: boolean;
   selected?: boolean;
+  targetable?: boolean;
+  ready?: boolean;
+  coached?: boolean;
+  cardId?: string;
+  iid?: string;
+  faction?: FactionId;
   onClick?: () => void;
+  onPointerDown?: (e: PointerEvent<HTMLButtonElement>) => void;
 }) {
-  const Tag = onClick ? "button" : "div";
+  const art = artFor(cardId ?? name);
   return (
-    <Tag
-      type={onClick ? "button" : undefined}
+    <button
+      type="button"
+      data-iid={iid}
+      data-card-name={name}
       onClick={onClick}
+      onPointerDown={onPointerDown}
       className={cn(
-        "relative flex h-20 w-16 flex-col items-center justify-end overflow-hidden rounded-full bg-panel-2 text-center outline outline-1 transition-transform duration-150",
-        taunt ? "outline-watch" : "outline-edge",
-        selected && "outline-2 outline-phosphor",
-        exhausted && "opacity-60",
-        stealth && "opacity-80",
-        onClick && "hover:-translate-y-1",
+        "minion-unit",
+        faction,
+        exhausted && "is-exhausted",
+        selected && "is-selected",
+        targetable && "is-targetable",
+        stealth && "is-stealth",
+        taunt && "is-taunt",
+        ready && "is-ready",
+        coached && "coach-mark",
       )}
     >
-      <span className="absolute inset-x-1 top-2 line-clamp-2 font-ui text-[9px] font-semibold leading-tight text-paper">
-        {name}
+      <span className="minion-art">
+        <img
+          src={art.src}
+          alt=""
+          style={{ objectPosition: `${art.x}% ${art.y}%` }}
+          draggable={false}
+        />
+        {stealth && <span className="minion-stealth" />}
       </span>
-      <div className="mb-1 flex w-full justify-between px-1">
-        <span className="rounded-sm bg-threat/80 px-1 font-mono text-[10px] text-paper">{atk}</span>
-        <span className="rounded-sm bg-phosphor-deep px-1 font-mono text-[10px] text-phosphor">{hp}</span>
-      </div>
-    </Tag>
+      <span className="minion-name">{name}</span>
+      <span className="minion-atk">{atk}</span>
+      <span className="minion-hp">{hp}</span>
+    </button>
   );
 }

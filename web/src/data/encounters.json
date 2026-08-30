@@ -81,7 +81,7 @@
       {
         "id": "welcome",
         "title": "Energy and your hand",
-        "text": "You start with 1 energy. Cards cost energy to play. Drag Squire (cost 1) onto your board, or click it then Play Card."
+        "text": "You start with 1 energy. Cards cost energy to play. Drag Squire (cost 1) onto your board, or click it."
       },
       {
         "id": "exhaustion",
@@ -106,17 +106,17 @@
       {
         "id": "spell",
         "title": "Spells",
-        "text": "Spells are one-shot effects. Drag Divine Smite onto the highlighted enemy, or click it then the enemy you want to damage."
+        "text": "Spells are one-shot effects. Drag Divine Smite onto the highlighted enemy, or click it then the enemy. It hits a character — not their hero."
       },
       {
         "id": "location",
         "title": "Locations",
-        "text": "Locations stay in play (one at a time). Drag Sacred Chapel onto your location slot, or click it then Play Card."
+        "text": "Locations stay in play (one at a time). Drag Sacred Chapel onto the location slot, or click it."
       },
       {
         "id": "charge",
         "title": "Charge",
-        "text": "Zealot has Charge \u2014 it can attack the turn you play it. Drag Zealot onto your board, then drag it onto an enemy. You can also click it, Play Card, then attack."
+        "text": "Zealot has Charge \u2014 it can attack the turn you play it. Drag Zealot onto your board, then drag it onto an enemy. You can also click it, then click an enemy."
       },
       {
         "id": "free",

@@ -54,6 +54,40 @@ export function rarityOf(card: CardDef): "common" | "uncommon" | "rare" | "legen
   return "common";
 }
 
+export function artFor(id: string) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 33 + id.charCodeAt(i)) >>> 0;
+  return {
+    x: 20 + (h % 55),
+    y: 18 + ((h >> 6) % 50),
+    src: ["/art/hero.jpg", "/art/cam-alley.jpg", "/art/cam-garage.jpg", "/art/eye.jpg"][h % 4]!,
+  };
+}
+
+export function energyCrystal(faction: FactionId): string {
+  if (faction === "templars") return "/ui/energy/faith.jpg";
+  if (faction === "reptilians") return "/ui/energy/psionics.jpg";
+  if (faction === "illuminati") return "/ui/energy/influence.jpg";
+  return "/ui/energy/empty.jpg";
+}
+
+export function powerArt(faction: Exclude<FactionId, "neutral">, ready: boolean) {
+  return `/ui/powers/${faction}-${ready ? "on" : "off"}.jpg`;
+}
+
+export function nameplateArt(faction: Exclude<FactionId, "neutral">) {
+  return `/ui/chrome/nameplate-${faction}.jpg`;
+}
+
+export const POWER_META: Record<
+  Exclude<FactionId, "neutral">,
+  { name: string; text: string }
+> = {
+  illuminati: { name: "Pull Strings", text: "Deal 1 to any target." },
+  templars: { name: "Call Initiate", text: "Summon a 1/1 Taunt Initiate." },
+  reptilians: { name: "Psi Lash", text: "Deal 2 to the enemy hero." },
+};
+
 export function plateFor(faction: FactionId): { front: string; back: string } {
   const file = FACTION_META[faction].file;
   return {
