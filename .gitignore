@@ -47,3 +47,11 @@ tmp/
 
 # Game-specific exports
 *.log
+
+# React / TanStack client (web/)
+web/dist/
+web/.output/
+web/.nitro/
+web/.tanstack/
+web/.vite/
+web/.cache/

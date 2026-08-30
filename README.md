@@ -33,6 +33,13 @@ python3 -m uvicorn server.app:app --port 8080
 ```
 Open http://localhost:8080 in your browser. Play the tutorial, the Keyword Lab, fight the AI, run a faction encounter, or build a deck.
 
+### React client (`web/`)
+TypeScript/TanStack playable (collection, decks, missions, store, match vs AI):
+```bash
+cd web && npm install && npm run dev
+```
+See [web/README.md](web/README.md).
+
 ### CLI (vs AI)
 ```bash
 python3 -m cli/game.py
@@ -96,6 +103,9 @@ python3 -m cli/game.py
 │   ├── test_player.py   # Player state (22 tests)
 │   ├── test_server.py   # FastAPI endpoints (14 tests)
 │   └── test_validate_cards.py # Schema validation (11 tests)
+├── web/                 # React / TanStack client (TRUTH.EXE)
+│   ├── src/             # Routes, TS match engine, data
+│   └── public/          # Card plates, table chrome
 ├── tools/
 │   └── validate_cards.py # Card schema validator
 ├── AGENTS.md            # AI cocreator guide
