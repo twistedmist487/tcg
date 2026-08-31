@@ -14,12 +14,14 @@ import { Route as CampaignRouteImport } from './routes/campaign'
 import { Route as CollectionRouteImport } from './routes/collection'
 import { Route as DecksRouteImport } from './routes/decks'
 import { Route as LockerRouteImport } from './routes/locker'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as MatchRouteImport } from './routes/match'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as PlayRouteImport } from './routes/play'
 import { Route as SetupRouteImport } from './routes/setup'
 import { Route as StoreRouteImport } from './routes/store'
 import { Route as DecksIdRouteImport } from './routes/decks.$id'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -44,6 +46,11 @@ const DecksRoute = DecksRouteImport.update({
 const LockerRoute = LockerRouteImport.update({
   id: '/locker',
   path: '/locker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchRoute = MatchRouteImport.update({
@@ -76,6 +83,11 @@ const DecksIdRoute = DecksIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => DecksRoute,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -83,12 +95,14 @@ export interface FileRoutesByFullPath {
   '/collection': typeof CollectionRoute
   '/decks': typeof DecksRouteWithChildren
   '/locker': typeof LockerRoute
+  '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/missions': typeof MissionsRoute
   '/play': typeof PlayRoute
   '/setup': typeof SetupRoute
   '/store': typeof StoreRoute
   '/decks/$id': typeof DecksIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -96,12 +110,14 @@ export interface FileRoutesByTo {
   '/collection': typeof CollectionRoute
   '/decks': typeof DecksRouteWithChildren
   '/locker': typeof LockerRoute
+  '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/missions': typeof MissionsRoute
   '/play': typeof PlayRoute
   '/setup': typeof SetupRoute
   '/store': typeof StoreRoute
   '/decks/$id': typeof DecksIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -110,12 +126,14 @@ export interface FileRoutesById {
   '/collection': typeof CollectionRoute
   '/decks': typeof DecksRouteWithChildren
   '/locker': typeof LockerRoute
+  '/login': typeof LoginRoute
   '/match': typeof MatchRoute
   '/missions': typeof MissionsRoute
   '/play': typeof PlayRoute
   '/setup': typeof SetupRoute
   '/store': typeof StoreRoute
   '/decks/$id': typeof DecksIdRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -125,12 +143,14 @@ export interface FileRouteTypes {
     | '/collection'
     | '/decks'
     | '/locker'
+    | '/login'
     | '/match'
     | '/missions'
     | '/play'
     | '/setup'
     | '/store'
     | '/decks/$id'
+    | '/api/auth/$'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -138,12 +158,14 @@ export interface FileRouteTypes {
     | '/collection'
     | '/decks'
     | '/locker'
+    | '/login'
     | '/match'
     | '/missions'
     | '/play'
     | '/setup'
     | '/store'
     | '/decks/$id'
+    | '/api/auth/$'
   id:
     | '__root__'
     | '/'
@@ -151,12 +173,14 @@ export interface FileRouteTypes {
     | '/collection'
     | '/decks'
     | '/locker'
+    | '/login'
     | '/match'
     | '/missions'
     | '/play'
     | '/setup'
     | '/store'
     | '/decks/$id'
+    | '/api/auth/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -165,11 +189,13 @@ export interface RootRouteChildren {
   CollectionRoute: typeof CollectionRoute
   DecksRoute: typeof DecksRouteWithChildren
   LockerRoute: typeof LockerRoute
+  LoginRoute: typeof LoginRoute
   MatchRoute: typeof MatchRoute
   MissionsRoute: typeof MissionsRoute
   PlayRoute: typeof PlayRoute
   SetupRoute: typeof SetupRoute
   StoreRoute: typeof StoreRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -207,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/locker'
       fullPath: '/locker'
       preLoaderRoute: typeof LockerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/match': {
@@ -251,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DecksIdRouteImport
       parentRoute: typeof DecksRoute
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -270,11 +310,13 @@ const rootRouteChildren: RootRouteChildren = {
   CollectionRoute: CollectionRoute,
   DecksRoute: DecksRouteWithChildren,
   LockerRoute: LockerRoute,
+  LoginRoute: LoginRoute,
   MatchRoute: MatchRoute,
   MissionsRoute: MissionsRoute,
   PlayRoute: PlayRoute,
   SetupRoute: SetupRoute,
   StoreRoute: StoreRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

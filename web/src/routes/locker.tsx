@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Lock } from "lucide-react";
 import { TerminalFrame } from "@/components/shell/TerminalFrame";
 import { NavButtons, PageHeader } from "@/components/nav/NavButtons";
+import { ClaimArchive } from "@/components/archive/ClaimArchive";
 import {
   COSMETICS,
   SLOT_LABEL,
@@ -72,6 +73,8 @@ function LockerPage() {
               </div>
             </div>
           </div>
+
+          <ClaimArchive />
 
           {SLOTS.map((slot) => (
             <section key={slot} className="mt-8">

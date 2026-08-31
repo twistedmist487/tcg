@@ -2,7 +2,7 @@
 
 A single-player strategic card game where three conspiracy-themed factions battle for global dominance through manipulation, ancient power, and otherworldly influence. Inspired by Hearthstone's gameplay with a dark conspiracy theme drawn from Robert Storey's "Ancient Origins" series.
 
-Learn in a guided tutorial, then play against AI. No multiplayer, accounts, or matchmaking.
+Learn in a guided tutorial, then play against AI. Optional CLAIM ARCHIVE (Google / X) binds collection and campaign across devices. No matchmaking.
 
 **240 cards | 3 factions + Network | Browser vs AI | Tutorial-first solo play**
 

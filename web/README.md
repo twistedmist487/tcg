@@ -23,8 +23,9 @@ npm run typecheck
 
 - `src/data/` — cards, decks, encounters, factions (mirrors `../data/`)
 - `src/lib/game/` — TypeScript match engine + AI
-- `src/routes/` — home, play, match, collection, decks, missions, store, locker, campaign
+- `src/routes/` — home, play, match, collection, decks, missions, store, locker, campaign, login
 - `src/data/campaign/` — Illuminati (City + HQ), Templars (Vault of Faith), Reptilians (Psionic Hive)
+- `src/lib/archive/` — CLAIM ARCHIVE cloud blob (optional Google / X)
 - `public/cards/` and `public/ui/` — faction plates, table chrome, campaign art
 
-Progress (collection unlocks, decks, match history) is stored in the browser.
+Progress lives in the browser (`truth-exe-archive`). Optional CLAIM ARCHIVE binds that file to a handler so collection, cosmetics, and campaign survive a device change. Play is not gated on sign-in. Live matches stay local. Next campaign boards: `docs/plans/campaign-slices.md`.

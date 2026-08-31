@@ -1,6 +1,7 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
+import { ArchiveSync } from "@/components/archive/ArchiveSync";
 import appCss from "../styles.css?url";
 
 const APP_NAME = "TRUTH.EXE";
@@ -36,6 +37,7 @@ export const Route = createRootRoute({
       <body className="bg-void text-ink">
         <PreviewHostBridge />
         <AuthProvider>
+          <ArchiveSync />
           <Outlet />
         </AuthProvider>
         <Scripts />

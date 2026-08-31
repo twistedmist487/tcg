@@ -5,6 +5,8 @@ import { cn, formatXp } from "@/lib/utils";
 import { useArchive } from "@/lib/store";
 import { NAV } from "@/components/nav/items";
 import { NavButtons } from "@/components/nav/NavButtons";
+import { authEnabled } from "@/lib/auth/client";
+import { useCurrentUserState } from "@/lib/auth/use-current-user";
 
 function MatrixRain() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -64,6 +66,17 @@ function MatrixRain() {
   );
 }
 
+function HandlerChip() {
+  const { user } = useCurrentUserState();
+  if (!authEnabled) return null;
+  if (user) return <span className="text-phosphor">BOUND</span>;
+  return (
+    <Link to="/login" className="text-phosphor no-underline hover:text-ink">
+      CLAIM ARCHIVE
+    </Link>
+  );
+}
+
 const NAV_LOCAL = NAV;
 
 export function navActive(pathname: string) {
@@ -112,6 +125,7 @@ export function TerminalFrame({
             <span>
               USER: <span className="text-ink">{agent.handle}</span>
             </span>
+            {!match && <HandlerChip />}
             <span>
               CLEARANCE: <span className="text-threat">[REDACTED]</span>
             </span>

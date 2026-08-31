@@ -24,6 +24,7 @@ import {
   type CosmeticSlot,
 } from "@/lib/game/cosmetics";
 import type { CampaignRun, DeckList, MatchState, SafehousePick } from "@/lib/game/types";
+import { toArchiveBlob, type ArchiveBlob } from "@/lib/archive/blob";
 
 type Collection = Record<string, number>;
 
@@ -54,6 +55,7 @@ type AgentState = {
   vaultHeroicCleared: boolean;
   hiveCleared: boolean;
   hiveHeroicCleared: boolean;
+  cloudBoundUserId: string | null;
 };
 
 type Store = AgentState & {
@@ -74,6 +76,7 @@ type Store = AgentState & {
   applyCampaignSafehouse: (nodeId: string, pick: SafehousePick) => void;
   enterCampaignHq: () => void;
   equipCosmetic: (id: string) => void;
+  applyCloudArchive: (blob: ArchiveBlob, userId: string) => void;
   resetArchive: () => void;
 };
 
@@ -165,6 +168,7 @@ const initial = (): AgentState => ({
   vaultHeroicCleared: false,
   hiveCleared: false,
   hiveHeroicCleared: false,
+  cloudBoundUserId: null,
 });
 
 export const useArchive = create<Store>()(
@@ -367,7 +371,42 @@ export const useArchive = create<Store>()(
           const slot: CosmeticSlot = item.slot;
           return { cosmeticsLoadout: { ...s.cosmeticsLoadout, [slot]: id } };
         }),
-      resetArchive: () => set({ ...initial(), match: null, campaignRun: null }),
+      applyCloudArchive: (blob, userId) =>
+        set((s) => {
+          const next = toArchiveBlob({ ...s, ...blob, campaignRun: blob.campaignRun });
+          return {
+            agentId: next.agentId,
+            handle: next.handle,
+            level: next.level,
+            xp: next.xp,
+            credits: next.credits,
+            decrypted: next.decrypted,
+            collection: next.collection,
+            decks: next.decks.length ? next.decks : s.decks,
+            activeDeckId: next.activeDeckId,
+            missions: { ...s.missions, ...next.missions },
+            wins: next.wins,
+            losses: next.losses,
+            packsOpened: next.packsOpened,
+            cosmeticsUnlocked: mergeUnlocks({ ...s, ...next }, progressOf(next)),
+            cosmeticsLoadout: next.cosmeticsLoadout,
+            fieldAcquired: next.fieldAcquired,
+            cityCleared: next.cityCleared,
+            chapterCleared: next.chapterCleared,
+            heroicCleared: next.heroicCleared,
+            recklessCleared: next.recklessCleared,
+            vaultCleared: next.vaultCleared,
+            vaultHeroicCleared: next.vaultHeroicCleared,
+            hiveCleared: next.hiveCleared,
+            hiveHeroicCleared: next.hiveHeroicCleared,
+            campaignRun: next.campaignRun,
+            cloudBoundUserId: userId,
+          };
+        }),
+      resetArchive: () => {
+        const bound = get().cloudBoundUserId;
+        set({ ...initial(), match: null, campaignRun: null, cloudBoundUserId: bound });
+      },
     }),
     {
       name: "truth-exe-archive",
@@ -398,6 +437,7 @@ export const useArchive = create<Store>()(
         vaultHeroicCleared: s.vaultHeroicCleared,
         hiveCleared: s.hiveCleared,
         hiveHeroicCleared: s.hiveHeroicCleared,
+        cloudBoundUserId: s.cloudBoundUserId,
       }),
     },
   ),
