@@ -52,6 +52,7 @@ export type CardInst = {
   eotTaunt: boolean;
   innateTaunt: boolean;
   recurUsed: boolean;
+  eotSilence: boolean;
 };
 
 export type SideId = "player" | "ai";
@@ -96,6 +97,9 @@ export type MatchState = {
   encounterId: string;
   playerGoesFirst: boolean;
   tutorialStep: string | null;
+  campaign: CampaignMatch | null;
+  crisis: CrisisState | null;
+  twist: TwistState | null;
 };
 
 export type DeckList = {
@@ -112,6 +116,148 @@ export type EncounterStep = {
   title: string;
   text: string;
 };
+
+export type CampaignStep = EncounterStep & {
+  require?: string;
+  highlight?: string;
+};
+
+export type StoryPanel = { text: string };
+
+export type SafehousePick = {
+  id: string;
+  label: string;
+  blurb: string;
+  action: "add" | "inject" | "prune" | "skip";
+  copies?: number;
+  trim?: string[];
+  prune_id?: string;
+  skip_reverse_node?: string;
+};
+
+export type CampaignTwist = {
+  id: string;
+  label: string;
+  description: string;
+  match_modifiers?: { enemy_character_health_bonus?: number };
+};
+
+export type CampaignNodeReverse = {
+  title?: string;
+  blurb?: string;
+  type?: "story" | "combat" | "crisis" | "safehouse" | "boss";
+  ai?: { difficulty?: "easy" | "medium" | "hard"; name?: string; faction?: string };
+  ai_starting_life?: number;
+  player_goes_first?: boolean;
+  shuffle?: boolean;
+  player_deck?: string[] | { id: string; copies: number }[];
+  ai_deck?: string[] | { id: string; copies: number }[];
+  twist?: CampaignTwist;
+  dialogue?: { speaker: string; text: string }[];
+  player_deck_mode?: "scripted" | "run" | "run_teach";
+  coach?: "recruiter" | "ops" | "silent";
+  skip_blurb?: string;
+  steps?: CampaignStep[];
+  teach?: boolean;
+};
+
+export type CampaignNode = {
+  id: string;
+  type: "story" | "combat" | "crisis" | "safehouse" | "boss";
+  title: string;
+  blurb: string;
+  map: { x: number; y: number };
+  requires: string[];
+  unlocks: string[];
+  ai?: { difficulty?: "easy" | "medium" | "hard"; name?: string; faction?: string };
+  player_goes_first?: boolean;
+  shuffle?: boolean;
+  ai_starting_life?: number;
+  player_deck?: string[] | { id: string; copies: number }[];
+  ai_deck?: string[] | { id: string; copies: number }[];
+  teach?: boolean;
+  steps?: CampaignStep[];
+  dialogue?: { speaker: string; text: string }[];
+  rewards?: {
+    ledger_ids?: string[];
+    flags?: Record<string, boolean>;
+    next_board?: string;
+  };
+  lesson_win?: string;
+  lesson_loss?: string;
+  player_deck_mode?: "scripted" | "run" | "run_teach";
+  teach_seed_ids?: string[];
+  coach?: "recruiter" | "ops" | "silent";
+  story_panels?: StoryPanel[];
+  story_panels_on_enter?: StoryPanel[];
+  story_panels_reckless?: StoryPanel[];
+  safehouse?: { text: string; pick_one_of: SafehousePick[] };
+  crisis?: { win: "survive_turns"; turns: number; label: string };
+  reverse?: CampaignNodeReverse;
+  triggers_reverse?: boolean;
+  boss_requires_reverse_clear?: boolean;
+  twist?: CampaignTwist;
+};
+
+export type CampaignBoard = {
+  id: string;
+  name: string;
+  chapter_id: string;
+  start_node: string;
+  map_hint: string;
+  reverse_order?: string[];
+  boss_node?: string;
+  nodes: CampaignNode[];
+  ledger: Record<string, { title: string; text: string }>;
+};
+
+export type CampaignPhase = "forward" | "reverse" | "boss" | "city_complete" | "done";
+
+export type CampaignRun = {
+  version: 1;
+  chapterId: string;
+  boardId: string;
+  difficulty: "normal" | "heroic";
+  phase: CampaignPhase;
+  cleared: string[];
+  reverseCleared: string[];
+  ledger: string[];
+  flags: Record<string, boolean | string>;
+  armoryPicks: { id: string; label?: string; action: string; node: string }[];
+  deckId: string;
+  deck: string[];
+  deckLive: boolean;
+  rewardsGranted: string[];
+  currentNodeId: string | null;
+};
+
+export type CampaignMatch = {
+  chapterId: string;
+  boardId: string;
+  nodeId: string;
+  nodeTitle: string;
+  coach: "recruiter" | "ops" | "silent";
+  teach: boolean;
+  steps: CampaignStep[];
+  lessonWin?: string;
+  lessonLoss?: string;
+  twistLabel?: string;
+};
+
+export type CrisisState = {
+  win: "survive_turns";
+  turnsRequired: number;
+  turnsCompleted: number;
+  label: string;
+};
+
+export type TwistState = {
+  id: string;
+  label: string;
+  description: string;
+  enemyHealthBonus: number;
+};
+
 
 export type EncounterDef = {
   id: string;

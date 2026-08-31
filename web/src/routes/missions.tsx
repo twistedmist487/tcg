@@ -4,6 +4,7 @@ import { TerminalFrame } from "@/components/shell/TerminalFrame";
 import { NavButtons, PageHeader } from "@/components/nav/NavButtons";
 import { ENCOUNTERS } from "@/lib/game/catalog";
 import { matchFromEncounter } from "@/lib/game/launch";
+import { callsignOf } from "@/lib/game/cosmetics";
 import { useArchive } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +18,11 @@ function MissionsPage() {
   const launch = (id: string) => {
     const status = archive.missions[id] ?? "available";
     if (status === "locked") return;
-    archive.setMatch(matchFromEncounter(id, deck, { playerName: archive.handle }));
+    archive.setMatch(
+      matchFromEncounter(id, deck, {
+        playerName: callsignOf(archive.handle, archive.cosmeticsLoadout?.title ?? "title-archive"),
+      }),
+    );
     void nav({ to: "/match" });
   };
 
@@ -25,7 +30,7 @@ function MissionsPage() {
     {
       id: "illuminati",
       title: "The Inner Circle",
-      blurb: "City initiation, then HQ. Learn Influence by doing. Illuminati chapter.",
+      blurb: "City initiation, then HQ. Heroic on the hub. Field cards and locker sleeves.",
     },
   ];
 
@@ -46,22 +51,32 @@ function MissionsPage() {
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             {campaign.map((c) => {
               const st = archive.missions[c.id] ?? "available";
+              const live = Boolean(archive.campaignRun);
               return (
                 <button
                   key={c.id}
                   type="button"
                   disabled={st === "locked"}
-                  onClick={() => launch("tutorial")}
+                  onClick={() => void nav({ to: "/campaign" })}
                   className={cn(
                     "rounded-lg p-4 text-left",
-                    st === "complete" ? "metal-btn-live" : "metal-btn",
+                    st === "complete" || live ? "metal-btn-live" : "metal-btn",
                   )}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-ui text-lg font-semibold">{c.title}</span>
-                    <StatusChip status={st} />
+                    <StatusChip status={st === "complete" ? "complete" : live ? "available" : st} />
                   </div>
                   <p className="mt-2 font-mono text-[11px] leading-relaxed text-muted">{c.blurb}</p>
+                  <div className="mt-2 font-mono text-[10px] tracking-[0.16em] text-watch">
+                    {live
+                      ? archive.campaignRun?.boardId === "hq"
+                        ? "RESUME LODGE"
+                        : "RESUME CITY BOARD"
+                      : st === "complete"
+                        ? "CHAPTER ON FILE"
+                        : "OPEN INITIATION"}
+                  </div>
                 </button>
               );
             })}

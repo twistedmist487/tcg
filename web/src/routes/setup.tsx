@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/nav/NavButtons";
 import { FACTION_META, type FactionId } from "@/lib/game/types";
 import { portraitFor } from "@/lib/game/catalog";
 import { matchFromSkirmish } from "@/lib/game/launch";
+import { callsignOf } from "@/lib/game/cosmetics";
 import { useArchive } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -97,7 +98,7 @@ function Setup() {
                     playerDeck: deck,
                     opponentFaction: opp,
                     difficulty: diff,
-                    playerName: archive.handle,
+                    playerName: callsignOf(archive.handle, archive.cosmeticsLoadout?.title ?? "title-archive"),
                   }),
                 );
                 void nav({ to: "/match" });

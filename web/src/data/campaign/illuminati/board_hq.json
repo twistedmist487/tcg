@@ -1,0 +1,950 @@
+{
+  "id": "hq",
+  "name": "Illuminati HQ",
+  "chapter_id": "illuminati",
+  "start_node": "hq_arrival",
+  "map_hint": "Train in the sanctum with your kit. When the breach hits, fight back out under Fortitude.",
+  "reverse_order": [
+    "train_bounce",
+    "train_discard",
+    "train_silence"
+  ],
+  "boss_node": "grandmaster",
+  "nodes": [
+    {
+      "id": "hq_arrival",
+      "type": "story",
+      "title": "The Lodge",
+      "blurb": "You are pulled into HQ for refined training.",
+      "map": {
+        "x": 0.1,
+        "y": 0.5
+      },
+      "requires": [],
+      "unlocks": [
+        "train_silence"
+      ],
+      "story_panels": [
+        {
+          "text": "They pull you through a service door under the city. Someone is already feeding the Recruiter's badge into a burn bag."
+        },
+        {
+          "text": "A colder voice on the interior radio: \"Ops. Condolences later. Here we teach Influence properly \u2014 silence, discard, denial. Then you earn the right to leave.\""
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_hq_arrival"
+        ]
+      },
+      "story_panels_reckless": [
+        {
+          "text": "They pull you through a service door. The Recruiter's badge is already ash. Ops does not mention the drop you skipped."
+        },
+        {
+          "text": "\"Reckless on the street, reckless in my halls. We will work with the kit you kept. Silence. Discard. Denial. Then you leave.\""
+        }
+      ],
+      "coach": "ops"
+    },
+    {
+      "id": "train_silence",
+      "type": "combat",
+      "title": "Mute Chamber",
+      "blurb": "Silence strips keywords. AI at 12 life.",
+      "map": {
+        "x": 0.28,
+        "y": 0.38
+      },
+      "requires": [
+        "hq_arrival"
+      ],
+      "unlocks": [
+        "train_discard"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Quiet Auditor",
+        "faction": "illuminati"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "illuminati_char_009",
+        "illuminati_spell_001",
+        "illuminati_char_001",
+        "illuminati_spell_012",
+        "illuminati_spell_011",
+        "neutral_char_007",
+        "illuminati_char_015",
+        "illuminati_spell_002",
+        "illuminati_char_009",
+        "illuminati_spell_001",
+        "illuminati_char_001",
+        "illuminati_spell_012",
+        "illuminati_spell_011",
+        "neutral_char_007",
+        "illuminati_char_015",
+        "illuminati_spell_002",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "neutral_char_022",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "neutral_char_021",
+        "neutral_char_029"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "illuminati_spell_001",
+        "illuminati_char_018",
+        "illuminati_spell_010",
+        "neutral_char_007",
+        "neutral_char_021",
+        "illuminati_spell_001",
+        "illuminati_char_018",
+        "illuminati_spell_010",
+        "neutral_char_007",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_char_009",
+        "illuminati_spell_011",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "illuminati_char_015",
+        "neutral_char_022",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "illuminati_char_012",
+        "illuminati_spell_014",
+        "neutral_spell_014",
+        "illuminati_char_002",
+        "illuminati_char_004"
+      ],
+      "teach": true,
+      "steps": [
+        {
+          "id": "silence",
+          "title": "Silence",
+          "text": "Media Blackout and mute effects strip Taunt/Stealth/abilities. Play Media Blackout when you can afford it, or win through board.",
+          "require": "play_named:Media Blackout"
+        },
+        {
+          "id": "free",
+          "title": "Clear the chamber",
+          "text": "Finish the Auditor \u2014 12 life.",
+          "require": "free"
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_silence"
+        ]
+      },
+      "reverse": {
+        "title": "Mute Chamber \u2014 Breached",
+        "blurb": "Templars in the silence lab. Fortitude is up.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "Chapel Interdictor",
+          "faction": "templars"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "illuminati_char_009",
+          "illuminati_spell_001",
+          "illuminati_char_001",
+          "illuminati_spell_012",
+          "illuminati_spell_011",
+          "neutral_char_007",
+          "illuminati_char_015",
+          "illuminati_spell_002",
+          "illuminati_char_009",
+          "illuminati_spell_001",
+          "illuminati_char_001",
+          "illuminati_spell_012",
+          "illuminati_spell_011",
+          "neutral_char_007",
+          "illuminati_char_015",
+          "illuminati_spell_002",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "illuminati_spell_004",
+          "illuminati_spell_009",
+          "illuminati_char_006",
+          "illuminati_loc_006",
+          "neutral_char_022",
+          "neutral_char_001",
+          "neutral_char_028",
+          "neutral_spell_003",
+          "neutral_spell_022",
+          "neutral_char_021",
+          "neutral_char_029"
+        ],
+        "ai_deck": [
+          "templars_char_014",
+          "templars_char_018",
+          "templars_spell_010",
+          "templars_char_011",
+          "templars_spell_006",
+          "templars_char_014",
+          "templars_char_018",
+          "templars_spell_010",
+          "templars_char_011",
+          "templars_spell_006",
+          "templars_char_009",
+          "templars_char_002",
+          "templars_char_006",
+          "templars_char_004",
+          "templars_char_007",
+          "templars_char_015",
+          "templars_char_001",
+          "templars_spell_001",
+          "templars_spell_003",
+          "templars_spell_004",
+          "templars_spell_005",
+          "templars_spell_011",
+          "templars_spell_012",
+          "templars_loc_001",
+          "neutral_char_005",
+          "neutral_char_007",
+          "templars_char_009",
+          "templars_char_002",
+          "templars_char_006",
+          "templars_char_004"
+        ],
+        "twist": {
+          "id": "templar_fortitude",
+          "label": "Righteous Fortitude",
+          "description": "Enemy characters enter play with +1 Health.",
+          "match_modifiers": {
+            "enemy_character_health_bonus": 1
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "Ops",
+            "text": "Twist active: Templar bodies are tougher (+1 Health on enter)."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "ops"
+      },
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": [
+        "illuminati_spell_001"
+      ],
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Mute the room. Media Blackout is on loan if you did not pack it. Keywords die. Walls go quiet."
+        }
+      ]
+    },
+    {
+      "id": "train_discard",
+      "type": "combat",
+      "title": "Burn Room",
+      "blurb": "Discard and hand pressure. AI at 12 life.",
+      "map": {
+        "x": 0.46,
+        "y": 0.55
+      },
+      "requires": [
+        "train_silence"
+      ],
+      "unlocks": [
+        "train_bounce"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Ash Clerk",
+        "faction": "illuminati"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "illuminati_char_009",
+        "illuminati_spell_001",
+        "illuminati_char_001",
+        "illuminati_spell_012",
+        "illuminati_spell_011",
+        "neutral_char_007",
+        "illuminati_char_015",
+        "illuminati_spell_002",
+        "illuminati_char_009",
+        "illuminati_spell_001",
+        "illuminati_char_001",
+        "illuminati_spell_012",
+        "illuminati_spell_011",
+        "neutral_char_007",
+        "illuminati_char_015",
+        "illuminati_spell_002",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "neutral_char_022",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "neutral_char_021",
+        "neutral_char_029"
+      ],
+      "ai_deck": [
+        "illuminati_char_006",
+        "illuminati_char_001",
+        "illuminati_spell_013",
+        "illuminati_char_014",
+        "illuminati_spell_002",
+        "illuminati_char_006",
+        "illuminati_char_001",
+        "illuminati_spell_013",
+        "illuminati_char_014",
+        "illuminati_spell_002",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_char_009",
+        "illuminati_spell_011",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_loc_006",
+        "illuminati_char_015",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "illuminati_spell_014",
+        "neutral_char_004",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_char_009"
+      ],
+      "teach": true,
+      "steps": [
+        {
+          "id": "discard",
+          "title": "Discard",
+          "text": "Shadow Broker and Leak tools attack the hand. Play Shadow Broker when you can.",
+          "require": "play_named:Shadow Broker"
+        },
+        {
+          "id": "free",
+          "title": "Empty the burn room",
+          "text": "Pressure life \u2014 Ash Clerk is on 12.",
+          "require": "free"
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_discard"
+        ]
+      },
+      "reverse": {
+        "title": "Burn Room \u2014 Breached",
+        "blurb": "Templar purge teams torch the archives.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "Relic Arsonist",
+          "faction": "templars"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "illuminati_char_009",
+          "illuminati_spell_001",
+          "illuminati_char_001",
+          "illuminati_spell_012",
+          "illuminati_spell_011",
+          "neutral_char_007",
+          "illuminati_char_015",
+          "illuminati_spell_002",
+          "illuminati_char_009",
+          "illuminati_spell_001",
+          "illuminati_char_001",
+          "illuminati_spell_012",
+          "illuminati_spell_011",
+          "neutral_char_007",
+          "illuminati_char_015",
+          "illuminati_spell_002",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "illuminati_spell_004",
+          "illuminati_spell_009",
+          "illuminati_char_006",
+          "illuminati_loc_006",
+          "neutral_char_022",
+          "neutral_char_001",
+          "neutral_char_028",
+          "neutral_spell_003",
+          "neutral_spell_022",
+          "neutral_char_021",
+          "neutral_char_029"
+        ],
+        "ai_deck": [
+          "templars_char_002",
+          "templars_char_007",
+          "templars_spell_012",
+          "templars_char_006",
+          "templars_loc_001",
+          "templars_char_002",
+          "templars_char_007",
+          "templars_spell_012",
+          "templars_char_006",
+          "templars_loc_001",
+          "templars_char_009",
+          "templars_char_004",
+          "templars_char_015",
+          "templars_char_001",
+          "templars_spell_001",
+          "templars_spell_003",
+          "templars_spell_004",
+          "templars_spell_005",
+          "templars_spell_011",
+          "templars_char_014",
+          "templars_char_018",
+          "neutral_char_005",
+          "neutral_char_007",
+          "templars_char_009",
+          "templars_char_004",
+          "templars_char_015",
+          "templars_char_001",
+          "templars_spell_001",
+          "templars_spell_003",
+          "templars_spell_004"
+        ],
+        "twist": {
+          "id": "templar_fortitude",
+          "label": "Righteous Fortitude",
+          "description": "Enemy characters enter play with +1 Health.",
+          "match_modifiers": {
+            "enemy_character_health_bonus": 1
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "Ops",
+            "text": "Twist active: Templar bodies are tougher (+1 Health on enter)."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "ops"
+      },
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": [
+        "illuminati_char_001"
+      ],
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Empty their options. Shadow Broker if you still carry one. Attrition is a victory condition."
+        }
+      ]
+    },
+    {
+      "id": "train_bounce",
+      "type": "combat",
+      "title": "Soft Exile Wing",
+      "blurb": "Bounce and tax. AI at 12 life.",
+      "map": {
+        "x": 0.64,
+        "y": 0.4
+      },
+      "requires": [
+        "train_discard"
+      ],
+      "unlocks": [
+        "hq_armory"
+      ],
+      "ai": {
+        "difficulty": "medium",
+        "name": "Door Clerk",
+        "faction": "illuminati"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "illuminati_char_009",
+        "illuminati_spell_001",
+        "illuminati_char_001",
+        "illuminati_spell_012",
+        "illuminati_spell_011",
+        "neutral_char_007",
+        "illuminati_char_015",
+        "illuminati_spell_002",
+        "illuminati_char_009",
+        "illuminati_spell_001",
+        "illuminati_char_001",
+        "illuminati_spell_012",
+        "illuminati_spell_011",
+        "neutral_char_007",
+        "illuminati_char_015",
+        "illuminati_spell_002",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "neutral_char_022",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "neutral_char_021",
+        "neutral_char_029"
+      ],
+      "ai_deck": [
+        "illuminati_spell_012",
+        "illuminati_char_016",
+        "illuminati_char_008",
+        "neutral_spell_015",
+        "illuminati_char_003",
+        "illuminati_spell_012",
+        "illuminati_char_016",
+        "illuminati_char_008",
+        "neutral_spell_015",
+        "illuminati_char_003",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_char_009",
+        "illuminati_spell_011",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "illuminati_char_015",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_059",
+        "neutral_spell_028"
+      ],
+      "teach": true,
+      "steps": [
+        {
+          "id": "bounce",
+          "title": "Bounce",
+          "text": "Quiet Extradition returns small enemies to hand. Tempo reset \u2014 then go face.",
+          "require": "play_named:Quiet Extradition"
+        },
+        {
+          "id": "free",
+          "title": "Own the wing",
+          "text": "Close the match at 12 life.",
+          "require": "free"
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_bounce"
+        ]
+      },
+      "reverse": {
+        "title": "Soft Exile \u2014 Breached",
+        "blurb": "Templars hold the exits.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "Gate Warden",
+          "faction": "templars"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "illuminati_char_009",
+          "illuminati_spell_001",
+          "illuminati_char_001",
+          "illuminati_spell_012",
+          "illuminati_spell_011",
+          "neutral_char_007",
+          "illuminati_char_015",
+          "illuminati_spell_002",
+          "illuminati_char_009",
+          "illuminati_spell_001",
+          "illuminati_char_001",
+          "illuminati_spell_012",
+          "illuminati_spell_011",
+          "neutral_char_007",
+          "illuminati_char_015",
+          "illuminati_spell_002",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "illuminati_spell_004",
+          "illuminati_spell_009",
+          "illuminati_char_006",
+          "illuminati_loc_006",
+          "neutral_char_022",
+          "neutral_char_001",
+          "neutral_char_028",
+          "neutral_spell_003",
+          "neutral_spell_022",
+          "neutral_char_021",
+          "neutral_char_029"
+        ],
+        "ai_deck": [
+          "templars_char_009",
+          "templars_char_002",
+          "templars_spell_001",
+          "templars_char_004",
+          "templars_spell_004",
+          "templars_char_009",
+          "templars_char_002",
+          "templars_spell_001",
+          "templars_char_004",
+          "templars_spell_004",
+          "templars_char_006",
+          "templars_char_007",
+          "templars_char_015",
+          "templars_char_001",
+          "templars_spell_003",
+          "templars_spell_005",
+          "templars_spell_011",
+          "templars_spell_012",
+          "templars_loc_001",
+          "templars_char_014",
+          "templars_char_018",
+          "neutral_char_005",
+          "neutral_char_007",
+          "templars_char_006",
+          "templars_char_007",
+          "templars_char_015",
+          "templars_char_001",
+          "templars_spell_003",
+          "templars_spell_005",
+          "templars_spell_011"
+        ],
+        "twist": {
+          "id": "templar_fortitude",
+          "label": "Righteous Fortitude",
+          "description": "Enemy characters enter play with +1 Health.",
+          "match_modifiers": {
+            "enemy_character_health_bonus": 1
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "Ops",
+            "text": "Twist active: Templar bodies are tougher (+1 Health on enter)."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "ops",
+        "skip_blurb": "Service elevator. Soft Exile stays behind you. The Gate Warden never sees your face."
+      },
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": [
+        "illuminati_spell_012"
+      ],
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Send it home. Quiet Extradition resets a body. Tempo is also control."
+        }
+      ]
+    },
+    {
+      "id": "hq_armory",
+      "type": "safehouse",
+      "title": "Black Budget Armory",
+      "blurb": "Pick one tool for the ledger (and future runs).",
+      "map": {
+        "x": 0.78,
+        "y": 0.58
+      },
+      "requires": [
+        "train_bounce"
+      ],
+      "unlocks": [
+        "hq_breach"
+      ],
+      "safehouse": {
+        "text": "Choose one. It is logged, then sleeved into your kit for the breach.",
+        "pick_one_of": [
+          {
+            "id": "illuminati_spell_013",
+            "label": "Leak Dump",
+            "blurb": "Draw 2. Opponent discards 2. Sleeved into your kit.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001"
+            ]
+          },
+          {
+            "id": "illuminati_spell_001",
+            "label": "Media Blackout",
+            "blurb": "Silence all enemy characters this turn. Sleeved into your kit.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001"
+            ]
+          },
+          {
+            "id": "illuminati_char_005",
+            "label": "Puppet Master",
+            "blurb": "Late steal. Also opens the service elevator \u2014 skip Soft Exile on the way out.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001"
+            ],
+            "skip_reverse_node": "train_bounce"
+          }
+        ]
+      },
+      "rewards": {
+        "ledger_ids": [
+          "file_armory"
+        ]
+      },
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Black budget. Pick a tool you will actually play. Puppet Master knows a back stair."
+        }
+      ]
+    },
+    {
+      "id": "hq_breach",
+      "type": "story",
+      "title": "Breach at the Sanctum",
+      "blurb": "Templars hit HQ. Fall back through the halls.",
+      "map": {
+        "x": 0.88,
+        "y": 0.32
+      },
+      "requires": [
+        "hq_armory"
+      ],
+      "unlocks": [],
+      "triggers_reverse": true,
+      "story_panels": [
+        {
+          "text": "Alarms smear gold across the marble. \"Templars in the sanctum \u2014 they knew the routes.\""
+        },
+        {
+          "text": "Previous halls light red on the board. Fight back the way you came. Righteous Fortitude hardens every Templar body."
+        },
+        {
+          "text": "Reach the entrance. The Grandmaster is waiting in the smoke. Your kit is the one you built."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_breach"
+        ],
+        "flags": {
+          "hq_breached": true
+        }
+      },
+      "coach": "ops"
+    },
+    {
+      "id": "grandmaster",
+      "type": "boss",
+      "title": "Templar Grandmaster",
+      "blurb": "Exit boss. Walls and cleanses. AI at 16 life.",
+      "map": {
+        "x": 0.12,
+        "y": 0.22
+      },
+      "requires": [],
+      "unlocks": [],
+      "boss_requires_reverse_clear": true,
+      "ai": {
+        "difficulty": "hard",
+        "name": "Templar Grandmaster",
+        "faction": "templars"
+      },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 16,
+      "player_deck": [
+        "illuminati_char_009",
+        "illuminati_spell_001",
+        "illuminati_char_001",
+        "illuminati_spell_012",
+        "illuminati_spell_011",
+        "neutral_char_007",
+        "illuminati_char_015",
+        "illuminati_spell_002",
+        "illuminati_char_009",
+        "illuminati_spell_001",
+        "illuminati_char_001",
+        "illuminati_spell_012",
+        "illuminati_spell_011",
+        "neutral_char_007",
+        "illuminati_char_015",
+        "illuminati_spell_002",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "neutral_char_022",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "neutral_char_021",
+        "neutral_char_029"
+      ],
+      "ai_deck": [
+        "templars_char_010",
+        "templars_char_014",
+        "templars_char_018",
+        "templars_spell_010",
+        "templars_spell_006",
+        "templars_char_007",
+        "templars_loc_004",
+        "templars_spell_002",
+        "templars_char_010",
+        "templars_char_014",
+        "templars_char_018",
+        "templars_spell_010",
+        "templars_spell_006",
+        "templars_char_007",
+        "templars_loc_004",
+        "templars_spell_002",
+        "templars_char_009",
+        "templars_char_002",
+        "templars_char_006",
+        "templars_char_004",
+        "templars_char_015",
+        "templars_char_001",
+        "templars_spell_001",
+        "templars_spell_003",
+        "templars_spell_004",
+        "templars_spell_005",
+        "templars_spell_011",
+        "templars_spell_012",
+        "templars_loc_001",
+        "neutral_char_005"
+      ],
+      "twist": {
+        "id": "templar_fortitude",
+        "label": "Righteous Fortitude",
+        "description": "Enemy characters enter play with +1 Health.",
+        "match_modifiers": {
+          "enemy_character_health_bonus": 1
+        }
+      },
+      "teach": false,
+      "rewards": {
+        "ledger_ids": [
+          "file_grandmaster",
+          "file_chapter_complete"
+        ],
+        "flags": {
+          "illuminati_chapter_complete": true,
+          "starter_upgrade": true,
+          "reward_stub_packs": 1
+        }
+      },
+      "lesson_win": "HQ holds. The Inner Circle marks your file complete \u2014 for now.",
+      "lesson_loss": "Walls and AoE punish greed. Chip Taunt, then close.",
+      "player_deck_mode": "run",
+      "coach": "ops",
+      "dialogue": [
+        {
+          "speaker": "Ops",
+          "text": "Fortitude still applies. Break the walls. Do not die in my doorway."
+        }
+      ]
+    }
+  ],
+  "ledger": {
+    "file_hq_arrival": {
+      "title": "File: The Lodge",
+      "text": "HQ trains Influence as a discipline, not a mood."
+    },
+    "file_silence": {
+      "title": "File: Silence",
+      "text": "Silence strips keywords and text. Walls fall quiet."
+    },
+    "file_discard": {
+      "title": "File: Discard",
+      "text": "Empty hands cannot answer. Attrition is a victory condition."
+    },
+    "file_bounce": {
+      "title": "File: Bounce",
+      "text": "Returning a body buys a turn. Tempo is also control."
+    },
+    "file_armory": {
+      "title": "File: Black Budget",
+      "text": "You selected a tool. The armory remembers."
+    },
+    "file_breach": {
+      "title": "File: Breach",
+      "text": "Templars walked the sanctum. Fortitude marked every fight out."
+    },
+    "file_grandmaster": {
+      "title": "File: Grandmaster",
+      "text": "Faith breaks on marble if you keep swinging."
+    },
+    "file_chapter_complete": {
+      "title": "File: Inner Circle \u2014 Closed",
+      "text": "City and HQ survived. Other wings remain sealed."
+    },
+    "file_reckless_ops": {
+      "title": "File: Reckless \u2014 Lodge Note",
+      "text": "The recruit skipped the city drop. Ops filed it. The kit was not rebuilt."
+    },
+    "file_elevator": {
+      "title": "File: Service Elevator",
+      "text": "Puppet Master knew a back stair. Soft Exile was never contested."
+    }
+  }
+}

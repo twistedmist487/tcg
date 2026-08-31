@@ -31,6 +31,8 @@ import { coachFor } from "@/lib/game/tutorial";
 import { faceEl, flashEl, floatText, flyFromHand, lunge, sleep, unitEl } from "@/lib/game/fx";
 import { FACTION_META, type CardDef, type CardInst, type MatchState, type SideId } from "@/lib/game/types";
 import { cn } from "@/lib/utils";
+import { useArchive } from "@/lib/store";
+import { STARTER_LOADOUT, cosmeticSrc } from "@/lib/game/cosmetics";
 
 function packSlots(units: CardInst[], n = 7) {
   const slots: (CardInst | null)[] = Array.from({ length: n }, () => null);
@@ -114,6 +116,11 @@ export function TableMatch({
   const [expanded, setExpanded] = useState(false);
   const [ghost, setGhost] = useState<{ x: number; y: number; cardId?: string; kind: DragKind } | null>(null);
   const [hint, setHint] = useState<DropHint>(EMPTY_HINT);
+  const archive = useArchive();
+  const loadout = archive.cosmeticsLoadout ?? STARTER_LOADOUT;
+  const sleeveSrc = cosmeticSrc(loadout.cardBack) || undefined;
+  const feltSrc = cosmeticSrc(loadout.tableFelt, "/ui/chrome/table-surface.jpg");
+  const plateSrc = cosmeticSrc(loadout.nameplate) || undefined;
   const drag = useRef<{
     tracking: boolean;
     active: boolean;
@@ -422,7 +429,11 @@ export function TableMatch({
         </section>
       </aside>
 
-      <div className="table-surface relative min-h-0 rounded-md" id="table-surface">
+      <div
+        className="table-surface relative min-h-0 rounded-md"
+        id="table-surface"
+        style={{ ["--table-felt" as string]: `url("${feltSrc}")` }}
+      >
         {coach && (
           <aside className="coach-plaque" id="tutorial-hint" data-step={coach.id} role="status">
             <div className="coach-kicker" id="hint-title">
@@ -430,6 +441,16 @@ export function TableMatch({
             </div>
             <p id="hint-text">{coach.text}</p>
           </aside>
+        )}
+        {match.crisis && (
+          <div className="crisis-banner" role="status">
+            {match.crisis.label}: {match.crisis.turnsCompleted} / {match.crisis.turnsRequired} turns
+          </div>
+        )}
+        {match.twist && (
+          <div className="twist-banner" role="status">
+            {match.twist.label}: {match.twist.description}
+          </div>
         )}
         {rejectLine && (
           <div className="coach-reject" role="alert">
@@ -504,6 +525,7 @@ export function TableMatch({
             match={match}
             powerReady={powerReady}
             heroTarget={liveHint.hero}
+            plateSrc={plateSrc}
             onFace={() => {
               const cur = matchRef.current;
               if (cur.pending) patch(chooseTarget(cur, { hero: "player" }));
@@ -540,7 +562,7 @@ export function TableMatch({
         </div>
         <div className="mt-auto flex flex-col items-center max-lg:mt-0" data-drop="deck">
           <h3 className="font-mono text-[10px] tracking-[0.2em] text-gold">DECK</h3>
-          <CardBack faction={match.player.faction} className="mt-1 w-16" />
+          <CardBack faction={match.player.faction} src={sleeveSrc} className="mt-1 w-16" />
           <div className="mt-1 font-display text-lg text-cream">{match.player.deck.length}</div>
         </div>
         <Link to="/play" className="font-mono text-[10px] tracking-[0.16em] text-muted no-underline hover:text-phosphor">
@@ -713,6 +735,7 @@ function HeroPlaque({
   powerReady,
   faceTarget,
   heroTarget,
+  plateSrc,
 }: {
   side: SideId;
   match: MatchState;
@@ -722,6 +745,7 @@ function HeroPlaque({
   powerReady?: boolean;
   faceTarget?: boolean;
   heroTarget?: boolean;
+  plateSrc?: string;
 }) {
   const s = side === "player" ? match.player : match.ai;
   const power = POWER_META[s.faction];
@@ -803,6 +827,7 @@ function HeroPlaque({
             faction={s.faction}
             onFace={onFace}
             heroTarget={heroTarget}
+            plateSrc={plateSrc}
           />
           <div className="flex flex-col items-start gap-1">
             <div className="field-meter" aria-hidden>
@@ -825,6 +850,7 @@ function HeroCenter({
   onFace,
   faceTarget,
   heroTarget,
+  plateSrc,
 }: {
   side: SideId;
   name: string;
@@ -832,6 +858,7 @@ function HeroCenter({
   onFace: () => void;
   faceTarget?: boolean;
   heroTarget?: boolean;
+  plateSrc?: string;
 }) {
   return (
     <div className="hero-stack">
@@ -846,7 +873,7 @@ function HeroCenter({
       </button>
       <div
         className="nameplate-banner"
-        style={{ ["--nameplate" as string]: `url(${nameplateArt(faction)})` }}
+        style={{ ["--nameplate" as string]: `url(${plateSrc ?? nameplateArt(faction)})` }}
       >
         <span className="truncate font-display text-[11px] tracking-wide text-cream uppercase">{name}</span>
       </div>

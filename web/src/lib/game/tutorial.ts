@@ -56,6 +56,7 @@ function visibleTaunts(state: MatchState) {
 export function advanceTutorial(prev: MatchState, next: MatchState): string | null {
   const step = prev.tutorialStep;
   if (!step || next.phase === "over") return step;
+  if (prev.campaign?.steps?.length) return advanceCampaignTeach(prev, next, step);
   if (prev.encounterId === "tutorial") return advanceFirstContact(prev, next, step);
   if (prev.encounterId === "keyword_lab") return advanceLab(prev, next, step);
   return step;
@@ -121,12 +122,72 @@ function advanceLab(prev: MatchState, next: MatchState, step: string): string {
   return step;
 }
 
+function stepMet(req: string | undefined, prev: MatchState, next: MatchState): boolean {
+  if (!req || req === "free") return false;
+  if (req.startsWith("play_named:")) {
+    const name = req.slice("play_named:".length);
+    return playedNamed(prev, next, name) || (hasNamed(next.player.board, name) && !hasNamed(prev.player.board, name));
+  }
+  if (req === "end_turn") return backToPlayer(prev, next);
+  if (req === "attack") return playerAttacked(prev, next);
+  if (req === "attack_taunt") {
+    if (visibleTaunts(prev).length > 0 && visibleTaunts(next).length === 0) return true;
+    return playerAttacked(prev, next) && visibleTaunts(prev).length > 0;
+  }
+  return false;
+}
+
+function advanceCampaignTeach(prev: MatchState, next: MatchState, stepId: string): string {
+  const steps = prev.campaign?.steps ?? [];
+  const idx = steps.findIndex((s) => s.id === stepId);
+  if (idx < 0) return stepId;
+  const step = steps[idx]!;
+  if (!stepMet(step.require, prev, next)) return stepId;
+  return steps[idx + 1]?.id ?? stepId;
+}
+
 export function coachFor(state: MatchState): Coach | null {
   if (!state.tutorialStep || state.phase === "over" || state.phase === "mulligan") return null;
+  if (state.campaign?.steps?.length) {
+    const step = state.campaign.steps.find((s) => s.id === state.tutorialStep);
+    if (!step) return null;
+    return { id: step.id, title: step.title, text: step.text, highlight: highlightForCampaign(state, step) };
+  }
   const enc = getEncounter(state.encounterId);
   const step = enc?.steps?.find((s) => s.id === state.tutorialStep);
   if (!step) return null;
   return { ...step, highlight: highlightFor(state, step.id) };
+}
+
+function highlightForCampaign(state: MatchState, step: { id: string; require?: string; highlight?: string }): CoachHighlight {
+  const h = { ...EMPTY_HIGHLIGHT, handNames: [] as string[], enemyIids: [] as string[] };
+  const req = step.require ?? "free";
+  const named =
+    step.highlight ||
+    (req.startsWith("play_named:") ? req.slice("play_named:".length) : "");
+  const ready = state.player.board.filter((m) => !m.exhausted && m.atk > 0);
+  const taunts = visibleTaunts(state);
+  const enemies = state.ai.board.filter((m) => !m.stealth);
+  if (named && (req.startsWith("play_named:") || hasNamed(state.player.hand, named))) {
+    h.handNames = [named];
+  }
+  if (req === "end_turn") h.endTurn = state.current === "player" && state.phase === "main";
+  if (req === "attack") {
+    h.readyAllies = ready.length > 0;
+    h.enemyIids = enemies.map((m) => m.iid);
+    h.face = taunts.length === 0 && step.id !== "rush-attack";
+  }
+  if (req === "attack_taunt") {
+    h.readyAllies = ready.length > 0;
+    h.enemyIids = taunts.map((m) => m.iid);
+  }
+  if (step.id === "rush" && named) h.handNames = [named];
+  if (step.id === "rush-attack") {
+    h.readyAllies = ready.length > 0;
+    h.enemyIids = enemies.map((m) => m.iid);
+    h.face = false;
+  }
+  return h;
 }
 
 function highlightFor(state: MatchState, id: string): CoachHighlight {

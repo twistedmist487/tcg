@@ -22,12 +22,14 @@ export function CardFace({
   copies,
   locked,
   compact,
+  tag,
   onClick,
 }: {
   card: CardDef;
   copies?: number;
   locked?: boolean;
   compact?: boolean;
+  tag?: string;
   onClick?: () => void;
 }) {
   const art = artFor(card.id);
@@ -116,12 +118,25 @@ export function CardFace({
             ×{copies}
           </span>
         )}
+        {tag && (
+          <span className="absolute left-1 bottom-1 rounded-sm bg-void/85 px-1 font-mono text-[8px] tracking-[0.14em] text-gold">
+            {tag}
+          </span>
+        )}
       </div>
     </Comp>
   );
 }
 
-export function CardBack({ faction, className }: { faction: FactionId; className?: string }) {
+export function CardBack({
+  faction,
+  className,
+  src,
+}: {
+  faction: FactionId;
+  className?: string;
+  src?: string;
+}) {
   return (
     <div
       className={cn(
@@ -129,7 +144,7 @@ export function CardBack({ faction, className }: { faction: FactionId; className
         className,
       )}
     >
-      <img src={plateFor(faction).back} alt="" className="h-full w-full object-cover" draggable={false} />
+      <img src={src ?? plateFor(faction).back} alt="" className="h-full w-full object-cover" draggable={false} />
     </div>
   );
 }

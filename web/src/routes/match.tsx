@@ -37,8 +37,12 @@ function MatchPage() {
       const won = next.winner === "player";
       archive.recordMatch(won);
       archive.addXp(won ? 180 : 60);
-      archive.addCredits(won ? 80 : 20);
-      if (won) archive.completeMission(next.encounterId);
+      if (match.campaign) {
+        if (won) archive.completeCampaignNode(match.campaign.nodeId);
+      } else {
+        archive.addCredits(won ? 80 : 20);
+        if (won) archive.completeMission(next.encounterId);
+      }
     }
   };
 
@@ -86,10 +90,18 @@ function MatchPage() {
           <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-void/90 p-6 text-center">
             <div className="font-mono text-[10px] tracking-[0.22em] text-phosphor">SESSION CLOSED</div>
             <h2 className="mt-2 font-display text-4xl text-glitch text-paper">
-              {match.winner === "player" ? "YOU SAW TOO MUCH" : "THE SYSTEM HELD"}
+              {match.winner === "player"
+                ? match.campaign?.lessonWin ?? (match.crisis ? "YOU LASTED" : "YOU SAW TOO MUCH")
+                : match.campaign?.lessonLoss ?? "THE SYSTEM HELD"}
             </h2>
             <p className="mt-2 font-mono text-sm text-muted">
-              {match.winner === "player" ? "Dossier updated. Credits wired." : "Burn the notes. Try another angle."}
+              {match.campaign
+                ? match.winner === "player"
+                  ? "Ledger updated. Return to the board."
+                  : "The node still has you. Try again."
+                : match.winner === "player"
+                  ? "Dossier updated. Credits wired."
+                  : "Burn the notes. Try another angle."}
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <button
@@ -97,10 +109,10 @@ function MatchPage() {
                 className="metal-btn-live min-h-11 rounded-md px-5 font-ui tracking-[0.16em] text-phosphor"
                 onClick={() => {
                   archive.setMatch(null);
-                  void nav({ to: "/play" });
+                  void nav({ to: match.campaign ? "/campaign" : "/play" });
                 }}
               >
-                ARCHIVE
+                {match.campaign ? "BOARD" : "ARCHIVE"}
               </button>
               <Link
                 to="/missions"

@@ -6,7 +6,24 @@ import {
   collectibleCards,
   getCard,
 } from "@/lib/game/catalog";
-import type { DeckList, MatchState } from "@/lib/game/types";
+import {
+  NODE_FIRST_CLEAR,
+  applyNodeClear,
+  applySafehousePick,
+  enterHq,
+  getBoard,
+  getNode,
+  rewardKey,
+} from "@/lib/game/campaign";
+import {
+  STARTER_LOADOUT,
+  cosmeticById,
+  unlocksFromProgress,
+  type CosmeticLoadout,
+  type CosmeticProgress,
+  type CosmeticSlot,
+} from "@/lib/game/cosmetics";
+import type { CampaignRun, DeckList, MatchState, SafehousePick } from "@/lib/game/types";
 
 type Collection = Record<string, number>;
 
@@ -26,11 +43,20 @@ type AgentState = {
   wins: number;
   losses: number;
   packsOpened: number;
+  cosmeticsUnlocked: string[];
+  cosmeticsLoadout: CosmeticLoadout;
+  fieldAcquired: string[];
+  cityCleared: boolean;
+  chapterCleared: boolean;
+  heroicCleared: boolean;
+  recklessCleared: boolean;
 };
 
 type Store = AgentState & {
   match: MatchState | null;
+  campaignRun: CampaignRun | null;
   setMatch: (m: MatchState | null) => void;
+  setCampaignRun: (run: CampaignRun | null) => void;
   addXp: (n: number) => void;
   addCredits: (n: number) => void;
   decrypt: () => void;
@@ -40,6 +66,10 @@ type Store = AgentState & {
   setActiveDeck: (id: string) => void;
   completeMission: (id: string) => void;
   recordMatch: (won: boolean) => void;
+  completeCampaignNode: (nodeId: string) => void;
+  applyCampaignSafehouse: (nodeId: string, pick: SafehousePick) => void;
+  enterCampaignHq: () => void;
+  equipCosmetic: (id: string) => void;
   resetArchive: () => void;
 };
 
@@ -68,6 +98,25 @@ function starterDecks(): DeckList[] {
   return CURATED_DECKS.map((d) => ({ ...d, custom: false }));
 }
 
+function progressOf(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared">): CosmeticProgress {
+  return {
+    cityCleared: s.cityCleared,
+    chapterCleared: s.chapterCleared,
+    heroicCleared: s.heroicCleared,
+    recklessCleared: s.recklessCleared,
+  };
+}
+
+function mergeUnlocks(s: AgentState, extra: CosmeticProgress): string[] {
+  const ids = unlocksFromProgress({
+    cityCleared: s.cityCleared || extra.cityCleared,
+    chapterCleared: s.chapterCleared || extra.chapterCleared,
+    heroicCleared: s.heroicCleared || extra.heroicCleared,
+    recklessCleared: s.recklessCleared || extra.recklessCleared,
+  });
+  return [...new Set([...s.cosmeticsUnlocked, ...ids])];
+}
+
 const initial = (): AgentState => ({
   agentId: 7,
   handle: "ARCHIVE_7",
@@ -82,6 +131,18 @@ const initial = (): AgentState => ({
   wins: 0,
   losses: 0,
   packsOpened: 0,
+  cosmeticsUnlocked: unlocksFromProgress({
+    cityCleared: false,
+    chapterCleared: false,
+    heroicCleared: false,
+    recklessCleared: false,
+  }),
+  cosmeticsLoadout: { ...STARTER_LOADOUT },
+  fieldAcquired: [],
+  cityCleared: false,
+  chapterCleared: false,
+  heroicCleared: false,
+  recklessCleared: false,
 });
 
 export const useArchive = create<Store>()(
@@ -89,7 +150,9 @@ export const useArchive = create<Store>()(
     (set, get) => ({
       ...initial(),
       match: null,
+      campaignRun: null,
       setMatch: (m) => set({ match: m }),
+      setCampaignRun: (run) => set({ campaignRun: run }),
       addXp: (n) =>
         set((s) => {
           const xp = s.xp + n;
@@ -135,7 +198,128 @@ export const useArchive = create<Store>()(
           wins: s.wins + (won ? 1 : 0),
           losses: s.losses + (won ? 0 : 1),
         })),
-      resetArchive: () => set({ ...initial(), match: null }),
+      completeCampaignNode: (nodeId) =>
+        set((s) => {
+          const run = s.campaignRun;
+          if (!run) return {};
+          const board = getBoard(run.chapterId, run.boardId);
+          const node = board ? getNode(board, nodeId) : undefined;
+          if (!node || !board) return {};
+          const key = rewardKey(run, nodeId);
+          const already = run.rewardsGranted.includes(key);
+          const nextRun = applyNodeClear(run, node, board);
+          nextRun.rewardsGranted = already ? run.rewardsGranted : [...run.rewardsGranted, key];
+          let credits = s.credits;
+          const collection = { ...s.collection };
+          const fieldAcquired = [...s.fieldAcquired];
+          if (!already) {
+            const rw = NODE_FIRST_CLEAR[key] ?? NODE_FIRST_CLEAR[nodeId] ?? { credits: 0, cards: [] };
+            credits += rw.credits;
+            for (const id of rw.cards) {
+              if (!getCard(id)) continue;
+              collection[id] = (collection[id] ?? 0) + 1;
+              if (!fieldAcquired.includes(id)) fieldAcquired.push(id);
+            }
+          }
+          const cityCleared = s.cityCleared || Boolean(nextRun.flags.board_city_complete);
+          const chapterCleared = s.chapterCleared || Boolean(nextRun.flags.illuminati_chapter_complete);
+          const heroicCleared =
+            s.heroicCleared || (Boolean(nextRun.flags.illuminati_chapter_complete) && run.difficulty === "heroic");
+          const recklessCleared =
+            s.recklessCleared ||
+            (Boolean(nextRun.flags.illuminati_chapter_complete) && Boolean(nextRun.flags.skipped_safe_drop));
+          if (!s.heroicCleared && heroicCleared) credits += 150;
+          const cosmeticsUnlocked = mergeUnlocks(s, {
+            cityCleared,
+            chapterCleared,
+            heroicCleared,
+            recklessCleared,
+          });
+          const missions = { ...s.missions };
+          if (nextRun.flags.board_city_complete) missions.illuminati = "complete";
+          if (nextRun.flags.illuminati_chapter_complete) missions.illuminati = "complete";
+          return {
+            campaignRun: nextRun,
+            credits,
+            collection,
+            fieldAcquired,
+            cityCleared,
+            chapterCleared,
+            heroicCleared,
+            recklessCleared,
+            cosmeticsUnlocked,
+            missions,
+          };
+        }),
+      enterCampaignHq: () =>
+        set((s) => {
+          if (!s.campaignRun) return {};
+          return { campaignRun: enterHq(s.campaignRun) };
+        }),
+      applyCampaignSafehouse: (nodeId, pick) =>
+        set((s) => {
+          const run = s.campaignRun;
+          if (!run) return {};
+          const board = getBoard(run.chapterId, run.boardId);
+          const node = board ? getNode(board, nodeId) : undefined;
+          if (!node) return {};
+          const applied = applySafehousePick(run.deck, pick);
+          const ledger = [...run.ledger];
+          for (const id of [...(node.rewards?.ledger_ids ?? []), ...applied.ledgerExtra]) {
+            if (!ledger.includes(id)) ledger.push(id);
+          }
+          if (node.id === "hq_armory" && (pick.action === "add" || pick.action === "inject") && !ledger.includes("file_armory_pick")) {
+            ledger.push("file_armory_pick");
+          }
+          const already = run.rewardsGranted.includes(nodeId);
+          const rewardsGranted = already ? run.rewardsGranted : [...run.rewardsGranted, nodeId];
+          let credits = s.credits;
+          const collection = { ...s.collection };
+          const fieldAcquired = [...s.fieldAcquired];
+          if (!already) {
+            const rw = NODE_FIRST_CLEAR[nodeId] ?? { credits: 0, cards: [] };
+            credits += rw.credits;
+            for (const id of rw.cards) {
+              if (!getCard(id)) continue;
+              collection[id] = (collection[id] ?? 0) + 1;
+              if (!fieldAcquired.includes(id)) fieldAcquired.push(id);
+            }
+          }
+          if ((pick.action === "add" || pick.action === "inject") && getCard(pick.id)) {
+            collection[pick.id] = (collection[pick.id] ?? 0) + 1;
+            if (!fieldAcquired.includes(pick.id)) fieldAcquired.push(pick.id);
+          }
+          const cleared = run.cleared.includes(nodeId) ? run.cleared : [...run.cleared, nodeId];
+          return {
+            campaignRun: {
+              ...run,
+              deck: applied.deck,
+              deckLive: pick.action !== "skip" ? true : run.deckLive,
+              flags: { ...run.flags, ...applied.flags },
+              ledger,
+              cleared,
+              rewardsGranted,
+              currentNodeId: null,
+              armoryPicks: [
+                ...run.armoryPicks,
+                { id: pick.id, label: pick.label, action: pick.action, node: nodeId },
+              ],
+            },
+            credits,
+            collection,
+            fieldAcquired,
+          };
+        }),
+      equipCosmetic: (id) =>
+        set((s) => {
+          const item = cosmeticById(id);
+          if (!item) return {};
+          const unlocked = mergeUnlocks(s, progressOf(s));
+          if (!unlocked.includes(id) && !(s.cosmeticsUnlocked ?? []).includes(id)) return {};
+          const slot: CosmeticSlot = item.slot;
+          return { cosmeticsLoadout: { ...s.cosmeticsLoadout, [slot]: id } };
+        }),
+      resetArchive: () => set({ ...initial(), match: null, campaignRun: null }),
     }),
     {
       name: "truth-exe-archive",
@@ -154,6 +338,14 @@ export const useArchive = create<Store>()(
         wins: s.wins,
         losses: s.losses,
         packsOpened: s.packsOpened,
+        campaignRun: s.campaignRun,
+        cosmeticsUnlocked: s.cosmeticsUnlocked,
+        cosmeticsLoadout: s.cosmeticsLoadout,
+        fieldAcquired: s.fieldAcquired,
+        cityCleared: s.cityCleared,
+        chapterCleared: s.chapterCleared,
+        heroicCleared: s.heroicCleared,
+        recklessCleared: s.recklessCleared,
       }),
     },
   ),
@@ -167,5 +359,8 @@ export function discoveredCount(collection: Collection) {
   return Object.values(collection).filter((n) => n > 0).length;
 }
 
-export type { Collection };
+export function archiveProgress(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared">): CosmeticProgress {
+  return progressOf(s);
+}
 
+export type { Collection };

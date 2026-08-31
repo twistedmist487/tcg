@@ -190,7 +190,7 @@
     flex-direction: column;
     overflow: hidden;
     padding: 10px 14px 8px;
-    background: #141414 url("/ui/chrome/table-surface.jpg") center / cover no-repeat;
+    background: #141414 var(--table-felt, url("/ui/chrome/table-surface.jpg")) center / cover no-repeat;
   }
   .table-surface:has(.coach-plaque) {
     padding-top: 76px;
@@ -239,6 +239,54 @@
   }
   .table-surface:has(.coach-plaque) .coach-reject {
     top: 78px;
+  }
+  .crisis-banner {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 9;
+    padding: 6px 10px;
+    background: rgb(7 9 10 / 0.9);
+    outline: 1px solid var(--color-threat-dim);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-threat);
+    pointer-events: none;
+  }
+  .table-surface:has(.coach-plaque) .crisis-banner {
+    top: 78px;
+  }
+  .twist-banner {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 9;
+    max-width: 240px;
+    padding: 6px 10px;
+    background: rgb(7 9 10 / 0.9);
+    outline: 1px solid var(--color-gold-dim);
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+    pointer-events: none;
+  }
+  .table-surface:has(.coach-plaque) .twist-banner {
+    top: 78px;
+  }
+  .table-surface:has(.crisis-banner) .twist-banner {
+    top: 44px;
+  }
+  .table-surface:has(.coach-plaque):has(.crisis-banner) .twist-banner {
+    top: 114px;
+  }
+  .campaign-node-pulse {
+    animation: coach-pulse 1.8s ease-in-out infinite;
   }
   .hand-fan .hand-card.coach-mark {
     filter: drop-shadow(0 0 10px rgb(124 255 154 / 0.75));
@@ -736,9 +784,15 @@
     grid-template-rows: minmax(220px, 1fr) auto auto;
   }
   .table-rail-left { display: none; }
-  .coach-plaque { display: none; }
+  .coach-plaque {
+    width: min(100%, 94%);
+    padding: 6px 8px;
+    top: 4px;
+  }
+  .coach-plaque p { font-size: 0.68rem; }
   .coach-reject { top: 6px; right: 6px; }
-  .table-surface:has(.coach-plaque) { padding-top: 4px; }
+  .table-surface:has(.coach-plaque) { padding-top: 62px; }
+  .table-surface:has(.coach-plaque) .crisis-banner { top: 64px; }
   .table-surface { min-height: 220px; padding: 4px 6px; }
   .hero-plaque {
     width: 100%;

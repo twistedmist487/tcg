@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { FlaskConical, GraduationCap, Swords, BookOpen } from "lucide-react";
+import { FlaskConical, GraduationCap, Swords, BookOpen, Landmark } from "lucide-react";
 import { TerminalFrame } from "@/components/shell/TerminalFrame";
 import { NavButtons, PageHeader } from "@/components/nav/NavButtons";
 import { useArchive } from "@/lib/store";
 import { ENCOUNTERS } from "@/lib/game/catalog";
 import { matchFromEncounter } from "@/lib/game/launch";
+import { callsignOf } from "@/lib/game/cosmetics";
 
 export const Route = createFileRoute("/play")({ component: PlayHub });
 
@@ -14,18 +15,27 @@ function PlayHub() {
   const deck = archive.decks.find((d) => d.id === archive.activeDeckId) ?? archive.decks[0]!;
 
   const launch = (id: string) => {
-    const match = matchFromEncounter(id, deck, { playerName: archive.handle });
+    const match = matchFromEncounter(id, deck, {
+      playerName: callsignOf(archive.handle, archive.cosmeticsLoadout?.title ?? "title-archive"),
+    });
     archive.setMatch(match);
     void nav({ to: "/match" });
   };
 
   const rows = [
     {
+      id: "campaign",
+      icon: Landmark,
+      kicker: "INNER CIRCLE",
+      title: "The Inner Circle",
+      blurb: "Illuminati chapter. City, Lodge, Heroic. Field cards and locker sleeves. First Contact stays optional.",
+    },
+    {
       id: "tutorial",
       icon: GraduationCap,
       kicker: "PROTOCOL 01",
       title: "First Contact",
-      blurb: "Guided match. Learn energy, Taunt, Deathrattle, spells, and Charge as Recruit vs The Recruiter.",
+      blurb: "Optional on-ramp. Learn energy, Taunt, Deathrattle, spells, and Charge as Recruit vs The Recruiter.",
     },
     {
       id: "keyword_lab",
@@ -63,14 +73,18 @@ function PlayHub() {
               </div>
             }
           />
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {rows.map((row) => {
               const Icon = row.icon;
               return (
                 <button
                   key={row.id}
                   type="button"
-                  onClick={() => (row.id === "skirmish" ? nav({ to: "/setup" }) : launch(row.id))}
+                  onClick={() => {
+                    if (row.id === "skirmish") void nav({ to: "/setup" });
+                    else if (row.id === "campaign") void nav({ to: "/campaign" });
+                    else launch(row.id);
+                  }}
                   className="metal-btn flex flex-col items-start gap-3 rounded-lg p-4 text-left transition-transform duration-150 hover:brightness-110 active:scale-[0.98]"
                 >
                   <span className="flex size-10 items-center justify-center rounded-sm bg-phosphor-deep text-phosphor">

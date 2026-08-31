@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { TerminalFrame } from "@/components/shell/TerminalFrame";
 import { NavButtons, PageHeader } from "@/components/nav/NavButtons";
@@ -15,11 +15,14 @@ const TYPES: Array<CardType | "all"> = ["all", "Character", "Spell", "Location"]
 
 function CollectionPage() {
   const archive = useArchive();
+  const nav = useNavigate();
   const [q, setQ] = useState("");
   const [faction, setFaction] = useState<FactionId | "all">("all");
   const [type, setType] = useState<CardType | "all">("all");
   const [onlyOwned, setOnlyOwned] = useState(false);
+  const [fieldOnly, setFieldOnly] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
+  const field = new Set(archive.fieldAcquired ?? []);
 
   const cards = useMemo(() => {
     return collectibleCards().filter((c) => {
@@ -30,9 +33,10 @@ function CollectionPage() {
       }
       const n = ownedCopies(archive.collection, c.id);
       if (onlyOwned && n <= 0) return false;
+      if (fieldOnly && !field.has(c.id)) return false;
       return true;
     });
-  }, [q, faction, type, onlyOwned, archive.collection]);
+  }, [q, faction, type, onlyOwned, fieldOnly, archive.collection, archive.fieldAcquired]);
 
   const found = discoveredCount(archive.collection);
   const selected = cards.find((c) => c.id === open);
@@ -50,8 +54,17 @@ function CollectionPage() {
             kicker="// UNCOVER THE RECORD"
             title="Collection"
             action={
-              <div className="font-mono text-[11px] tracking-[0.14em] text-phosphor">
-                {found} / {collectibleCards().length} FILES
+              <div className="flex items-center gap-2">
+                <div className="font-mono text-[11px] tracking-[0.14em] text-phosphor">
+                  {found} / {collectibleCards().length} FILES
+                </div>
+                <button
+                  type="button"
+                  className="metal-btn min-h-11 rounded-md px-3 font-mono text-[10px] tracking-[0.16em]"
+                  onClick={() => void nav({ to: "/locker" })}
+                >
+                  LOCKER
+                </button>
               </div>
             }
           />
@@ -95,6 +108,13 @@ function CollectionPage() {
             >
               OWNED
             </button>
+            <button
+              type="button"
+              onClick={() => setFieldOnly((v) => !v)}
+              className={cn("min-h-11 rounded-md px-3 font-mono text-[11px]", fieldOnly ? "metal-btn-live" : "metal-btn")}
+            >
+              FIELD · {field.size}
+            </button>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
             {cards.map((c) => {
@@ -106,6 +126,7 @@ function CollectionPage() {
                   copies={n}
                   locked={n <= 0}
                   compact
+                  tag={field.has(c.id) ? "FIELD" : undefined}
                   onClick={() => setOpen(c.id)}
                 />
               );
@@ -120,19 +141,24 @@ function CollectionPage() {
           onClick={() => setOpen(null)}
         >
           <div
-            className="panel w-full max-w-md rounded-lg p-4"
+            className="panel w-full max-w-md overflow-auto rounded-lg p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <CardFace card={selected} copies={ownedCopies(archive.collection, selected.id)} locked={ownedCopies(archive.collection, selected.id) <= 0} />
+            <CardFace card={selected} copies={ownedCopies(archive.collection, selected.id)} />
+            {field.has(selected.id) && (
+              <p className="mt-3 font-mono text-[11px] tracking-[0.14em] text-gold">
+                FIELD ACQUIRED — first-clear on The Inner Circle.
+              </p>
+            )}
             {selected.lore && (
               <p className="mt-3 font-mono text-[12px] italic leading-relaxed text-muted">{selected.lore}</p>
             )}
             <button
               type="button"
-              className="metal-btn mt-4 min-h-11 w-full rounded-md font-mono text-xs tracking-[0.16em]"
+              className="metal-btn mt-4 min-h-11 w-full rounded-md font-mono text-[11px]"
               onClick={() => setOpen(null)}
             >
-              CLOSE FILE
+              CLOSE
             </button>
           </div>
         </div>

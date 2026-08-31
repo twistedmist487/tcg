@@ -8,10 +8,13 @@ import { finishPatch, initialTutorialStep } from "./tutorial";
 import type {
   CardDef,
   CardInst,
+  CampaignMatch,
+  CrisisState,
   MatchState,
   PendingTarget,
   SideId,
   SideState,
+  TwistState,
 } from "./types";
 
 function mulberry32(a: number) {
@@ -70,6 +73,7 @@ function makeInst(state: MatchState, def: CardDef, ready = false): CardInst {
     eotTaunt: false,
     innateTaunt: taunt,
     recurUsed: false,
+    eotSilence: false,
   };
 }
 
@@ -231,8 +235,17 @@ function summonToken(state: MatchState, id: SideId, cardId: string, ready = fals
     inst.maxHp = 1;
   }
   applyTemplarAuraToNew(state, id, inst, def);
+  applyEnterModifiers(state, id, inst);
   side.board.push(inst);
   log(state, `${side.name} summons ${def.name}.`);
+}
+
+function applyEnterModifiers(state: MatchState, owner: SideId, inst: CardInst) {
+  const bonus = state.twist?.enemyHealthBonus ?? 0;
+  if (bonus && owner === "ai") {
+    inst.hp += bonus;
+    inst.maxHp += bonus;
+  }
 }
 
 function applyTemplarAuraToNew(state: MatchState, id: SideId, inst: CardInst, def: CardDef) {
@@ -333,6 +346,15 @@ function applyBattlecry(state: MatchState, id: SideId, inst: CardInst, def: Card
   void self;
 }
 
+function discardFromHand(side: SideState, n: number, state: MatchState) {
+  for (let i = 0; i < n && side.hand.length; i++) {
+    const idx = Math.floor(side.hand.length * 0.37) % side.hand.length;
+    const gone = side.hand.splice(idx, 1)[0];
+    const gdef = gone ? resolveCard(gone.cardId) : undefined;
+    log(state, `${side.name} discards ${gdef?.name ?? "a file"}.`);
+  }
+}
+
 function bounceToHand(state: MatchState, owner: SideId, minion: CardInst) {
   const side = sideOf(state, owner);
   side.board = side.board.filter((c) => c.iid !== minion.iid);
@@ -341,7 +363,8 @@ function bounceToHand(state: MatchState, owner: SideId, minion: CardInst) {
   log(state, `${def?.name ?? "Asset"} is pulled back.`);
 }
 
-function silence(minion: CardInst) {
+function silence(minion: CardInst, untilEot = false) {
+  if (untilEot && !minion.silenced) minion.eotSilence = true;
   minion.silenced = true;
   minion.stealth = false;
   minion.taunt = false;
@@ -352,6 +375,23 @@ function silence(minion: CardInst) {
   minion.shielding = false;
   minion.ward = false;
   minion.enraged = false;
+}
+
+function unsilence(minion: CardInst) {
+  minion.silenced = false;
+  minion.eotSilence = false;
+  const def = resolveCard(minion.cardId);
+  if (!def) return;
+  const kws = keywordsOf(def);
+  minion.taunt = kws.includes("Taunt") || minion.innateTaunt;
+  minion.stealth = kws.includes("Stealth") && minion.attackedThisTurn === 0;
+  minion.charge = kws.includes("Charge");
+  minion.rush = kws.includes("Rush");
+  minion.venom = kws.includes("Venom");
+  minion.drain = kws.includes("Drain");
+  minion.shielding = kws.includes("Shielding");
+  minion.ward = kws.includes("Ward");
+  minion.enraged = kws.includes("Enraged");
 }
 
 function applyEotHp(minion: CardInst, n: number) {
@@ -388,6 +428,7 @@ function clearEot(state: MatchState, id: SideId) {
       m.taunt = m.innateTaunt && !m.silenced;
       m.eotTaunt = false;
     }
+    if (m.eotSilence) unsilence(m);
     m.ward = false;
   }
 }
@@ -477,12 +518,21 @@ export function startMatch(opts: {
   playerGoesFirst?: boolean;
   difficulty: MatchState["difficulty"];
   encounterId: string;
+  skipMulligan?: boolean;
+  campaign?: CampaignMatch | null;
+  crisis?: Omit<CrisisState, "turnsCompleted"> | null;
+  twist?: TwistState | null;
 }): MatchState {
   const seed = opts.seed ?? Math.floor(Math.random() * 1e9);
   const rand = mulberry32(seed);
   const shuffleDecks = opts.shuffle !== false;
   const pDeck = shuffleDecks ? shuffle(opts.playerDeck, rand) : [...opts.playerDeck];
   const aDeck = shuffleDecks ? shuffle(opts.aiDeck, rand) : [...opts.aiDeck];
+  const campaign = opts.campaign ?? null;
+  const crisis: CrisisState | null = opts.crisis
+    ? { ...opts.crisis, turnsCompleted: 0 }
+    : null;
+  const twist = opts.twist ?? null;
 
   const state: MatchState = {
     seed,
@@ -494,7 +544,10 @@ export function startMatch(opts: {
     difficulty: opts.difficulty,
     encounterId: opts.encounterId,
     playerGoesFirst: opts.playerGoesFirst !== false,
-    tutorialStep: initialTutorialStep(opts.encounterId),
+    tutorialStep: campaign?.steps?.[0]?.id ?? initialTutorialStep(opts.encounterId),
+    campaign,
+    crisis,
+    twist,
     log: ["INITIATING MATCH...", `vs ${opts.aiName}`],
     pending: null,
     player: {
@@ -527,10 +580,17 @@ export function startMatch(opts: {
     },
   };
 
+  if (campaign?.coach === "silent") log(state, "Radio dead. Survive.");
+  if (twist) log(state, `TWIST: ${twist.label} — ${twist.description}`);
   draw(state, "player", 4);
   draw(state, "ai", state.current === "player" ? 4 : 3);
   if (state.current === "ai") {
     draw(state, "player", 1);
+  }
+  if (opts.skipMulligan) {
+    state.phase = "main";
+    beginTurn(state, state.current);
+    return state;
   }
   return state;
 }
@@ -578,6 +638,20 @@ function endTurnInternal(state: MatchState) {
   const id = state.current;
   clearEot(state, id);
   boardTick(state, id, "end");
+  if (
+    state.crisis?.win === "survive_turns" &&
+    state.winner == null &&
+    id === "player"
+  ) {
+    state.crisis.turnsCompleted += 1;
+    if (state.crisis.turnsCompleted >= state.crisis.turnsRequired) {
+      state.phase = "over";
+      state.winner = "player";
+      log(state, `${state.crisis.label} — you lasted ${state.crisis.turnsCompleted} turns.`);
+      return;
+    }
+  }
+  if (state.winner != null) return;
   const nxt = otherOf(id);
   if (nxt === "player") state.turn += 1;
   beginTurn(state, nxt);
@@ -668,6 +742,7 @@ function resolvePlay(state: MatchState, id: SideId, handIndex: number, target?: 
   if (def.type === "Character") {
     const body = makeInst(state, def);
     body.iid = inst.iid;
+    applyEnterModifiers(state, id, body);
     side.board.push(body);
     applyBattlecry(state, id, body, def, target);
   } else if (def.type === "Location") {
@@ -758,10 +833,20 @@ function resolveSpell(state: MatchState, id: SideId, def: CardDef, target?: Targ
   }
 
   if (/silence all enemy/i.test(text)) {
-    for (const m of foe.board) silence(m);
+    const untilEot = /until end of turn/i.test(text);
+    for (const m of foe.board) silence(m, untilEot);
   } else if (/silence/i.test(text) && target?.minionIid && target.minionOwner) {
     const m = findOnBoard(sideOf(state, target.minionOwner), target.minionIid);
-    if (m) silence(m);
+    if (m) silence(m, /until end of turn/i.test(text));
+  }
+
+  const oppDisc = text.match(/opponent discards (\d+)/i);
+  if (oppDisc) discardFromHand(foe, Number(oppDisc[1]), state);
+  const eachDisc = text.match(/each player discards (\d+)/i);
+  if (eachDisc) {
+    const n = Number(eachDisc[1]);
+    discardFromHand(self, n, state);
+    discardFromHand(foe, n, state);
   }
 
   if (/summon two 2\/1 Raptors/i.test(text)) {
@@ -994,6 +1079,7 @@ function usePowerOn(state: MatchState, id: SideId, target: TargetRef) {
     if (side.board.length < 7) {
       const inst = makeInst(state, INITIATE, false);
       applyTemplarAuraToNew(state, id, inst, INITIATE);
+      applyEnterModifiers(state, id, inst);
       side.board.push(inst);
       log(state, `${side.name} calls an Initiate.`);
     }
@@ -1006,7 +1092,7 @@ function usePowerOn(state: MatchState, id: SideId, target: TargetRef) {
 function pickAi(state: MatchState, difficulty: MatchState["difficulty"]): AiAction {
   const side = state.ai;
   const rand = Math.random();
-  const teaching = state.encounterId === "tutorial" && state.turn <= 3;
+  const teaching = (state.encounterId === "tutorial" || Boolean(state.campaign?.teach)) && state.turn <= 3;
   if (difficulty === "easy" && !teaching && rand < 0.22) return "end";
 
   const plays: { index: number; score: number }[] = [];
@@ -1029,6 +1115,9 @@ function pickAi(state: MatchState, difficulty: MatchState["difficulty"]): AiActi
     const atk = auraAtk(state, "ai", m);
     const killable = legal.minions.find((t) => t.hp <= atk);
     if (killable) return { t: "attack", iid: m.iid, target: { minionIid: killable.iid, minionOwner: "player" } };
+    if (legal.face && difficulty === "hard" && state.player.life <= atk + 1) {
+      return { t: "attack", iid: m.iid, target: { hero: "player" } };
+    }
     if (legal.face) return { t: "attack", iid: m.iid, target: { hero: "player" } };
     if (legal.minions[0]) {
       return { t: "attack", iid: m.iid, target: { minionIid: legal.minions[0].iid, minionOwner: "player" } };

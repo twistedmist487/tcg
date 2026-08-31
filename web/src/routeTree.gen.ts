@@ -10,8 +10,10 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CampaignRouteImport } from './routes/campaign'
 import { Route as CollectionRouteImport } from './routes/collection'
 import { Route as DecksRouteImport } from './routes/decks'
+import { Route as LockerRouteImport } from './routes/locker'
 import { Route as MatchRouteImport } from './routes/match'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as PlayRouteImport } from './routes/play'
@@ -24,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CampaignRoute = CampaignRouteImport.update({
+  id: '/campaign',
+  path: '/campaign',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CollectionRoute = CollectionRouteImport.update({
   id: '/collection',
   path: '/collection',
@@ -32,6 +39,11 @@ const CollectionRoute = CollectionRouteImport.update({
 const DecksRoute = DecksRouteImport.update({
   id: '/decks',
   path: '/decks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LockerRoute = LockerRouteImport.update({
+  id: '/locker',
+  path: '/locker',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MatchRoute = MatchRouteImport.update({
@@ -67,8 +79,10 @@ const DecksIdRoute = DecksIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/campaign': typeof CampaignRoute
   '/collection': typeof CollectionRoute
   '/decks': typeof DecksRouteWithChildren
+  '/locker': typeof LockerRoute
   '/match': typeof MatchRoute
   '/missions': typeof MissionsRoute
   '/play': typeof PlayRoute
@@ -78,8 +92,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/campaign': typeof CampaignRoute
   '/collection': typeof CollectionRoute
   '/decks': typeof DecksRouteWithChildren
+  '/locker': typeof LockerRoute
   '/match': typeof MatchRoute
   '/missions': typeof MissionsRoute
   '/play': typeof PlayRoute
@@ -90,8 +106,10 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/campaign': typeof CampaignRoute
   '/collection': typeof CollectionRoute
   '/decks': typeof DecksRouteWithChildren
+  '/locker': typeof LockerRoute
   '/match': typeof MatchRoute
   '/missions': typeof MissionsRoute
   '/play': typeof PlayRoute
@@ -103,8 +121,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/campaign'
     | '/collection'
     | '/decks'
+    | '/locker'
     | '/match'
     | '/missions'
     | '/play'
@@ -114,8 +134,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/campaign'
     | '/collection'
     | '/decks'
+    | '/locker'
     | '/match'
     | '/missions'
     | '/play'
@@ -125,8 +147,10 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/campaign'
     | '/collection'
     | '/decks'
+    | '/locker'
     | '/match'
     | '/missions'
     | '/play'
@@ -137,8 +161,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CampaignRoute: typeof CampaignRoute
   CollectionRoute: typeof CollectionRoute
   DecksRoute: typeof DecksRouteWithChildren
+  LockerRoute: typeof LockerRoute
   MatchRoute: typeof MatchRoute
   MissionsRoute: typeof MissionsRoute
   PlayRoute: typeof PlayRoute
@@ -155,6 +181,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/campaign': {
+      id: '/campaign'
+      path: '/campaign'
+      fullPath: '/campaign'
+      preLoaderRoute: typeof CampaignRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/collection': {
       id: '/collection'
       path: '/collection'
@@ -167,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/decks'
       fullPath: '/decks'
       preLoaderRoute: typeof DecksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locker': {
+      id: '/locker'
+      path: '/locker'
+      fullPath: '/locker'
+      preLoaderRoute: typeof LockerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/match': {
@@ -226,8 +266,10 @@ const DecksRouteWithChildren = DecksRoute._addFileChildren(DecksRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CampaignRoute: CampaignRoute,
   CollectionRoute: CollectionRoute,
   DecksRoute: DecksRouteWithChildren,
+  LockerRoute: LockerRoute,
   MatchRoute: MatchRoute,
   MissionsRoute: MissionsRoute,
   PlayRoute: PlayRoute,

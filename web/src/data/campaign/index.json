@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "chapters": [
+    {
+      "id": "illuminati",
+      "name": "The Inner Circle",
+      "faction": "illuminati",
+      "description": "City initiation, then HQ. Learn Influence by doing.",
+      "status": "available",
+      "starter_board": "city",
+      "art": "/ui/campaign/hq-board.jpg"
+    },
+    {
+      "id": "templars",
+      "name": "Vault of Faith",
+      "faction": "templars",
+      "description": "Hallowed Ground. The seal still holds. Templar chapter — sealed.",
+      "status": "sealed",
+      "starter_board": "vault",
+      "art": "/ui/campaign/vault-tease.jpg"
+    },
+    {
+      "id": "reptilians",
+      "name": "Psionic Hive",
+      "faction": "reptilians",
+      "description": "Static Air. The hive is listening. Reptilian chapter — sealed.",
+      "status": "sealed",
+      "starter_board": "hive",
+      "art": "/ui/campaign/hive-tease.jpg"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "illuminati",
+  "name": "The Inner Circle",
+  "faction": "illuminati",
+  "starter_deck_id": "campaign_illuminati_city_starter",
+  "boards": [
+    "city",
+    "hq"
+  ],
+  "difficulties": {
+    "normal": {
+      "ai_default": "easy",
+      "label": "Normal"
+    },
+    "heroic": {
+      "ai_default": "medium",
+      "label": "Heroic"
+    }
+  }
+}

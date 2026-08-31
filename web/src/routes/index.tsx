@@ -4,6 +4,7 @@ import { TerminalFrame } from "@/components/shell/TerminalFrame";
 import { NavButtons } from "@/components/nav/NavButtons";
 import { useArchive } from "@/lib/store";
 import { formatXp } from "@/lib/utils";
+import { callsignOf, STARTER_LOADOUT } from "@/lib/game/cosmetics";
 
 export const Route = createFileRoute("/")({ component: Home });
 
@@ -47,7 +48,9 @@ function Home() {
               className="size-12 rounded-sm object-cover object-top outline outline-1 -outline-offset-1 outline-white/10"
             />
             <div className="min-w-0">
-              <div className="font-mono text-[10px] tracking-[0.18em] text-muted">AGENT_ID: {agent.agentId}</div>
+              <div className="font-mono text-[10px] tracking-[0.18em] text-muted">
+                {callsignOf(agent.handle, (agent.cosmeticsLoadout ?? STARTER_LOADOUT).title)}
+              </div>
               <div className="font-ui text-sm font-semibold tracking-wide text-ink">
                 LVL {agent.level} · {formatXp(agent.xp)} XP
               </div>
