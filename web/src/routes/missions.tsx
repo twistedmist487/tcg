@@ -32,6 +32,11 @@ function MissionsPage() {
       title: "The Inner Circle",
       blurb: "City initiation, then HQ. Heroic on the hub. Field cards and locker sleeves.",
     },
+    {
+      id: "templars",
+      title: "Vault of Faith",
+      blurb: "Hold the reliquary. Hallowed Ground blesses the first body each turn. Opens after Inner Circle.",
+    },
   ];
 
   const challenges = ENCOUNTERS.filter((e) => e.mode === "challenge" || e.mode === "tutorial" || e.mode === "lab");
@@ -69,13 +74,19 @@ function MissionsPage() {
                   </div>
                   <p className="mt-2 font-mono text-[11px] leading-relaxed text-muted">{c.blurb}</p>
                   <div className="mt-2 font-mono text-[10px] tracking-[0.16em] text-watch">
-                    {live
+                    {live && archive.campaignRun?.chapterId === c.id
                       ? archive.campaignRun?.boardId === "hq"
                         ? "RESUME LODGE"
-                        : "RESUME CITY BOARD"
+                        : archive.campaignRun?.boardId === "vault"
+                          ? "RESUME VAULT"
+                          : "RESUME CITY BOARD"
                       : st === "complete"
                         ? "CHAPTER ON FILE"
-                        : "OPEN INITIATION"}
+                        : st === "locked"
+                          ? "SEALED"
+                          : c.id === "templars"
+                            ? "OPEN VAULT"
+                            : "OPEN INITIATION"}
                   </div>
                 </button>
               );

@@ -1,6 +1,6 @@
 export type CosmeticSlot = "cardBack" | "tableFelt" | "nameplate" | "title";
 
-export type UnlockRule = "starter" | "city" | "chapter" | "heroic" | "reckless";
+export type UnlockRule = "starter" | "city" | "chapter" | "heroic" | "reckless" | "vault" | "vaultHeroic";
 
 export type Cosmetic = {
   id: string;
@@ -24,6 +24,8 @@ export type CosmeticProgress = {
   chapterCleared: boolean;
   heroicCleared: boolean;
   recklessCleared: boolean;
+  vaultCleared: boolean;
+  vaultHeroicCleared: boolean;
 };
 
 export const STARTER_LOADOUT: CosmeticLoadout = {
@@ -169,6 +171,42 @@ export const COSMETICS: Cosmetic[] = [
     unlock: "reckless",
     hint: "Skip Safe Drop, then close the chapter.",
   },
+  {
+    id: "back-templars",
+    slot: "cardBack",
+    name: "Reliquary Sleeve",
+    blurb: "Gold cross on dark stock. Issued after the seal holds.",
+    src: "/cards/backs/templars-back.jpg",
+    unlock: "vault",
+    hint: "Close Vault of Faith.",
+  },
+  {
+    id: "plate-faith",
+    slot: "nameplate",
+    name: "Faith Plate",
+    blurb: "Templar hardware. The hall remembers who stood.",
+    src: "/ui/chrome/nameplate-templars.jpg",
+    unlock: "vault",
+    hint: "Close Vault of Faith.",
+  },
+  {
+    id: "title-oathkeeper",
+    slot: "title",
+    name: "OATHKEEPER",
+    blurb: "The Chaplain logged the name. The vault is quiet.",
+    src: "",
+    unlock: "vault",
+    hint: "Close Vault of Faith.",
+  },
+  {
+    id: "title-seal-warden",
+    slot: "title",
+    name: "SEAL WARDEN",
+    blurb: "Heroic. You held the door on the hard path.",
+    src: "",
+    unlock: "vaultHeroic",
+    hint: "Close Vault of Faith on Heroic.",
+  },
 ];
 
 export const SLOT_LABEL: Record<CosmeticSlot, string> = {
@@ -192,6 +230,8 @@ export function isCosmeticUnlocked(c: Cosmetic, progress: CosmeticProgress): boo
   if (c.unlock === "chapter") return progress.chapterCleared;
   if (c.unlock === "heroic") return progress.heroicCleared;
   if (c.unlock === "reckless") return progress.recklessCleared;
+  if (c.unlock === "vault") return progress.vaultCleared;
+  if (c.unlock === "vaultHeroic") return progress.vaultHeroicCleared;
   return false;
 }
 

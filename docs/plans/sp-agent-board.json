@@ -2,7 +2,7 @@
   "version": 2,
   "project": "Conspiracy TCG",
   "initiative": "campaign single-player (notebook-driven)",
-  "updated": "2026-08-25",
+  "updated": "2026-08-31",
   "north_star": "Narrative Investigation Board: Illuminati City+HQ vertical slice; organic teaching; control archetypes; ledger lore; economy later.",
   "hard_constraints": [
     "single-player only",
@@ -277,7 +277,8 @@
   ],
   "notes": [
     "M3 HQ reverse siege + Fortitude twist + Grandmaster + ledger UI + armory pick shipped.",
-    "City escape hands off to HQ. Abandon run if testing fresh.",
-    "Human play of full City\u2192HQ still recommended."
+    "Vault of Faith (Templars) shipped in React client: Hallowed Ground, Chaplain, vestry relic, Guardian of the Seal. Unlocks after Inner Circle.",
+    "Next: Psionic Hive (Reptilians, Static Air). Currency/packs still deferred.",
+    "City escape hands off to HQ. Abandon run if testing fresh."
   ]
 }

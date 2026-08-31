@@ -87,6 +87,7 @@ function heroicTwist(run: CampaignRun, twist: MatchState["twist"]): MatchState["
     label: "Heroic Pressure",
     description: "Enemy characters enter play with +1 Health.",
     enemyHealthBonus: extra,
+    firstCharacterHealthBonus: 0,
   };
 }
 
@@ -117,6 +118,7 @@ export function matchFromCampaignNode(
           label: twistDef.label,
           description: twistDef.description,
           enemyHealthBonus: twistDef.match_modifiers?.enemy_character_health_bonus ?? 0,
+          firstCharacterHealthBonus: twistDef.match_modifiers?.first_character_health_bonus ?? 0,
         }
       : null,
   );
@@ -126,7 +128,7 @@ export function matchFromCampaignNode(
   return startMatch({
     playerName,
     aiName: resolved.ai?.name ?? "Handler",
-    playerFaction: "illuminati",
+    playerFaction: asHeroFaction(run.chapterId),
     aiFaction,
     playerDeck: payload.ids,
     aiDeck: flattenDeckIds(resolved.ai_deck),

@@ -1,0 +1,19 @@
+{
+  "id": "templars",
+  "name": "Vault of Faith",
+  "faction": "templars",
+  "starter_deck_id": "campaign_templars_vault_starter",
+  "boards": [
+    "vault"
+  ],
+  "difficulties": {
+    "normal": {
+      "ai_default": "easy",
+      "label": "Normal"
+    },
+    "heroic": {
+      "ai_default": "medium",
+      "label": "Heroic"
+    }
+  }
+}

@@ -1393,6 +1393,36 @@
           "copies": 2
         }
       ]
+    },
+    {
+      "id": "campaign_templars_vault_starter",
+      "name": "Vault Reliquary Starter",
+      "faction": "templars",
+      "archetype": "campaign_starter",
+      "description": "Faith walls and prayer. Squire, Guardian, Zealot, Battle Chaplain, Knight Commander. The kit is yours after the Vestry.",
+      "campaign": "templars_vault",
+      "cards": [
+        { "id": "templars_char_009", "copies": 2 },
+        { "id": "templars_char_015", "copies": 2 },
+        { "id": "templars_char_002", "copies": 2 },
+        { "id": "templars_char_006", "copies": 2 },
+        { "id": "templars_char_012", "copies": 2 },
+        { "id": "templars_char_004", "copies": 1 },
+        { "id": "templars_char_001", "copies": 1 },
+        { "id": "templars_char_017", "copies": 1 },
+        { "id": "templars_char_016", "copies": 1 },
+        { "id": "templars_spell_003", "copies": 2 },
+        { "id": "templars_spell_001", "copies": 2 },
+        { "id": "templars_spell_004", "copies": 1 },
+        { "id": "templars_spell_011", "copies": 1 },
+        { "id": "templars_spell_012", "copies": 1 },
+        { "id": "templars_spell_005", "copies": 1 },
+        { "id": "templars_loc_001", "copies": 1 },
+        { "id": "templars_loc_007", "copies": 1 },
+        { "id": "neutral_char_007", "copies": 2 },
+        { "id": "neutral_char_022", "copies": 2 },
+        { "id": "neutral_spell_003", "copies": 2 }
+      ]
     }
   ]
 }

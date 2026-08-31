@@ -8,6 +8,22 @@
       "description": "City initiation, then HQ. Learn Influence by doing.",
       "status": "available",
       "starter_board": "city"
+    },
+    {
+      "id": "templars",
+      "name": "Vault of Faith",
+      "faction": "templars",
+      "description": "Hold the reliquary. Faith, walls, and Hallowed Ground.",
+      "status": "sealed",
+      "starter_board": "vault"
+    },
+    {
+      "id": "reptilians",
+      "name": "Psionic Hive",
+      "faction": "reptilians",
+      "description": "Static Air. The hive is listening. Reptilian chapter — sealed.",
+      "status": "sealed",
+      "starter_board": "hive"
     }
   ]
 }

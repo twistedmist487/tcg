@@ -275,7 +275,8 @@ work is visual polish and QoL.
 - [x] M1: Control archetype decks from existing pool
 - [x] M2: Illuminati Board 1 (City + Escape crisis) playable (data + engine + UI)
 - [x] M3: Illuminati Board 2 (HQ reverse + boss + ledger UI)
-- [ ] Deferred: currency/packs UI; Templar/Reptilian full chapters
+- [x] Templar chapter (Vault of Faith) in the React client — Hallowed Ground, Chaplain coach, Guardian of the Seal
+- [ ] Deferred: currency/packs UI; Reptilian full chapter (Psionic Hive)
 
 
 ---

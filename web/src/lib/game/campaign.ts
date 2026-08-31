@@ -2,6 +2,8 @@ import campaignIndex from "@/data/campaign/index.json";
 import illuminatiChapter from "@/data/campaign/illuminati/chapter.json";
 import cityBoardJson from "@/data/campaign/illuminati/board_city.json";
 import hqBoardJson from "@/data/campaign/illuminati/board_hq.json";
+import templarsChapter from "@/data/campaign/templars/chapter.json";
+import vaultBoardJson from "@/data/campaign/templars/board_vault.json";
 import { expandDeck, getCard } from "./catalog";
 import rawDecks from "@/data/decks.json";
 import type {
@@ -43,17 +45,26 @@ export const CAMPAIGN_CHAPTERS = (
 
 const CITY_BOARD = cityBoardJson as CampaignBoard;
 const HQ_BOARD = hqBoardJson as CampaignBoard;
+const VAULT_BOARD = vaultBoardJson as CampaignBoard;
+
+type ChapterMeta = {
+  id: string;
+  name: string;
+  faction: string;
+  starter_deck_id: string;
+  boards: string[];
+};
 
 export function loadChapter(chapterId: string) {
+  if (chapterId === "templars") {
+    return {
+      ...(templarsChapter as ChapterMeta),
+      board_data: { vault: VAULT_BOARD } as Record<string, CampaignBoard>,
+    };
+  }
   if (chapterId !== "illuminati") return null;
   return {
-    ...(illuminatiChapter as {
-      id: string;
-      name: string;
-      faction: string;
-      starter_deck_id: string;
-      boards: string[];
-    }),
+    ...(illuminatiChapter as ChapterMeta),
     board_data: { city: CITY_BOARD, hq: HQ_BOARD } as Record<string, CampaignBoard>,
   };
 }
@@ -172,10 +183,11 @@ export function seedTeachFront(deck: string[], seedIds: string[]): string[] {
   return [...front, ...out];
 }
 
-export function campaignCoachId(run: CampaignRun | null, node?: CampaignNode): "recruiter" | "ops" | "silent" {
+export function campaignCoachId(run: CampaignRun | null, node?: CampaignNode): "recruiter" | "ops" | "silent" | "chaplain" {
   if (node?.coach === "silent") return "silent";
+  if (node?.coach === "chaplain" || run?.chapterId === "templars") return "chaplain";
   if (run?.flags.recruiter_dead || run?.boardId === "hq") return "ops";
-  if (node?.coach) return node.coach;
+  if (node?.coach === "ops" || node?.coach === "recruiter") return node.coach;
   return "recruiter";
 }
 
@@ -280,7 +292,7 @@ export function applyNodeClear(run: CampaignRun, node: CampaignNode, board: Camp
     if (reverseAllClear(next, board)) next.phase = "boss";
   }
 
-  if (next.flags.illuminati_chapter_complete) next.phase = "done";
+  if (next.flags.illuminati_chapter_complete || next.flags.templars_chapter_complete) next.phase = "done";
 
   if (rewards.next_board && rewards.next_board !== next.boardId) {
     next = {
@@ -335,7 +347,9 @@ export function mapLinks(board: CampaignBoard, run: CampaignRun): { from: Campai
 }
 
 export function boardArt(boardId: string) {
-  return boardId === "hq" ? "/ui/campaign/hq-board.jpg" : "/ui/campaign/city-board.jpg";
+  if (boardId === "hq") return "/ui/campaign/hq-board.jpg";
+  if (boardId === "vault") return "/ui/campaign/vault-board.jpg";
+  return "/ui/campaign/city-board.jpg";
 }
 
 export function boardHint(run: CampaignRun, board: CampaignBoard) {
@@ -343,13 +357,21 @@ export function boardHint(run: CampaignRun, board: CampaignBoard) {
     return "Fight back through the halls. Righteous Fortitude is active. Your kit is the one you built.";
   }
   if (run.phase === "boss") return "The Grandmaster holds the entrance. Ops is on the radio.";
-  if (run.phase === "done") return "Chapter complete. Review the ledger or abandon to restart.";
+  if (run.phase === "done") {
+    return board.id === "vault"
+      ? "The seal holds. Review the ledger or abandon to restart."
+      : "Chapter complete. Review the ledger or abandon to restart.";
+  }
   if (run.phase === "city_complete") return "You escaped. The Lodge is waiting.";
   return board.map_hint;
 }
 
 export function boardKicker(run: CampaignRun, board: CampaignBoard) {
   const heroic = run.difficulty === "heroic" ? " · HEROIC" : "";
+  if (board.id === "vault") {
+    if (run.phase === "done") return `// VAULT — SECURE${heroic}`;
+    return `// VAULT OF FAITH${heroic}`;
+  }
   if (board.id === "hq") {
     if (run.phase === "reverse") return `// HQ — BREACH${heroic}`;
     if (run.phase === "boss") return `// HQ — EXIT${heroic}`;
@@ -368,7 +390,7 @@ export function ledgerFile(id: string, run: CampaignRun): { title: string; text:
         : "A tool was taken from the black budget.",
     };
   }
-  return CITY_BOARD.ledger[id] ?? HQ_BOARD.ledger[id];
+  return CITY_BOARD.ledger[id] ?? HQ_BOARD.ledger[id] ?? VAULT_BOARD.ledger[id];
 }
 
 export const NODE_ART: Record<string, string> = {
@@ -386,6 +408,13 @@ export const NODE_ART: Record<string, string> = {
   hq_armory: "/ui/campaign/story-armory.jpg",
   hq_breach: "/ui/campaign/story-breach.jpg",
   grandmaster: "/ui/campaign/grandmaster.jpg",
+  vault_intro: "/ui/campaign/chaplain.jpg",
+  nave_watch: "/ui/campaign/story-nave.jpg",
+  infirmary: "/ui/campaign/chaplain.jpg",
+  vestry: "/ui/campaign/story-heist.jpg",
+  crypt_rush: "/ui/campaign/story-heist.jpg",
+  inner_gate: "/ui/campaign/vault-board.jpg",
+  guardian: "/ui/campaign/guardian.jpg",
 };
 
 export const NODE_FIRST_CLEAR: Record<string, { credits: number; cards: string[] }> = {
@@ -406,6 +435,13 @@ export const NODE_FIRST_CLEAR: Record<string, { credits: number; cards: string[]
   "reverse:train_bounce": { credits: 70, cards: [] },
   "reverse:train_discard": { credits: 70, cards: [] },
   "reverse:train_silence": { credits: 70, cards: [] },
+  vault_intro: { credits: 20, cards: [] },
+  nave_watch: { credits: 40, cards: ["templars_char_009"] },
+  infirmary: { credits: 40, cards: ["templars_char_006"] },
+  vestry: { credits: 30, cards: [] },
+  crypt_rush: { credits: 50, cards: ["templars_char_012"] },
+  inner_gate: { credits: 50, cards: ["templars_char_001"] },
+  guardian: { credits: 200, cards: ["templars_char_005"] },
 };
 
 export function rewardKey(run: CampaignRun, nodeId: string) {
@@ -464,9 +500,14 @@ export function kitSummary(deck: string[]) {
 }
 
 export function storyArtFor(node: CampaignNode): string {
-  return NODE_ART[node.id] ?? (node.id.startsWith("hq") || node.id.startsWith("train") || node.id === "grandmaster"
-    ? "/ui/campaign/hq-board.jpg"
-    : "/ui/campaign/city-board.jpg");
+  if (NODE_ART[node.id]) return NODE_ART[node.id]!;
+  if (node.id.startsWith("hq") || node.id.startsWith("train") || node.id === "grandmaster") {
+    return "/ui/campaign/hq-board.jpg";
+  }
+  if (node.id === "guardian" || node.id.startsWith("vault") || node.id.startsWith("nave") || node.id === "vestry" || node.id === "infirmary" || node.id === "crypt_rush" || node.id === "inner_gate") {
+    return "/ui/campaign/vault-board.jpg";
+  }
+  return "/ui/campaign/city-board.jpg";
 }
 
 export function nodeKindLabel(node: CampaignNode): string {

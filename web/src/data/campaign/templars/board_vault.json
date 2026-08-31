@@ -1,0 +1,698 @@
+{
+  "id": "vault",
+  "name": "Vault of Faith",
+  "chapter_id": "templars",
+  "start_node": "vault_intro",
+  "map_hint": "Hold the reliquary. Faith, walls, and the first body each turn is blessed.",
+  "nodes": [
+    {
+      "id": "vault_intro",
+      "type": "story",
+      "title": "The Seal Holds",
+      "blurb": "A Chaplain finds you at the side door.",
+      "map": {
+        "x": 0.12,
+        "y": 0.58
+      },
+      "requires": [],
+      "unlocks": [
+        "nave_watch"
+      ],
+      "story_panels": [
+        {
+          "text": "Candle-smoke and wet stone. A Chaplain in a dark cassock does not ask your name. \"The seal still holds. A heist team is already in the nave.\""
+        },
+        {
+          "text": "\"Faith. Walls. Healing. We script the first lessons so you learn by standing, not by dying at the door.\""
+        },
+        {
+          "text": "They press a thin reliquary deck into your hands. \"Energy. Taunt. Prayer. Follow the prompts.\""
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_seal"
+        ]
+      },
+      "coach": "chaplain"
+    },
+    {
+      "id": "nave_watch",
+      "type": "combat",
+      "title": "Nave Watch",
+      "blurb": "Taunt walls. AI at 10 life.",
+      "map": {
+        "x": 0.28,
+        "y": 0.62
+      },
+      "requires": [
+        "vault_intro"
+      ],
+      "unlocks": [
+        "infirmary"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Night Thief",
+        "faction": "neutral"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 10,
+      "player_deck": [
+        "templars_char_009",
+        "templars_char_009",
+        "templars_char_015",
+        "templars_char_015",
+        "templars_char_002",
+        "templars_char_002",
+        "templars_char_006",
+        "templars_char_006",
+        "templars_char_012",
+        "templars_char_012",
+        "templars_char_004",
+        "templars_char_001",
+        "templars_char_017",
+        "templars_char_016",
+        "templars_spell_003",
+        "templars_spell_003",
+        "templars_spell_001",
+        "templars_spell_001",
+        "templars_spell_004",
+        "templars_spell_011",
+        "templars_spell_012",
+        "templars_spell_005",
+        "templars_loc_001",
+        "templars_loc_007",
+        "neutral_char_007",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_022",
+        "neutral_spell_003",
+        "neutral_spell_003"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050",
+        "neutral_spell_027",
+        "neutral_char_023",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050"
+      ],
+      "teach": true,
+      "steps": [
+        {
+          "id": "welcome",
+          "title": "Faith and walls",
+          "text": "You start with 1 energy. Play Squire (Taunt, cost 1) from hand onto your board.",
+          "require": "play_named:Squire",
+          "highlight": "Squire"
+        },
+        {
+          "id": "exhaustion",
+          "title": "Exhausted",
+          "text": "New characters usually cannot attack this turn. Click End Turn and let the thief act.",
+          "require": "end_turn"
+        },
+        {
+          "id": "attack",
+          "title": "Attack",
+          "text": "Your wall is ready. Attack the thief's board or their hero. They only have 10 life.",
+          "require": "attack"
+        },
+        {
+          "id": "free",
+          "title": "Hold the nave",
+          "text": "Spend energy, attack, end turn. Reduce Night Thief to 0.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "Chaplain",
+          "text": "Faith grows each turn. Unspent Faith is gone. Taunt is a wall \u2014 stand in the door."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_faith"
+        ]
+      },
+      "player_deck_mode": "scripted",
+      "coach": "chaplain"
+    },
+    {
+      "id": "infirmary",
+      "type": "combat",
+      "title": "Infirmary",
+      "blurb": "Heals. AI at 12 life.",
+      "map": {
+        "x": 0.44,
+        "y": 0.48
+      },
+      "requires": [
+        "nave_watch"
+      ],
+      "unlocks": [
+        "vestry"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Wounded Courier",
+        "faction": "neutral"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "templars_char_006",
+        "templars_spell_003",
+        "templars_char_009",
+        "templars_char_009",
+        "templars_char_015",
+        "templars_char_015",
+        "templars_char_002",
+        "templars_char_002",
+        "templars_char_006",
+        "templars_char_012",
+        "templars_char_012",
+        "templars_char_004",
+        "templars_char_001",
+        "templars_char_017",
+        "templars_char_016",
+        "templars_spell_003",
+        "templars_spell_001",
+        "templars_spell_001",
+        "templars_spell_004",
+        "templars_spell_011",
+        "templars_spell_012",
+        "templars_spell_005",
+        "templars_loc_001",
+        "templars_loc_007",
+        "neutral_char_007",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_022",
+        "neutral_spell_003",
+        "neutral_spell_003"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050",
+        "neutral_spell_027",
+        "neutral_char_023",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050"
+      ],
+      "teach": true,
+      "steps": [
+        {
+          "id": "heal",
+          "title": "Prayer",
+          "text": "Play Battle Chaplain (heals you) or Absolution (restore 5, draw). Keep your life total honest.",
+          "require": "play_named:Battle Chaplain",
+          "highlight": "Battle Chaplain"
+        },
+        {
+          "id": "free",
+          "title": "Clear the ward",
+          "text": "Finish the Courier \u2014 12 life. Healing is tempo if it keeps a wall alive.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "Chaplain",
+          "text": "Absolution targets a body or your own life. Do not hoard the prayer."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_heal"
+        ]
+      },
+      "player_deck_mode": "scripted",
+      "coach": "chaplain"
+    },
+    {
+      "id": "vestry",
+      "type": "safehouse",
+      "title": "Vestry",
+      "blurb": "A brother offers a relic.",
+      "map": {
+        "x": 0.58,
+        "y": 0.58
+      },
+      "requires": [
+        "infirmary"
+      ],
+      "unlocks": [
+        "crypt_rush"
+      ],
+      "safehouse": {
+        "text": "A brother waits with a key. Take Relic Keeper, dump a Novice, or keep walking. After this, the kit is yours.",
+        "pick_one_of": [
+          {
+            "id": "templars_char_004",
+            "label": "Take the relic",
+            "blurb": "Relic Keeper (Taunt, retaliates). One spare card is cut to stay at 30.",
+            "action": "add",
+            "copies": 1,
+            "trim": [
+              "templars_char_015",
+              "neutral_spell_003",
+              "templars_spell_011"
+            ]
+          },
+          {
+            "id": "templars_char_015",
+            "label": "Dump a Novice",
+            "blurb": "Cut one Novice. Leaner hand for the crypt and the seal.",
+            "action": "prune",
+            "prune_id": "templars_char_015"
+          },
+          {
+            "id": "walk",
+            "label": "Keep walking",
+            "blurb": "No change. The Chaplain logs you as proud.",
+            "action": "skip"
+          }
+        ]
+      },
+      "rewards": {
+        "ledger_ids": [
+          "file_vestry"
+        ]
+      },
+      "coach": "chaplain",
+      "dialogue": [
+        {
+          "speaker": "Chaplain",
+          "text": "A relic, a cut, or pride. Choose. After this, I stop stacking your deck."
+        }
+      ]
+    },
+    {
+      "id": "crypt_rush",
+      "type": "combat",
+      "title": "Crypt Signal",
+      "blurb": "Charge hits now. Hallowed Ground is live. AI at 12 life.",
+      "map": {
+        "x": 0.72,
+        "y": 0.42
+      },
+      "requires": [
+        "vestry"
+      ],
+      "unlocks": [
+        "inner_gate"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Cutters",
+        "faction": "illuminati"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "templars_char_012",
+        "templars_char_009",
+        "templars_char_009",
+        "templars_char_015",
+        "templars_char_015",
+        "templars_char_002",
+        "templars_char_002",
+        "templars_char_006",
+        "templars_char_006",
+        "templars_char_012",
+        "templars_char_004",
+        "templars_char_001",
+        "templars_char_017",
+        "templars_char_016",
+        "templars_spell_003",
+        "templars_spell_003",
+        "templars_spell_001",
+        "templars_spell_001",
+        "templars_spell_004",
+        "templars_spell_011",
+        "templars_spell_012",
+        "templars_spell_005",
+        "templars_loc_001",
+        "templars_loc_007",
+        "neutral_char_007",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_022",
+        "neutral_spell_003",
+        "neutral_spell_003"
+      ],
+      "ai_deck": [
+        "illuminati_char_009",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_011",
+        "neutral_char_010",
+        "illuminati_char_009",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_011",
+        "neutral_char_010",
+        "illuminati_char_001",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "illuminati_char_015",
+        "neutral_char_007",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "illuminati_char_001",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "neutral_char_007",
+        "neutral_char_022",
+        "illuminati_spell_002"
+      ],
+      "teach": true,
+      "twist": {
+        "id": "hallowed_ground",
+        "label": "Hallowed Ground",
+        "description": "The first character each player plays each turn gains +2 Health.",
+        "match_modifiers": {
+          "first_character_health_bonus": 2
+        }
+      },
+      "steps": [
+        {
+          "id": "charge",
+          "title": "Charge",
+          "text": "Play Zealot (Charge). Charge can attack face the turn it lands. Hallowed Ground also blesses the first body you play each turn.",
+          "require": "play_named:Zealot",
+          "highlight": "Zealot"
+        },
+        {
+          "id": "charge-attack",
+          "title": "Swing now",
+          "text": "Attack with Zealot this turn \u2014 face is legal if no Taunt.",
+          "require": "attack"
+        },
+        {
+          "id": "free",
+          "title": "Take the crypt",
+          "text": "Use Charge and walls. Finish at 12 life.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "Chaplain",
+          "text": "Hallowed Ground: first character each turn is thicker. Charge still hits face tonight."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_hallowed"
+        ]
+      },
+      "player_deck_mode": "scripted",
+      "coach": "chaplain"
+    },
+    {
+      "id": "inner_gate",
+      "type": "combat",
+      "title": "Inner Gate",
+      "blurb": "Commander aura. AI at 14 life.",
+      "map": {
+        "x": 0.86,
+        "y": 0.52
+      },
+      "requires": [
+        "crypt_rush"
+      ],
+      "unlocks": [
+        "guardian"
+      ],
+      "ai": {
+        "difficulty": "medium",
+        "name": "Vault Broker",
+        "faction": "illuminati"
+      },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 14,
+      "ai_deck": [
+        "illuminati_char_009",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_011",
+        "neutral_char_010",
+        "illuminati_char_009",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_011",
+        "neutral_char_010",
+        "illuminati_char_001",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "illuminati_char_015",
+        "neutral_char_007",
+        "neutral_char_001",
+        "neutral_char_028",
+        "neutral_spell_003",
+        "neutral_spell_022",
+        "illuminati_char_001",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "neutral_char_007",
+        "neutral_char_022",
+        "illuminati_spell_002"
+      ],
+      "teach": true,
+      "twist": {
+        "id": "hallowed_ground",
+        "label": "Hallowed Ground",
+        "description": "The first character each player plays each turn gains +2 Health.",
+        "match_modifiers": {
+          "first_character_health_bonus": 2
+        }
+      },
+      "steps": [
+        {
+          "id": "aura",
+          "title": "Commander",
+          "text": "Play Knight Commander when you can afford it \u2014 other Templars enter thicker.",
+          "require": "play_named:Knight Commander",
+          "highlight": "Knight Commander"
+        },
+        {
+          "id": "free",
+          "title": "Hold the gate",
+          "text": "Keep the wall. Broker is on 14 life. Card advantage is secondary to not dying.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "Chaplain",
+          "text": "Your kit, your calls. The Commander makes the hall heavier."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_gate"
+        ]
+      },
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": [
+        "templars_char_001"
+      ],
+      "coach": "chaplain"
+    },
+    {
+      "id": "guardian",
+      "type": "boss",
+      "title": "Guardian of the Seal",
+      "blurb": "High life. Taunt walls. Hallowed Ground. You must break him.",
+      "map": {
+        "x": 0.92,
+        "y": 0.28
+      },
+      "requires": [
+        "inner_gate"
+      ],
+      "unlocks": [],
+      "ai": {
+        "difficulty": "medium",
+        "name": "Guardian of the Seal",
+        "faction": "templars"
+      },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 24,
+      "ai_deck": [
+        "templars_char_002",
+        "templars_char_002",
+        "templars_char_009",
+        "templars_char_009",
+        "templars_char_007",
+        "templars_char_007",
+        "templars_char_004",
+        "templars_char_004",
+        "templars_char_001",
+        "templars_char_010",
+        "templars_char_018",
+        "templars_char_005",
+        "templars_char_005",
+        "templars_char_006",
+        "templars_char_006",
+        "templars_spell_001",
+        "templars_spell_001",
+        "templars_spell_003",
+        "templars_spell_003",
+        "templars_spell_004",
+        "templars_spell_004",
+        "templars_spell_002",
+        "templars_spell_005",
+        "templars_spell_005",
+        "templars_spell_012",
+        "templars_loc_001",
+        "neutral_char_007",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_022"
+      ],
+      "teach": true,
+      "twist": {
+        "id": "hallowed_ground",
+        "label": "Hallowed Ground",
+        "description": "The first character each player plays each turn gains +2 Health.",
+        "match_modifiers": {
+          "first_character_health_bonus": 2
+        }
+      },
+      "steps": [
+        {
+          "id": "seal",
+          "title": "The Seal",
+          "text": "He is the wall. Respect Taunt, heal through Hallowed Ground, and do not race face blindly. 24 life.",
+          "require": "free"
+        }
+      ],
+      "story_panels_on_enter": [
+        {
+          "text": "The last door does not open. Gold tabard, dented helm. The Guardian of the Seal has been standing there longer than the heist."
+        },
+        {
+          "text": "\"None pass.\" The Chaplain's radio clicks once. Then silence. Break him, or the vault falls."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_guardian"
+        ],
+        "flags": {
+          "templars_chapter_complete": true,
+          "board_vault_complete": true
+        }
+      },
+      "lesson_win": "The seal holds. You held it.",
+      "lesson_loss": "Taunt first. Heal second. Face only when the wall is gone.",
+      "player_deck_mode": "run",
+      "coach": "silent",
+      "dialogue": []
+    }
+  ],
+  "ledger": {
+    "file_seal": {
+      "title": "File: The Seal",
+      "text": "The vault predates the Lodge. Faith is the lock."
+    },
+    "file_faith": {
+      "title": "File: Faith",
+      "text": "Faith grows by one each turn, max 10. Unspent Faith is gone."
+    },
+    "file_heal": {
+      "title": "File: Absolution",
+      "text": "Heals keep walls honest. Absolution can target a body or your own life."
+    },
+    "file_vestry": {
+      "title": "File: Vestry",
+      "text": "Relics are assigned, not taken. Pride is also a choice."
+    },
+    "file_hallowed": {
+      "title": "File: Hallowed Ground",
+      "text": "The first character played each turn gains +2 Health. Blessing is not optional."
+    },
+    "file_gate": {
+      "title": "File: Inner Gate",
+      "text": "Knight Commander thickens every Templar that follows."
+    },
+    "file_guardian": {
+      "title": "File: Guardian",
+      "text": "The Seal does not negotiate. You did."
+    },
+    "file_reckless": {
+      "title": "File: Proud",
+      "text": "You skipped the vestry. The Chaplain noticed. The kit stayed as-issued."
+    }
+  }
+}

@@ -34,7 +34,7 @@ python3 -m uvicorn server.app:app --port 8080
 Open http://localhost:8080 in your browser. Play the tutorial, the Keyword Lab, fight the AI, run a faction encounter, or build a deck.
 
 ### React client (`web/`)
-TypeScript/TanStack playable (collection, decks, missions, store, match vs AI):
+TypeScript/TanStack playable (collection, decks, missions, store, locker, campaign vs AI):
 ```bash
 cd web && npm install && npm run dev
 ```

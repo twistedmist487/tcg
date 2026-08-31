@@ -50,6 +50,8 @@ type AgentState = {
   chapterCleared: boolean;
   heroicCleared: boolean;
   recklessCleared: boolean;
+  vaultCleared: boolean;
+  vaultHeroicCleared: boolean;
 };
 
 type Store = AgentState & {
@@ -80,6 +82,7 @@ const STARTER_MISSIONS: Record<string, MissionStatus> = {
   showcase_templars: "available",
   showcase_reptilians: "available",
   illuminati: "available",
+  templars: "locked",
   challenge_black_room: "locked",
   challenge_street_war: "locked",
   challenge_unquiet: "locked",
@@ -98,12 +101,14 @@ function starterDecks(): DeckList[] {
   return CURATED_DECKS.map((d) => ({ ...d, custom: false }));
 }
 
-function progressOf(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared">): CosmeticProgress {
+function progressOf(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared" | "vaultCleared" | "vaultHeroicCleared">): CosmeticProgress {
   return {
-    cityCleared: s.cityCleared,
-    chapterCleared: s.chapterCleared,
-    heroicCleared: s.heroicCleared,
-    recklessCleared: s.recklessCleared,
+    cityCleared: Boolean(s.cityCleared),
+    chapterCleared: Boolean(s.chapterCleared),
+    heroicCleared: Boolean(s.heroicCleared),
+    recklessCleared: Boolean(s.recklessCleared),
+    vaultCleared: Boolean(s.vaultCleared),
+    vaultHeroicCleared: Boolean(s.vaultHeroicCleared),
   };
 }
 
@@ -113,6 +118,8 @@ function mergeUnlocks(s: AgentState, extra: CosmeticProgress): string[] {
     chapterCleared: s.chapterCleared || extra.chapterCleared,
     heroicCleared: s.heroicCleared || extra.heroicCleared,
     recklessCleared: s.recklessCleared || extra.recklessCleared,
+    vaultCleared: s.vaultCleared || extra.vaultCleared,
+    vaultHeroicCleared: s.vaultHeroicCleared || extra.vaultHeroicCleared,
   });
   return [...new Set([...s.cosmeticsUnlocked, ...ids])];
 }
@@ -136,6 +143,8 @@ const initial = (): AgentState => ({
     chapterCleared: false,
     heroicCleared: false,
     recklessCleared: false,
+    vaultCleared: false,
+    vaultHeroicCleared: false,
   }),
   cosmeticsLoadout: { ...STARTER_LOADOUT },
   fieldAcquired: [],
@@ -143,6 +152,8 @@ const initial = (): AgentState => ({
   chapterCleared: false,
   heroicCleared: false,
   recklessCleared: false,
+  vaultCleared: false,
+  vaultHeroicCleared: false,
 });
 
 export const useArchive = create<Store>()(
@@ -228,16 +239,27 @@ export const useArchive = create<Store>()(
           const recklessCleared =
             s.recklessCleared ||
             (Boolean(nextRun.flags.illuminati_chapter_complete) && Boolean(nextRun.flags.skipped_safe_drop));
+          const vaultCleared = s.vaultCleared || Boolean(nextRun.flags.templars_chapter_complete);
+          const vaultHeroicCleared =
+            s.vaultHeroicCleared ||
+            (Boolean(nextRun.flags.templars_chapter_complete) && run.difficulty === "heroic");
           if (!s.heroicCleared && heroicCleared) credits += 150;
+          if (!s.vaultHeroicCleared && vaultHeroicCleared) credits += 150;
           const cosmeticsUnlocked = mergeUnlocks(s, {
             cityCleared,
             chapterCleared,
             heroicCleared,
             recklessCleared,
+            vaultCleared,
+            vaultHeroicCleared,
           });
           const missions = { ...s.missions };
           if (nextRun.flags.board_city_complete) missions.illuminati = "complete";
-          if (nextRun.flags.illuminati_chapter_complete) missions.illuminati = "complete";
+          if (nextRun.flags.illuminati_chapter_complete) {
+            missions.illuminati = "complete";
+            if (missions.templars === "locked") missions.templars = "available";
+          }
+          if (nextRun.flags.templars_chapter_complete) missions.templars = "complete";
           return {
             campaignRun: nextRun,
             credits,
@@ -247,6 +269,8 @@ export const useArchive = create<Store>()(
             chapterCleared,
             heroicCleared,
             recklessCleared,
+            vaultCleared,
+            vaultHeroicCleared,
             cosmeticsUnlocked,
             missions,
           };
@@ -294,7 +318,7 @@ export const useArchive = create<Store>()(
             campaignRun: {
               ...run,
               deck: applied.deck,
-              deckLive: pick.action !== "skip" ? true : run.deckLive,
+              deckLive: node.id === "vestry" ? true : pick.action !== "skip" ? true : run.deckLive,
               flags: { ...run.flags, ...applied.flags },
               ledger,
               cleared,
@@ -346,6 +370,8 @@ export const useArchive = create<Store>()(
         chapterCleared: s.chapterCleared,
         heroicCleared: s.heroicCleared,
         recklessCleared: s.recklessCleared,
+        vaultCleared: s.vaultCleared,
+        vaultHeroicCleared: s.vaultHeroicCleared,
       }),
     },
   ),
@@ -359,7 +385,7 @@ export function discoveredCount(collection: Collection) {
   return Object.values(collection).filter((n) => n > 0).length;
 }
 
-export function archiveProgress(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared">): CosmeticProgress {
+export function archiveProgress(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared" | "vaultCleared" | "vaultHeroicCleared">): CosmeticProgress {
   return progressOf(s);
 }
 

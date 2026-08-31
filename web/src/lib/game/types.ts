@@ -70,6 +70,7 @@ export type SideState = {
   location: CardInst | null;
   powerUsed: boolean;
   fatigue: number;
+  hallowedUsed: boolean;
 };
 
 export type Phase = "mulligan" | "main" | "ai" | "over";
@@ -139,7 +140,10 @@ export type CampaignTwist = {
   id: string;
   label: string;
   description: string;
-  match_modifiers?: { enemy_character_health_bonus?: number };
+  match_modifiers?: {
+    enemy_character_health_bonus?: number;
+    first_character_health_bonus?: number;
+  };
 };
 
 export type CampaignNodeReverse = {
@@ -155,7 +159,7 @@ export type CampaignNodeReverse = {
   twist?: CampaignTwist;
   dialogue?: { speaker: string; text: string }[];
   player_deck_mode?: "scripted" | "run" | "run_teach";
-  coach?: "recruiter" | "ops" | "silent";
+  coach?: "recruiter" | "ops" | "silent" | "chaplain";
   skip_blurb?: string;
   steps?: CampaignStep[];
   teach?: boolean;
@@ -187,7 +191,7 @@ export type CampaignNode = {
   lesson_loss?: string;
   player_deck_mode?: "scripted" | "run" | "run_teach";
   teach_seed_ids?: string[];
-  coach?: "recruiter" | "ops" | "silent";
+  coach?: "recruiter" | "ops" | "silent" | "chaplain";
   story_panels?: StoryPanel[];
   story_panels_on_enter?: StoryPanel[];
   story_panels_reckless?: StoryPanel[];
@@ -236,7 +240,7 @@ export type CampaignMatch = {
   boardId: string;
   nodeId: string;
   nodeTitle: string;
-  coach: "recruiter" | "ops" | "silent";
+  coach: "recruiter" | "ops" | "silent" | "chaplain";
   teach: boolean;
   steps: CampaignStep[];
   lessonWin?: string;
@@ -256,6 +260,7 @@ export type TwistState = {
   label: string;
   description: string;
   enemyHealthBonus: number;
+  firstCharacterHealthBonus: number;
 };
 
 

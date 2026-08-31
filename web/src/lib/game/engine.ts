@@ -248,6 +248,18 @@ function applyEnterModifiers(state: MatchState, owner: SideId, inst: CardInst) {
   }
 }
 
+function applyHallowedGround(state: MatchState, owner: SideId, inst: CardInst) {
+  const bonus = state.twist?.firstCharacterHealthBonus ?? 0;
+  if (!bonus) return;
+  const side = sideOf(state, owner);
+  if (side.hallowedUsed) return;
+  side.hallowedUsed = true;
+  inst.hp += bonus;
+  inst.maxHp += bonus;
+  const name = resolveCard(inst.cardId)?.name ?? "body";
+  log(state, `Hallowed Ground: ${name} +${bonus} Health.`);
+}
+
 function applyTemplarAuraToNew(state: MatchState, id: SideId, inst: CardInst, def: CardDef) {
   if (def.faction !== "templars" || def.id === "templars_char_001") return;
   const side = sideOf(state, id);
@@ -563,6 +575,7 @@ export function startMatch(opts: {
       location: null,
       powerUsed: false,
       fatigue: 0,
+      hallowedUsed: false,
     },
     ai: {
       id: "ai",
@@ -577,6 +590,7 @@ export function startMatch(opts: {
       location: null,
       powerUsed: false,
       fatigue: 0,
+      hallowedUsed: false,
     },
   };
 
@@ -620,6 +634,7 @@ function beginTurn(state: MatchState, id: SideId) {
   side.maxEnergy = Math.min(10, side.maxEnergy + 1);
   side.energy = side.maxEnergy;
   side.powerUsed = false;
+  side.hallowedUsed = false;
   for (const m of side.board) {
     m.exhausted = false;
     m.attackedThisTurn = 0;
@@ -743,6 +758,7 @@ function resolvePlay(state: MatchState, id: SideId, handIndex: number, target?: 
     const body = makeInst(state, def);
     body.iid = inst.iid;
     applyEnterModifiers(state, id, body);
+    applyHallowedGround(state, id, body);
     side.board.push(body);
     applyBattlecry(state, id, body, def, target);
   } else if (def.type === "Location") {

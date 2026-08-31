@@ -14,7 +14,7 @@
       "id": "templars",
       "name": "Vault of Faith",
       "faction": "templars",
-      "description": "Hallowed Ground. The seal still holds. Templar chapter — sealed.",
+      "description": "Hold the reliquary. Faith, walls, and Hallowed Ground.",
       "status": "sealed",
       "starter_board": "vault",
       "art": "/ui/campaign/vault-tease.jpg"

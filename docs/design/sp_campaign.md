@@ -5,8 +5,8 @@ Derived from NotebookLM notes (`docs/plans/notebook-sp-raw.md`, structured in
 `docs/plans/notebook-sp-brief.md`). Agent execution:
 `docs/plans/phase9-sp-agent-team.md` + `python -m agents.orchestrator`.
 
-**Status:** M0–M3 shipped for Illuminati vertical slice (City teach board + HQ reverse siege + ledger). Next: polish / other factions / economy stubs.  
-**Out of scope for v1 ship:** currency economy, pack opening UI, full three-faction wings.
+**Status:** M0–M3 shipped for Illuminati (City teach board + HQ reverse siege + ledger). Vault of Faith playable in the React client (Hallowed Ground, Chaplain, Guardian of the Seal). Next: Reptilian Psionic Hive / economy stubs.  
+**Out of scope for v1 ship:** currency economy, pack opening UI.
 
 ### M0 decisions (locked)
 
@@ -94,7 +94,7 @@ data/campaign/
 | `liquid_assets` | When a player discards, they gain +1 energy next turn (needs discard hook) |
 | `static_air` | Every 3rd spell cast is negated (counter) |
 
-v1 ships **one** twist fully (`templar_fortitude`); others stubbed in data.
+v1 ships **templar_fortitude** (Illuminati HQ reverse) and **hallowed_ground** (Vault of Faith). `static_air` is next (Psionic Hive).
 
 ### Run state (browser localStorage or server session)
 
@@ -145,15 +145,15 @@ v1 ships **one** twist fully (`templar_fortitude`); others stubbed in data.
 
 ---
 
-## 6. Later chapters (spec only)
+## 6. Later chapters
 
 ### Templars — Vault of Faith
-- Twist: Hallowed Ground  
-- Boss: Guardian of the Seal fantasy (high life / seal break — simplify to high HP + Taunt wall deck if seal system deferred)
+Shipped in the React client. Twist: **Hallowed Ground** (first character each player plays each turn gains +2 Health). Board: intro → Nave Watch (Squire/Taunt) → Infirmary (heal) → Vestry (relic pick) → Crypt Signal (Charge + Hallowed) → Inner Gate (run kit, Knight Commander) → **Guardian of the Seal** (24 life, Taunt wall). Unlocks after Inner Circle.
 
 ### Reptilians — Psionic Hive
 - Twist: Static Air  
 - Boss: Psionic Slaver fantasy (temp steal highest ATK — needs timed mind-control; else hard stealth deck)
+- Unlocks after Vault of Faith
 
 ---
 
