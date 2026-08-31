@@ -4,6 +4,8 @@ import cityBoardJson from "@/data/campaign/illuminati/board_city.json";
 import hqBoardJson from "@/data/campaign/illuminati/board_hq.json";
 import templarsChapter from "@/data/campaign/templars/chapter.json";
 import vaultBoardJson from "@/data/campaign/templars/board_vault.json";
+import reptiliansChapter from "@/data/campaign/reptilians/chapter.json";
+import hiveBoardJson from "@/data/campaign/reptilians/board_hive.json";
 import { expandDeck, getCard } from "./catalog";
 import rawDecks from "@/data/decks.json";
 import type {
@@ -46,6 +48,7 @@ export const CAMPAIGN_CHAPTERS = (
 const CITY_BOARD = cityBoardJson as CampaignBoard;
 const HQ_BOARD = hqBoardJson as CampaignBoard;
 const VAULT_BOARD = vaultBoardJson as CampaignBoard;
+const HIVE_BOARD = hiveBoardJson as CampaignBoard;
 
 type ChapterMeta = {
   id: string;
@@ -60,6 +63,12 @@ export function loadChapter(chapterId: string) {
     return {
       ...(templarsChapter as ChapterMeta),
       board_data: { vault: VAULT_BOARD } as Record<string, CampaignBoard>,
+    };
+  }
+  if (chapterId === "reptilians") {
+    return {
+      ...(reptiliansChapter as ChapterMeta),
+      board_data: { hive: HIVE_BOARD } as Record<string, CampaignBoard>,
     };
   }
   if (chapterId !== "illuminati") return null;
@@ -183,8 +192,9 @@ export function seedTeachFront(deck: string[], seedIds: string[]): string[] {
   return [...front, ...out];
 }
 
-export function campaignCoachId(run: CampaignRun | null, node?: CampaignNode): "recruiter" | "ops" | "silent" | "chaplain" {
+export function campaignCoachId(run: CampaignRun | null, node?: CampaignNode): "recruiter" | "ops" | "silent" | "chaplain" | "voice" {
   if (node?.coach === "silent") return "silent";
+  if (node?.coach === "voice" || run?.chapterId === "reptilians") return "voice";
   if (node?.coach === "chaplain" || run?.chapterId === "templars") return "chaplain";
   if (run?.flags.recruiter_dead || run?.boardId === "hq") return "ops";
   if (node?.coach === "ops" || node?.coach === "recruiter") return node.coach;
@@ -292,7 +302,7 @@ export function applyNodeClear(run: CampaignRun, node: CampaignNode, board: Camp
     if (reverseAllClear(next, board)) next.phase = "boss";
   }
 
-  if (next.flags.illuminati_chapter_complete || next.flags.templars_chapter_complete) next.phase = "done";
+  if (next.flags.illuminati_chapter_complete || next.flags.templars_chapter_complete || next.flags.reptilians_chapter_complete) next.phase = "done";
 
   if (rewards.next_board && rewards.next_board !== next.boardId) {
     next = {
@@ -349,6 +359,7 @@ export function mapLinks(board: CampaignBoard, run: CampaignRun): { from: Campai
 export function boardArt(boardId: string) {
   if (boardId === "hq") return "/ui/campaign/hq-board.jpg";
   if (boardId === "vault") return "/ui/campaign/vault-board.jpg";
+  if (boardId === "hive") return "/ui/campaign/hive-board.jpg";
   return "/ui/campaign/city-board.jpg";
 }
 
@@ -358,6 +369,7 @@ export function boardHint(run: CampaignRun, board: CampaignBoard) {
   }
   if (run.phase === "boss") return "The Grandmaster holds the entrance. Ops is on the radio.";
   if (run.phase === "done") {
+    if (board.id === "hive") return "The hive is quiet. Review the ledger or abandon to restart.";
     return board.id === "vault"
       ? "The seal holds. Review the ledger or abandon to restart."
       : "Chapter complete. Review the ledger or abandon to restart.";
@@ -368,6 +380,10 @@ export function boardHint(run: CampaignRun, board: CampaignBoard) {
 
 export function boardKicker(run: CampaignRun, board: CampaignBoard) {
   const heroic = run.difficulty === "heroic" ? " · HEROIC" : "";
+  if (board.id === "hive") {
+    if (run.phase === "done") return `// HIVE — QUIET${heroic}`;
+    return `// PSIONIC HIVE${heroic}`;
+  }
   if (board.id === "vault") {
     if (run.phase === "done") return `// VAULT — SECURE${heroic}`;
     return `// VAULT OF FAITH${heroic}`;
@@ -390,7 +406,7 @@ export function ledgerFile(id: string, run: CampaignRun): { title: string; text:
         : "A tool was taken from the black budget.",
     };
   }
-  return CITY_BOARD.ledger[id] ?? HQ_BOARD.ledger[id] ?? VAULT_BOARD.ledger[id];
+  return CITY_BOARD.ledger[id] ?? HQ_BOARD.ledger[id] ?? VAULT_BOARD.ledger[id] ?? HIVE_BOARD.ledger[id];
 }
 
 export const NODE_ART: Record<string, string> = {
@@ -415,6 +431,13 @@ export const NODE_ART: Record<string, string> = {
   crypt_rush: "/ui/campaign/story-heist.jpg",
   inner_gate: "/ui/campaign/vault-board.jpg",
   guardian: "/ui/campaign/guardian.jpg",
+  hive_intro: "/ui/campaign/voice.jpg",
+  comb_watch: "/ui/campaign/story-nest.jpg",
+  psi_den: "/ui/campaign/voice.jpg",
+  molt: "/ui/campaign/story-abduct.jpg",
+  static_field: "/ui/campaign/story-static.jpg",
+  inner_comb: "/ui/campaign/hive-board.jpg",
+  slaver: "/ui/campaign/slaver.jpg",
 };
 
 export const NODE_FIRST_CLEAR: Record<string, { credits: number; cards: string[] }> = {
@@ -442,6 +465,13 @@ export const NODE_FIRST_CLEAR: Record<string, { credits: number; cards: string[]
   crypt_rush: { credits: 50, cards: ["templars_char_012"] },
   inner_gate: { credits: 50, cards: ["templars_char_001"] },
   guardian: { credits: 200, cards: ["templars_char_005"] },
+  hive_intro: { credits: 20, cards: [] },
+  comb_watch: { credits: 40, cards: ["reptilians_char_015"] },
+  psi_den: { credits: 40, cards: ["reptilians_char_009"] },
+  molt: { credits: 30, cards: [] },
+  static_field: { credits: 50, cards: ["reptilians_spell_011"] },
+  inner_comb: { credits: 50, cards: ["reptilians_char_001"] },
+  slaver: { credits: 200, cards: ["reptilians_char_002"] },
 };
 
 export function rewardKey(run: CampaignRun, nodeId: string) {
@@ -506,6 +536,9 @@ export function storyArtFor(node: CampaignNode): string {
   }
   if (node.id === "guardian" || node.id.startsWith("vault") || node.id.startsWith("nave") || node.id === "vestry" || node.id === "infirmary" || node.id === "crypt_rush" || node.id === "inner_gate") {
     return "/ui/campaign/vault-board.jpg";
+  }
+  if (node.id === "slaver" || node.id.startsWith("hive") || node.id === "comb_watch" || node.id === "psi_den" || node.id === "molt" || node.id === "static_field" || node.id === "inner_comb") {
+    return "/ui/campaign/hive-board.jpg";
   }
   return "/ui/campaign/city-board.jpg";
 }

@@ -143,6 +143,7 @@ export type CampaignTwist = {
   match_modifiers?: {
     enemy_character_health_bonus?: number;
     first_character_health_bonus?: number;
+    negate_every_n_spells?: number;
   };
 };
 
@@ -159,7 +160,7 @@ export type CampaignNodeReverse = {
   twist?: CampaignTwist;
   dialogue?: { speaker: string; text: string }[];
   player_deck_mode?: "scripted" | "run" | "run_teach";
-  coach?: "recruiter" | "ops" | "silent" | "chaplain";
+  coach?: "recruiter" | "ops" | "silent" | "chaplain" | "voice";
   skip_blurb?: string;
   steps?: CampaignStep[];
   teach?: boolean;
@@ -191,7 +192,7 @@ export type CampaignNode = {
   lesson_loss?: string;
   player_deck_mode?: "scripted" | "run" | "run_teach";
   teach_seed_ids?: string[];
-  coach?: "recruiter" | "ops" | "silent" | "chaplain";
+  coach?: "recruiter" | "ops" | "silent" | "chaplain" | "voice";
   story_panels?: StoryPanel[];
   story_panels_on_enter?: StoryPanel[];
   story_panels_reckless?: StoryPanel[];
@@ -240,7 +241,7 @@ export type CampaignMatch = {
   boardId: string;
   nodeId: string;
   nodeTitle: string;
-  coach: "recruiter" | "ops" | "silent" | "chaplain";
+  coach: "recruiter" | "ops" | "silent" | "chaplain" | "voice";
   teach: boolean;
   steps: CampaignStep[];
   lessonWin?: string;
@@ -261,6 +262,8 @@ export type TwistState = {
   description: string;
   enemyHealthBonus: number;
   firstCharacterHealthBonus: number;
+  negateEveryN: number;
+  spellsCast: number;
 };
 
 

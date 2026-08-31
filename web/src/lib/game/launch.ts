@@ -88,6 +88,8 @@ function heroicTwist(run: CampaignRun, twist: MatchState["twist"]): MatchState["
     description: "Enemy characters enter play with +1 Health.",
     enemyHealthBonus: extra,
     firstCharacterHealthBonus: 0,
+    negateEveryN: 0,
+    spellsCast: 0,
   };
 }
 
@@ -119,6 +121,8 @@ export function matchFromCampaignNode(
           description: twistDef.description,
           enemyHealthBonus: twistDef.match_modifiers?.enemy_character_health_bonus ?? 0,
           firstCharacterHealthBonus: twistDef.match_modifiers?.first_character_health_bonus ?? 0,
+          negateEveryN: twistDef.match_modifiers?.negate_every_n_spells ?? 0,
+          spellsCast: 0,
         }
       : null,
   );

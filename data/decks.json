@@ -1423,6 +1423,37 @@
         { "id": "neutral_char_022", "copies": 2 },
         { "id": "neutral_spell_003", "copies": 2 }
       ]
+    },
+    {
+      "id": "campaign_reptilians_hive_starter",
+      "name": "Hive Comb Starter",
+      "faction": "reptilians",
+      "archetype": "campaign_starter",
+      "description": "Psionics, Rush, Stealth. Skitterling, Hatchling, Chameleon, Shape-Shifter, Shed Skin. The kit is yours after the Molt.",
+      "campaign": "reptilians_hive",
+      "cards": [
+        { "id": "reptilians_char_015", "copies": 2 },
+        { "id": "reptilians_char_007", "copies": 2 },
+        { "id": "reptilians_char_009", "copies": 2 },
+        { "id": "reptilians_char_016", "copies": 2 },
+        { "id": "reptilians_char_005", "copies": 2 },
+        { "id": "reptilians_char_001", "copies": 1 },
+        { "id": "reptilians_char_011", "copies": 1 },
+        { "id": "reptilians_char_017", "copies": 1 },
+        { "id": "reptilians_char_008", "copies": 1 },
+        { "id": "reptilians_char_003", "copies": 1 },
+        { "id": "reptilians_spell_011", "copies": 2 },
+        { "id": "reptilians_spell_001", "copies": 2 },
+        { "id": "reptilians_spell_009", "copies": 1 },
+        { "id": "reptilians_spell_004", "copies": 1 },
+        { "id": "reptilians_spell_012", "copies": 1 },
+        { "id": "reptilians_spell_013", "copies": 1 },
+        { "id": "neutral_spell_040", "copies": 1 },
+        { "id": "reptilians_loc_007", "copies": 1 },
+        { "id": "reptilians_loc_001", "copies": 1 },
+        { "id": "neutral_char_006", "copies": 2 },
+        { "id": "neutral_char_002", "copies": 2 }
+      ]
     }
   ]
 }

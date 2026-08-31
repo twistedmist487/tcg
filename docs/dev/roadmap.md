@@ -276,7 +276,8 @@ work is visual polish and QoL.
 - [x] M2: Illuminati Board 1 (City + Escape crisis) playable (data + engine + UI)
 - [x] M3: Illuminati Board 2 (HQ reverse + boss + ledger UI)
 - [x] Templar chapter (Vault of Faith) in the React client — Hallowed Ground, Chaplain coach, Guardian of the Seal
-- [ ] Deferred: currency/packs UI; Reptilian full chapter (Psionic Hive)
+- [x] Reptilian chapter (Psionic Hive) in the React client — Static Air, Voice coach, Psionic Slaver
+- [ ] Deferred: currency/packs UI
 
 
 ---

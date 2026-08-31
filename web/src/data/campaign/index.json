@@ -23,7 +23,7 @@
       "id": "reptilians",
       "name": "Psionic Hive",
       "faction": "reptilians",
-      "description": "Static Air. The hive is listening. Reptilian chapter — sealed.",
+      "description": "Static Air. Psionics, Stealth, and the Slaver. Opens after the Vault.",
       "status": "sealed",
       "starter_board": "hive",
       "art": "/ui/campaign/hive-tease.jpg"

@@ -449,7 +449,11 @@ export function TableMatch({
         )}
         {match.twist && (
           <div className="twist-banner" role="status">
-            {match.twist.label}: {match.twist.description}
+            {match.twist.label}
+            {match.twist.negateEveryN
+              ? ` ${match.twist.spellsCast % match.twist.negateEveryN}/${match.twist.negateEveryN}`
+              : ""}
+            : {match.twist.description}
           </div>
         )}
         {rejectLine && (

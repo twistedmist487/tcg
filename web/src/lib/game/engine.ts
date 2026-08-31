@@ -260,6 +260,15 @@ function applyHallowedGround(state: MatchState, owner: SideId, inst: CardInst) {
   log(state, `Hallowed Ground: ${name} +${bonus} Health.`);
 }
 
+function applyStaticAir(state: MatchState, def: { name: string }): boolean {
+  const n = state.twist?.negateEveryN ?? 0;
+  if (!n || !state.twist) return false;
+  state.twist.spellsCast += 1;
+  if (state.twist.spellsCast % n !== 0) return false;
+  log(state, `Static Air: ${def.name} fizzles.`);
+  return true;
+}
+
 function applyTemplarAuraToNew(state: MatchState, id: SideId, inst: CardInst, def: CardDef) {
   if (def.faction !== "templars" || def.id === "templars_char_001") return;
   const side = sideOf(state, id);
@@ -764,7 +773,7 @@ function resolvePlay(state: MatchState, id: SideId, handIndex: number, target?: 
   } else if (def.type === "Location") {
     side.location = makeInst(state, def, true);
   } else {
-    resolveSpell(state, id, def, target);
+    if (!applyStaticAir(state, def)) resolveSpell(state, id, def, target);
   }
 }
 

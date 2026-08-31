@@ -37,6 +37,11 @@ function MissionsPage() {
       title: "Vault of Faith",
       blurb: "Hold the reliquary. Hallowed Ground blesses the first body each turn. Opens after Inner Circle.",
     },
+    {
+      id: "reptilians",
+      title: "Psionic Hive",
+      blurb: "Static Air kills every third spell. Stealth and the Slaver. Opens after the Vault.",
+    },
   ];
 
   const challenges = ENCOUNTERS.filter((e) => e.mode === "challenge" || e.mode === "tutorial" || e.mode === "lab");
@@ -55,7 +60,13 @@ function MissionsPage() {
           <h2 className="font-mono text-[10px] tracking-[0.22em] text-phosphor">CAMPAIGN</h2>
           <div className="mt-3 grid gap-3 md:grid-cols-2">
             {campaign.map((c) => {
-              const st = archive.missions[c.id] ?? "available";
+              const raw = archive.missions[c.id] ?? "available";
+              const st =
+                c.id === "reptilians" && archive.vaultCleared && raw === "locked"
+                  ? "available"
+                  : c.id === "templars" && archive.chapterCleared && raw === "locked"
+                    ? "available"
+                    : raw;
               const live = Boolean(archive.campaignRun);
               return (
                 <button
@@ -79,14 +90,18 @@ function MissionsPage() {
                         ? "RESUME LODGE"
                         : archive.campaignRun?.boardId === "vault"
                           ? "RESUME VAULT"
-                          : "RESUME CITY BOARD"
+                          : archive.campaignRun?.boardId === "hive"
+                            ? "RESUME HIVE"
+                            : "RESUME CITY BOARD"
                       : st === "complete"
                         ? "CHAPTER ON FILE"
                         : st === "locked"
                           ? "SEALED"
                           : c.id === "templars"
                             ? "OPEN VAULT"
-                            : "OPEN INITIATION"}
+                            : c.id === "reptilians"
+                              ? "OPEN HIVE"
+                              : "OPEN INITIATION"}
                   </div>
                 </button>
               );

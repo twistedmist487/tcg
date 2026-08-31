@@ -1,6 +1,6 @@
 export type CosmeticSlot = "cardBack" | "tableFelt" | "nameplate" | "title";
 
-export type UnlockRule = "starter" | "city" | "chapter" | "heroic" | "reckless" | "vault" | "vaultHeroic";
+export type UnlockRule = "starter" | "city" | "chapter" | "heroic" | "reckless" | "vault" | "vaultHeroic" | "hive" | "hiveHeroic";
 
 export type Cosmetic = {
   id: string;
@@ -26,6 +26,8 @@ export type CosmeticProgress = {
   recklessCleared: boolean;
   vaultCleared: boolean;
   vaultHeroicCleared: boolean;
+  hiveCleared: boolean;
+  hiveHeroicCleared: boolean;
 };
 
 export const STARTER_LOADOUT: CosmeticLoadout = {
@@ -207,6 +209,42 @@ export const COSMETICS: Cosmetic[] = [
     unlock: "vaultHeroic",
     hint: "Close Vault of Faith on Heroic.",
   },
+  {
+    id: "back-hive",
+    slot: "cardBack",
+    name: "Scale Sleeve",
+    blurb: "Teal hex on black stock. Issued after the visor cracked.",
+    src: "/cards/backs/reptilians-back.jpg",
+    unlock: "hive",
+    hint: "Close Psionic Hive.",
+  },
+  {
+    id: "plate-hive",
+    slot: "nameplate",
+    name: "Hive Plate",
+    blurb: "Reptilian hardware. The comb remembers who molted.",
+    src: "/ui/chrome/nameplate-reptilians.jpg",
+    unlock: "hive",
+    hint: "Close Psionic Hive.",
+  },
+  {
+    id: "title-hiveborn",
+    slot: "title",
+    name: "HIVEBORN",
+    blurb: "The Voice logged the name. The hive is quiet.",
+    src: "",
+    unlock: "hive",
+    hint: "Close Psionic Hive.",
+  },
+  {
+    id: "title-mindkiller",
+    slot: "title",
+    name: "MINDKILLER",
+    blurb: "Heroic. You broke the visor on the hard path.",
+    src: "",
+    unlock: "hiveHeroic",
+    hint: "Close Psionic Hive on Heroic.",
+  },
 ];
 
 export const SLOT_LABEL: Record<CosmeticSlot, string> = {
@@ -232,6 +270,8 @@ export function isCosmeticUnlocked(c: Cosmetic, progress: CosmeticProgress): boo
   if (c.unlock === "reckless") return progress.recklessCleared;
   if (c.unlock === "vault") return progress.vaultCleared;
   if (c.unlock === "vaultHeroic") return progress.vaultHeroicCleared;
+  if (c.unlock === "hive") return progress.hiveCleared;
+  if (c.unlock === "hiveHeroic") return progress.hiveHeroicCleared;
   return false;
 }
 

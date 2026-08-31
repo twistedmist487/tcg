@@ -1,0 +1,19 @@
+{
+  "id": "reptilians",
+  "name": "Psionic Hive",
+  "faction": "reptilians",
+  "starter_deck_id": "campaign_reptilians_hive_starter",
+  "boards": [
+    "hive"
+  ],
+  "difficulties": {
+    "normal": {
+      "ai_default": "easy",
+      "label": "Normal"
+    },
+    "heroic": {
+      "ai_default": "medium",
+      "label": "Heroic"
+    }
+  }
+}

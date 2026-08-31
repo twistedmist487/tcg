@@ -32,7 +32,7 @@ around the same engine.
 | 8 | Tutorial + single-player experience + deck builder | COMPLETE |
 | 9 | Polish, Hard AI, replayability | IN PROGRESS |
 
-**Stats:** 324 tests, 240 cards (120 faction + 120 Network), 31 Python source files, vanilla JS frontend + `static/ui/` art kit. React client (`web/`) ships Illuminati (City + HQ) and Templars (Vault of Faith) campaign chapters.
+**Stats:** 324 tests, 240 cards (120 faction + 120 Network), 31 Python source files, vanilla JS frontend + `static/ui/` art kit. React client (`web/`) ships Illuminati (City + HQ), Templars (Vault of Faith), and Reptilians (Psionic Hive) campaign chapters.
 
 ## Directory Layout
 

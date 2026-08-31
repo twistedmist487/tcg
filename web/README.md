@@ -24,7 +24,7 @@ npm run typecheck
 - `src/data/` — cards, decks, encounters, factions (mirrors `../data/`)
 - `src/lib/game/` — TypeScript match engine + AI
 - `src/routes/` — home, play, match, collection, decks, missions, store, locker, campaign
-- `src/data/campaign/` — Illuminati (City + HQ) and Templars (Vault of Faith) boards
+- `src/data/campaign/` — Illuminati (City + HQ), Templars (Vault of Faith), Reptilians (Psionic Hive)
 - `public/cards/` and `public/ui/` — faction plates, table chrome, campaign art
 
 Progress (collection unlocks, decks, match history) is stored in the browser.

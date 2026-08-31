@@ -83,9 +83,9 @@ Existing First Contact tutorial remains a **short optional on-ramp**; campaign i
 - Boss: Templar Grandmaster (walls + clears)
 - Reward (v1): ledger entries + starter-deck upgrade flag; pack UI stub only
 
-### Later chapters (design only until Illuminati ships; Vault of Faith now playable in the React client)
+### Later chapters
 - **Templars — Vault of Faith** — shipped (Hallowed Ground; Guardian of the Seal)
-- **Reptilians — Psionic Hive** — twist Static Air; boss Psionic Slaver
+- **Reptilians — Psionic Hive** — shipped (Static Air; Psionic Slaver)
 - Cross-faction Global Conspiracy Map linking wings (post-v1)
 
 ### Crisis examples (reusable templates)

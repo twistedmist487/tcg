@@ -1,0 +1,338 @@
+{
+  "id": "hive",
+  "name": "Psionic Hive",
+  "chapter_id": "reptilians",
+  "start_node": "hive_intro",
+  "map_hint": "The hive is listening. Psionics, Stealth, and every third spell dies in the air.",
+  "nodes": [
+    {
+      "id": "hive_intro",
+      "type": "story",
+      "title": "The Air Goes Wrong",
+      "blurb": "A voice sits behind your eyes.",
+      "map": { "x": 0.12, "y": 0.58 },
+      "requires": [],
+      "unlocks": ["comb_watch"],
+      "story_panels": [
+        { "text": "The vault held. Then the air went wrong. A voice that is not a voice sits behind your eyes. \"The comb is open. You will molt or you will be eaten.\"" },
+        { "text": "\"Psionics. Stealth. Static. We script the first lessons so you learn by hiding, not by dying in the dark.\"" },
+        { "text": "A thin scaled deck is already in your hands. You do not remember taking it. \"Energy. Rush. Hide. Follow the prompts.\"" }
+      ],
+      "rewards": { "ledger_ids": ["file_air"] },
+      "coach": "voice"
+    },
+    {
+      "id": "comb_watch",
+      "type": "combat",
+      "title": "Comb Watch",
+      "blurb": "Rush hits a body now. AI at 10 life.",
+      "map": { "x": 0.28, "y": 0.62 },
+      "requires": ["hive_intro"],
+      "unlocks": ["psi_den"],
+      "ai": { "difficulty": "easy", "name": "Lost Handler", "faction": "neutral" },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 10,
+      "player_deck": [
+        "reptilians_char_015", "reptilians_char_015", "reptilians_char_007", "reptilians_char_007",
+        "reptilians_char_009", "reptilians_char_009", "reptilians_char_016", "reptilians_char_016",
+        "reptilians_char_005", "reptilians_char_005", "reptilians_char_001", "reptilians_char_011",
+        "reptilians_char_017", "reptilians_char_008", "reptilians_char_003", "reptilians_spell_011",
+        "reptilians_spell_011", "reptilians_spell_001", "reptilians_spell_001", "reptilians_spell_009",
+        "reptilians_spell_004", "reptilians_spell_012", "reptilians_spell_013", "neutral_spell_040",
+        "reptilians_loc_007", "reptilians_loc_001", "neutral_char_006", "neutral_char_006",
+        "neutral_char_002", "neutral_char_002"
+      ],
+      "ai_deck": [
+        "neutral_char_021", "neutral_char_029", "neutral_char_001", "neutral_spell_018", "neutral_char_059",
+        "neutral_char_021", "neutral_char_029", "neutral_char_001", "neutral_spell_018", "neutral_char_059",
+        "neutral_spell_028", "neutral_spell_022", "neutral_spell_013", "neutral_char_040", "neutral_char_033",
+        "neutral_loc_010", "neutral_char_032", "neutral_spell_017", "neutral_char_050", "neutral_spell_027",
+        "neutral_char_023", "neutral_spell_028", "neutral_spell_022", "neutral_spell_013", "neutral_char_040",
+        "neutral_char_033", "neutral_loc_010", "neutral_char_032", "neutral_spell_017", "neutral_char_050"
+      ],
+      "teach": true,
+      "steps": [
+        {
+          "id": "rush",
+          "title": "Rush",
+          "text": "You start with 1 Psionics. Play Skitterling (Rush, cost 1). Rush can attack a character the turn it lands — not face.",
+          "require": "play_named:Skitterling",
+          "highlight": "Skitterling"
+        },
+        {
+          "id": "free",
+          "title": "Take the comb",
+          "text": "Spend energy, attack, end turn. Reduce Lost Handler to 0.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [{ "speaker": "The Voice", "text": "Psionics grows each turn. Unspent is gone. Rush is a tooth — bite a body, not the skull." }],
+      "rewards": { "ledger_ids": ["file_psionics"] },
+      "player_deck_mode": "scripted",
+      "coach": "voice"
+    },
+    {
+      "id": "psi_den",
+      "type": "combat",
+      "title": "Psi Den",
+      "blurb": "Stealth. AI at 12 life.",
+      "map": { "x": 0.44, "y": 0.48 },
+      "requires": ["comb_watch"],
+      "unlocks": ["molt"],
+      "ai": { "difficulty": "easy", "name": "Wiretap", "faction": "neutral" },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "reptilians_char_009", "reptilians_char_009", "reptilians_char_015", "reptilians_char_007",
+        "reptilians_char_007", "reptilians_char_015", "reptilians_char_016", "reptilians_char_016",
+        "reptilians_char_005", "reptilians_char_005", "reptilians_char_001", "reptilians_char_011",
+        "reptilians_char_017", "reptilians_char_008", "reptilians_char_003", "reptilians_spell_011",
+        "reptilians_spell_011", "reptilians_spell_001", "reptilians_spell_001", "reptilians_spell_009",
+        "reptilians_spell_004", "reptilians_spell_012", "reptilians_spell_013", "neutral_spell_040",
+        "reptilians_loc_007", "reptilians_loc_001", "neutral_char_006", "neutral_char_006",
+        "neutral_char_002", "neutral_char_002"
+      ],
+      "ai_deck": [
+        "neutral_char_021", "neutral_char_029", "neutral_char_001", "neutral_spell_018", "neutral_char_059",
+        "neutral_char_021", "neutral_char_029", "neutral_char_001", "neutral_spell_018", "neutral_char_059",
+        "neutral_spell_028", "neutral_spell_022", "neutral_spell_013", "neutral_char_040", "neutral_char_033",
+        "neutral_loc_010", "neutral_char_032", "neutral_spell_017", "neutral_char_050", "neutral_spell_027",
+        "neutral_char_023", "neutral_spell_028", "neutral_spell_022", "neutral_spell_013", "neutral_char_040",
+        "neutral_char_033", "neutral_loc_010", "neutral_char_032", "neutral_spell_017", "neutral_char_050"
+      ],
+      "teach": true,
+      "steps": [
+        {
+          "id": "stealth",
+          "title": "Stealth",
+          "text": "Play Chameleon Operative (Stealth). They cannot attack or target it until it strikes.",
+          "require": "play_named:Chameleon Operative",
+          "highlight": "Chameleon Operative"
+        },
+        {
+          "id": "free",
+          "title": "Clear the den",
+          "text": "Keep it stealthed until the swing matters. Wiretap is on 12 life.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [{ "speaker": "The Voice", "text": "Hide. The first strike from Stealth is the one they did not budget." }],
+      "rewards": { "ledger_ids": ["file_stealth"] },
+      "player_deck_mode": "scripted",
+      "coach": "voice"
+    },
+    {
+      "id": "molt",
+      "type": "safehouse",
+      "title": "Molt",
+      "blurb": "A contact offers a hide.",
+      "map": { "x": 0.58, "y": 0.58 },
+      "requires": ["psi_den"],
+      "unlocks": ["static_field"],
+      "safehouse": {
+        "text": "A human in a scaled glove waits on the dais. Take Skin-Walker Hireling, dump a Hatchling, or keep walking. After this, the kit is yours.",
+        "pick_one_of": [
+          {
+            "id": "neutral_char_006",
+            "label": "Take the hide",
+            "blurb": "Skin-Walker Hireling (Stealth if you are Reptilians). One spare card is cut to stay at 30.",
+            "action": "add",
+            "copies": 1,
+            "trim": ["reptilians_char_007", "reptilians_spell_004", "neutral_spell_040"]
+          },
+          {
+            "id": "reptilians_char_007",
+            "label": "Dump a Hatchling",
+            "blurb": "Cut one Hatchling Brood. Leaner hand for the static.",
+            "action": "prune",
+            "prune_id": "reptilians_char_007"
+          },
+          {
+            "id": "walk",
+            "label": "Keep walking",
+            "blurb": "No change. The Voice logs you as proud.",
+            "action": "skip"
+          }
+        ]
+      },
+      "rewards": { "ledger_ids": ["file_molt"] },
+      "coach": "voice",
+      "dialogue": [{ "speaker": "The Voice", "text": "A hide, a cut, or pride. Choose. After this, I stop stacking your deck." }]
+    },
+    {
+      "id": "static_field",
+      "type": "combat",
+      "title": "Static Field",
+      "blurb": "Shed Skin. Static Air is live. AI at 12 life.",
+      "map": { "x": 0.72, "y": 0.42 },
+      "requires": ["molt"],
+      "unlocks": ["inner_comb"],
+      "ai": { "difficulty": "easy", "name": "Jammer Crew", "faction": "illuminati" },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "reptilians_char_007", "reptilians_spell_011", "reptilians_char_015", "reptilians_char_009",
+        "reptilians_char_015", "reptilians_char_007", "reptilians_char_009", "reptilians_char_016",
+        "reptilians_char_016", "reptilians_char_005", "reptilians_char_005", "reptilians_char_001",
+        "reptilians_char_011", "reptilians_char_017", "reptilians_char_008", "reptilians_char_003",
+        "reptilians_spell_011", "reptilians_spell_001", "reptilians_spell_001", "reptilians_spell_009",
+        "reptilians_spell_004", "reptilians_spell_012", "reptilians_spell_013", "neutral_spell_040",
+        "reptilians_loc_007", "reptilians_loc_001", "neutral_char_006", "neutral_char_006",
+        "neutral_char_002", "neutral_char_002"
+      ],
+      "ai_deck": [
+        "illuminati_char_009", "illuminati_char_002", "illuminati_char_004", "illuminati_spell_011", "neutral_char_010",
+        "illuminati_char_009", "illuminati_char_002", "illuminati_char_004", "illuminati_spell_011", "neutral_char_010",
+        "illuminati_char_001", "illuminati_spell_008", "illuminati_spell_004", "illuminati_spell_009", "illuminati_char_006",
+        "illuminati_loc_006", "illuminati_char_015", "neutral_char_007", "neutral_char_001", "neutral_char_028",
+        "neutral_spell_003", "neutral_spell_022", "illuminati_char_001", "illuminati_spell_008", "illuminati_spell_004",
+        "illuminati_spell_009", "illuminati_char_006", "neutral_char_007", "neutral_char_022", "illuminati_spell_002"
+      ],
+      "teach": true,
+      "twist": {
+        "id": "static_air",
+        "label": "Static Air",
+        "description": "Every third spell either player casts is negated.",
+        "match_modifiers": { "negate_every_n_spells": 3 }
+      },
+      "steps": [
+        {
+          "id": "body",
+          "title": "A body",
+          "text": "Play Hatchling Brood. You need skin to hide.",
+          "require": "play_named:Hatchling Brood",
+          "highlight": "Hatchling Brood"
+        },
+        {
+          "id": "shed",
+          "title": "Shed Skin",
+          "text": "Play Shed Skin on your Hatchling. Static Air is live — every third spell either side plays dies in the air.",
+          "require": "play_named:Shed Skin",
+          "highlight": "Shed Skin"
+        },
+        {
+          "id": "free",
+          "title": "Walk the static",
+          "text": "Count spells. The third one fizzles. Finish at 12 life.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [{ "speaker": "The Voice", "text": "Static Air: every third spell is a corpse. Hide anyway." }],
+      "rewards": { "ledger_ids": ["file_static"] },
+      "player_deck_mode": "scripted",
+      "coach": "voice"
+    },
+    {
+      "id": "inner_comb",
+      "type": "combat",
+      "title": "Inner Comb",
+      "blurb": "Shape-Shifter. AI at 14 life.",
+      "map": { "x": 0.86, "y": 0.52 },
+      "requires": ["static_field"],
+      "unlocks": ["slaver"],
+      "ai": { "difficulty": "medium", "name": "Lodge Intercept", "faction": "illuminati" },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 14,
+      "ai_deck": [
+        "illuminati_char_009", "illuminati_char_002", "illuminati_char_004", "illuminati_spell_011", "neutral_char_010",
+        "illuminati_char_009", "illuminati_char_002", "illuminati_char_004", "illuminati_spell_011", "neutral_char_010",
+        "illuminati_char_001", "illuminati_spell_008", "illuminati_spell_004", "illuminati_spell_009", "illuminati_char_006",
+        "illuminati_loc_006", "illuminati_char_015", "neutral_char_007", "neutral_char_001", "neutral_char_028",
+        "neutral_spell_003", "neutral_spell_022", "illuminati_char_001", "illuminati_spell_008", "illuminati_spell_004",
+        "illuminati_spell_009", "illuminati_char_006", "neutral_char_007", "neutral_char_022", "illuminati_spell_002"
+      ],
+      "teach": true,
+      "twist": {
+        "id": "static_air",
+        "label": "Static Air",
+        "description": "Every third spell either player casts is negated.",
+        "match_modifiers": { "negate_every_n_spells": 3 }
+      },
+      "steps": [
+        {
+          "id": "infiltrate",
+          "title": "Infiltrator",
+          "text": "Play Shape-Shifter Infiltrator when you can afford it — Stealth until it bites.",
+          "require": "play_named:Shape-Shifter Infiltrator",
+          "highlight": "Shape-Shifter Infiltrator"
+        },
+        {
+          "id": "free",
+          "title": "Hold the comb",
+          "text": "Your kit, your calls. Intercept is on 14. Do not spend the third spell unless you can lose it.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [{ "speaker": "The Voice", "text": "Your kit. The Infiltrator is a door they cannot see." }],
+      "rewards": { "ledger_ids": ["file_comb"] },
+      "player_deck_mode": "run_teach",
+      "teach_seed_ids": ["reptilians_char_001"],
+      "coach": "voice"
+    },
+    {
+      "id": "slaver",
+      "type": "boss",
+      "title": "Psionic Slaver",
+      "blurb": "High life. Stealth. Static Air. Dominators in the dark.",
+      "map": { "x": 0.92, "y": 0.28 },
+      "requires": ["inner_comb"],
+      "unlocks": [],
+      "ai": { "difficulty": "medium", "name": "Psionic Slaver", "faction": "reptilians" },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 24,
+      "ai_deck": [
+        "reptilians_char_009", "reptilians_char_009", "reptilians_char_001", "reptilians_char_001",
+        "reptilians_char_006", "reptilians_char_006", "reptilians_char_011", "reptilians_char_011",
+        "reptilians_char_018", "reptilians_char_018", "reptilians_char_002", "reptilians_char_002",
+        "reptilians_char_013", "reptilians_char_014", "reptilians_char_010", "reptilians_char_007",
+        "reptilians_char_007", "reptilians_spell_011", "reptilians_spell_011", "neutral_spell_040",
+        "neutral_spell_040", "reptilians_loc_004", "reptilians_loc_001", "reptilians_loc_007",
+        "neutral_char_002", "neutral_char_002", "neutral_char_031", "neutral_char_031",
+        "neutral_char_006", "neutral_char_006"
+      ],
+      "teach": true,
+      "twist": {
+        "id": "static_air",
+        "label": "Static Air",
+        "description": "Every third spell either player casts is negated.",
+        "match_modifiers": { "negate_every_n_spells": 3 }
+      },
+      "steps": [
+        {
+          "id": "throne",
+          "title": "The Slaver",
+          "text": "It hides. It steals the small. Static Air still kills the third spell. 24 life. Break the visor.",
+          "require": "free"
+        }
+      ],
+      "story_panels_on_enter": [
+        { "text": "The last comb does not open. A visor of cracked gold. Teal at the temples. The Psionic Slaver has been listening since the vault." },
+        { "text": "\"Kneel.\" The Voice is gone. There is only the grip. Steal the board back, or the hive keeps you." }
+      ],
+      "rewards": {
+        "ledger_ids": ["file_slaver"],
+        "flags": { "reptilians_chapter_complete": true, "board_hive_complete": true }
+      },
+      "lesson_win": "The hive is quiet. You were louder.",
+      "lesson_loss": "Stealth first. Count spells. Face only when the visor is open.",
+      "player_deck_mode": "run",
+      "coach": "silent",
+      "dialogue": []
+    }
+  ],
+  "ledger": {
+    "file_air": { "title": "File: The Air", "text": "The hive predates the Lodge. Static is the lock." },
+    "file_psionics": { "title": "File: Psionics", "text": "Psionics grows by one each turn, max 10. Unspent Psionics is gone." },
+    "file_stealth": { "title": "File: Stealth", "text": "Stealthed bodies cannot be attacked or targeted until they strike." },
+    "file_molt": { "title": "File: Molt", "text": "Hides are assigned, not taken. Pride is also a choice." },
+    "file_static": { "title": "File: Static Air", "text": "Every third spell either player casts is negated. Count or die." },
+    "file_comb": { "title": "File: Inner Comb", "text": "The Infiltrator is a door. The Lodge still thinks in Influence." },
+    "file_slaver": { "title": "File: Slaver", "text": "The visor does not negotiate. You did." },
+    "file_reckless": { "title": "File: Proud", "text": "You skipped the molt. The Voice noticed. The kit stayed as-issued." }
+  }
+}

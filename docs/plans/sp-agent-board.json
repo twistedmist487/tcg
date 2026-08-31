@@ -278,7 +278,8 @@
   "notes": [
     "M3 HQ reverse siege + Fortitude twist + Grandmaster + ledger UI + armory pick shipped.",
     "Vault of Faith (Templars) shipped in React client: Hallowed Ground, Chaplain, vestry relic, Guardian of the Seal. Unlocks after Inner Circle.",
-    "Next: Psionic Hive (Reptilians, Static Air). Currency/packs still deferred.",
+    "Psionic Hive (Reptilians) shipped in React client: Static Air, Voice coach, molt hide, Psionic Slaver. Unlocks after Vault.",
+    "Currency/packs still deferred.",
     "City escape hands off to HQ. Abandon run if testing fresh."
   ]
 }
