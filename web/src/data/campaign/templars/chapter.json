@@ -4,7 +4,8 @@
   "faction": "templars",
   "starter_deck_id": "campaign_templars_vault_starter",
   "boards": [
-    "vault"
+    "vault",
+    "crypt"
   ],
   "difficulties": {
     "normal": {

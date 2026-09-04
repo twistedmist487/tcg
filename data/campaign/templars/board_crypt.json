@@ -1,0 +1,954 @@
+{
+  "id": "crypt",
+  "name": "Crypt Reverse",
+  "chapter_id": "templars",
+  "start_node": "crypt_arrival",
+  "map_hint": "Train under the nave. When the heist hits, fight back out under Liquid Assets.",
+  "reverse_order": [
+    "train_charge",
+    "train_shield",
+    "train_recur"
+  ],
+  "boss_node": "hierophant",
+  "nodes": [
+    {
+      "id": "crypt_arrival",
+      "type": "story",
+      "title": "The Crypt Opens",
+      "blurb": "The seal held. The heist did not leave.",
+      "map": {
+        "x": 0.1,
+        "y": 0.5
+      },
+      "requires": [],
+      "unlocks": [
+        "train_recur"
+      ],
+      "story_panels": [
+        {
+          "text": "The Guardian is down. The Chaplain does not celebrate. He takes a lamp and a side door under the nave. Bone dust. Gold in the grout."
+        },
+        {
+          "text": "\"The heist team is still in the ossuary. Recur. Shielding. Charge. We teach you how the dead stand back up. Then you earn the right to leave.\""
+        }
+      ],
+      "story_panels_reckless": [
+        {
+          "text": "The Guardian is down. The Chaplain does not ask why the vestry was empty. He takes the lamp anyway."
+        },
+        {
+          "text": "\"Proud at the door, proud in my crypt. Recur. Shielding. Charge. Then you leave with the kit you kept.\""
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_crypt_arrival"
+        ]
+      },
+      "coach": "chaplain"
+    },
+    {
+      "id": "train_recur",
+      "type": "combat",
+      "title": "Ossuary",
+      "blurb": "Recur stands back up. AI at 12 life.",
+      "map": {
+        "x": 0.28,
+        "y": 0.38
+      },
+      "requires": [
+        "crypt_arrival"
+      ],
+      "unlocks": [
+        "train_shield"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Bone Broker",
+        "faction": "neutral"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "templars_char_009",
+        "templars_char_009",
+        "templars_char_015",
+        "templars_char_015",
+        "templars_char_002",
+        "templars_char_002",
+        "templars_char_006",
+        "templars_char_006",
+        "templars_char_012",
+        "templars_char_012",
+        "templars_char_004",
+        "templars_char_001",
+        "templars_char_017",
+        "templars_char_016",
+        "templars_spell_003",
+        "templars_spell_003",
+        "templars_spell_001",
+        "templars_spell_001",
+        "templars_spell_004",
+        "templars_spell_011",
+        "templars_spell_012",
+        "templars_spell_005",
+        "templars_loc_001",
+        "templars_loc_007",
+        "neutral_char_007",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_022",
+        "neutral_spell_003",
+        "neutral_spell_003"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050",
+        "neutral_spell_027",
+        "neutral_char_023",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050"
+      ],
+      "teach": true,
+      "teach_seed_ids": [
+        "templars_char_018"
+      ],
+      "steps": [
+        {
+          "id": "recur",
+          "title": "Recur",
+          "text": "Crypt Warden is on loan (cost 6, Taunt, Recur). When it would die the first time, it Recurs at 1 Health. Play it when you can afford it, then let it take a hit.",
+          "require": "play_named:Crypt Warden",
+          "highlight": "Crypt Warden"
+        },
+        {
+          "id": "free",
+          "title": "Hold the niche",
+          "text": "Finish Bone Broker \u2014 12 life. Recur is not a second life forever. One stand.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "The Chaplain",
+          "text": "The dead are also a wall. Crypt Warden Recurs once. Spend the Faith. Let it fall, then let it stand."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_recur"
+        ]
+      },
+      "player_deck_mode": "run_teach",
+      "coach": "chaplain",
+      "reverse": {
+        "title": "Ossuary \u2014 Breached",
+        "blurb": "Illuminati heist team. Liquid Assets. Kit is live.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "File Auditor",
+          "faction": "illuminati"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "templars_char_009",
+          "templars_char_009",
+          "templars_char_015",
+          "templars_char_015",
+          "templars_char_002",
+          "templars_char_002",
+          "templars_char_006",
+          "templars_char_006",
+          "templars_char_012",
+          "templars_char_012",
+          "templars_char_004",
+          "templars_char_001",
+          "templars_char_017",
+          "templars_char_016",
+          "templars_spell_003",
+          "templars_spell_003",
+          "templars_spell_001",
+          "templars_spell_001",
+          "templars_spell_004",
+          "templars_spell_011",
+          "templars_spell_012",
+          "templars_spell_005",
+          "templars_loc_001",
+          "templars_loc_007",
+          "neutral_char_007",
+          "neutral_char_007",
+          "neutral_char_022",
+          "neutral_char_022",
+          "neutral_spell_003",
+          "neutral_spell_003"
+        ],
+        "ai_deck": [
+          "illuminati_char_001",
+          "illuminati_char_015",
+          "illuminati_spell_013",
+          "illuminati_char_014",
+          "illuminati_spell_002",
+          "illuminati_char_001",
+          "illuminati_char_015",
+          "illuminati_spell_013",
+          "illuminati_char_014",
+          "illuminati_spell_002",
+          "illuminati_char_006",
+          "illuminati_char_010",
+          "illuminati_char_009",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "illuminati_spell_004",
+          "illuminati_spell_009",
+          "illuminati_char_006",
+          "illuminati_loc_006",
+          "illuminati_char_009",
+          "neutral_char_007",
+          "neutral_char_010",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "neutral_char_007",
+          "neutral_char_022",
+          "illuminati_spell_005",
+          "illuminati_spell_001"
+        ],
+        "twist": {
+          "id": "liquid_assets",
+          "label": "Liquid Assets",
+          "description": "When a player discards, they gain +1 energy next turn.",
+          "match_modifiers": {
+            "discard_energy_next_turn": true
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "The Chaplain",
+            "text": "Twist active: every discard pays +1 energy next turn. They brought the burn bags."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "chaplain"
+      }
+    },
+    {
+      "id": "train_shield",
+      "type": "combat",
+      "title": "Reliquary Ward",
+      "blurb": "Shielding pops once. AI at 12 life.",
+      "map": {
+        "x": 0.46,
+        "y": 0.55
+      },
+      "requires": [
+        "train_recur"
+      ],
+      "unlocks": [
+        "train_charge"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Glass Thief",
+        "faction": "neutral"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "templars_char_009",
+        "templars_char_009",
+        "templars_char_015",
+        "templars_char_015",
+        "templars_char_002",
+        "templars_char_002",
+        "templars_char_006",
+        "templars_char_006",
+        "templars_char_012",
+        "templars_char_012",
+        "templars_char_004",
+        "templars_char_001",
+        "templars_char_017",
+        "templars_char_016",
+        "templars_spell_003",
+        "templars_spell_003",
+        "templars_spell_001",
+        "templars_spell_001",
+        "templars_spell_004",
+        "templars_spell_011",
+        "templars_spell_012",
+        "templars_spell_005",
+        "templars_loc_001",
+        "templars_loc_007",
+        "neutral_char_007",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_022",
+        "neutral_spell_003",
+        "neutral_spell_003"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050",
+        "neutral_spell_027",
+        "neutral_char_023",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050"
+      ],
+      "teach": true,
+      "teach_seed_ids": [
+        "templars_char_015",
+        "templars_char_016"
+      ],
+      "steps": [
+        {
+          "id": "shield",
+          "title": "Shielding",
+          "text": "Novice (cost 1, Shielding) ignores the next damage, then the shield pops. Play Novice. Field Medic can heal after.",
+          "require": "play_named:Novice",
+          "highlight": "Novice"
+        },
+        {
+          "id": "free",
+          "title": "Hold the grate",
+          "text": "Finish Glass Thief \u2014 12 life. Shielding is not Taunt. It is one wrong hit forgiven.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "The Chaplain",
+          "text": "Shielding is a vow, not a wall. It pops. Then you bleed like anyone."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_shield"
+        ]
+      },
+      "player_deck_mode": "run_teach",
+      "coach": "chaplain",
+      "reverse": {
+        "title": "Reliquary Ward \u2014 Breached",
+        "blurb": "Illuminati heist team. Liquid Assets. Kit is live.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "Quiet Auditor",
+          "faction": "illuminati"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "templars_char_009",
+          "templars_char_009",
+          "templars_char_015",
+          "templars_char_015",
+          "templars_char_002",
+          "templars_char_002",
+          "templars_char_006",
+          "templars_char_006",
+          "templars_char_012",
+          "templars_char_012",
+          "templars_char_004",
+          "templars_char_001",
+          "templars_char_017",
+          "templars_char_016",
+          "templars_spell_003",
+          "templars_spell_003",
+          "templars_spell_001",
+          "templars_spell_001",
+          "templars_spell_004",
+          "templars_spell_011",
+          "templars_spell_012",
+          "templars_spell_005",
+          "templars_loc_001",
+          "templars_loc_007",
+          "neutral_char_007",
+          "neutral_char_007",
+          "neutral_char_022",
+          "neutral_char_022",
+          "neutral_spell_003",
+          "neutral_spell_003"
+        ],
+        "ai_deck": [
+          "illuminati_char_001",
+          "illuminati_char_015",
+          "illuminati_spell_013",
+          "illuminati_char_014",
+          "illuminati_spell_002",
+          "illuminati_char_001",
+          "illuminati_char_015",
+          "illuminati_spell_013",
+          "illuminati_char_014",
+          "illuminati_spell_002",
+          "illuminati_char_006",
+          "illuminati_char_010",
+          "illuminati_char_009",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "illuminati_spell_004",
+          "illuminati_spell_009",
+          "illuminati_char_006",
+          "illuminati_loc_006",
+          "illuminati_char_009",
+          "neutral_char_007",
+          "neutral_char_010",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "neutral_char_007",
+          "neutral_char_022",
+          "illuminati_spell_005",
+          "illuminati_spell_001"
+        ],
+        "twist": {
+          "id": "liquid_assets",
+          "label": "Liquid Assets",
+          "description": "When a player discards, they gain +1 energy next turn.",
+          "match_modifiers": {
+            "discard_energy_next_turn": true
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "The Chaplain",
+            "text": "Twist active: every discard pays +1 energy next turn. They brought the burn bags."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "chaplain"
+      }
+    },
+    {
+      "id": "train_charge",
+      "type": "combat",
+      "title": "Nave Battery",
+      "blurb": "Charge hits face now. AI at 14 life.",
+      "map": {
+        "x": 0.64,
+        "y": 0.4
+      },
+      "requires": [
+        "train_shield"
+      ],
+      "unlocks": [
+        "relic_vault"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Stair Runner",
+        "faction": "neutral"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 14,
+      "player_deck": [
+        "templars_char_009",
+        "templars_char_009",
+        "templars_char_015",
+        "templars_char_015",
+        "templars_char_002",
+        "templars_char_002",
+        "templars_char_006",
+        "templars_char_006",
+        "templars_char_012",
+        "templars_char_012",
+        "templars_char_004",
+        "templars_char_001",
+        "templars_char_017",
+        "templars_char_016",
+        "templars_spell_003",
+        "templars_spell_003",
+        "templars_spell_001",
+        "templars_spell_001",
+        "templars_spell_004",
+        "templars_spell_011",
+        "templars_spell_012",
+        "templars_spell_005",
+        "templars_loc_001",
+        "templars_loc_007",
+        "neutral_char_007",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_022",
+        "neutral_spell_003",
+        "neutral_spell_003"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050",
+        "neutral_spell_027",
+        "neutral_char_023",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050"
+      ],
+      "teach": true,
+      "teach_seed_ids": [
+        "templars_char_012"
+      ],
+      "steps": [
+        {
+          "id": "charge",
+          "title": "Charge",
+          "text": "Zealot (cost 3, Charge) can attack the turn it lands \u2014 face is legal if no Taunt. Play Zealot, then hit life.",
+          "require": "play_named:Zealot",
+          "highlight": "Zealot"
+        },
+        {
+          "id": "free",
+          "title": "Take the stair",
+          "text": "Finish Stair Runner \u2014 14 life. Charge is a door, not a sermon.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "The Chaplain",
+          "text": "Rush bites a body. Charge bites the skull. Know the difference when the stair is on fire."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_charge"
+        ]
+      },
+      "player_deck_mode": "run_teach",
+      "coach": "chaplain",
+      "reverse": {
+        "title": "Nave Battery \u2014 Breached",
+        "blurb": "Illuminati heist team. Liquid Assets. Kit is live.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "Gate Interdictor",
+          "faction": "illuminati"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "templars_char_009",
+          "templars_char_009",
+          "templars_char_015",
+          "templars_char_015",
+          "templars_char_002",
+          "templars_char_002",
+          "templars_char_006",
+          "templars_char_006",
+          "templars_char_012",
+          "templars_char_012",
+          "templars_char_004",
+          "templars_char_001",
+          "templars_char_017",
+          "templars_char_016",
+          "templars_spell_003",
+          "templars_spell_003",
+          "templars_spell_001",
+          "templars_spell_001",
+          "templars_spell_004",
+          "templars_spell_011",
+          "templars_spell_012",
+          "templars_spell_005",
+          "templars_loc_001",
+          "templars_loc_007",
+          "neutral_char_007",
+          "neutral_char_007",
+          "neutral_char_022",
+          "neutral_char_022",
+          "neutral_spell_003",
+          "neutral_spell_003"
+        ],
+        "ai_deck": [
+          "illuminati_char_001",
+          "illuminati_char_015",
+          "illuminati_spell_013",
+          "illuminati_char_014",
+          "illuminati_spell_002",
+          "illuminati_char_001",
+          "illuminati_char_015",
+          "illuminati_spell_013",
+          "illuminati_char_014",
+          "illuminati_spell_002",
+          "illuminati_char_006",
+          "illuminati_char_010",
+          "illuminati_char_009",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "illuminati_spell_004",
+          "illuminati_spell_009",
+          "illuminati_char_006",
+          "illuminati_loc_006",
+          "illuminati_char_009",
+          "neutral_char_007",
+          "neutral_char_010",
+          "illuminati_char_002",
+          "illuminati_char_004",
+          "illuminati_spell_008",
+          "neutral_char_007",
+          "neutral_char_022",
+          "illuminati_spell_005",
+          "illuminati_spell_001"
+        ],
+        "twist": {
+          "id": "liquid_assets",
+          "label": "Liquid Assets",
+          "description": "When a player discards, they gain +1 energy next turn.",
+          "match_modifiers": {
+            "discard_energy_next_turn": true
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "The Chaplain",
+            "text": "Twist active: every discard pays +1 energy next turn. They brought the burn bags."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "chaplain",
+        "skip_blurb": "The nave stair is broken. Charge drill skipped. The kit still has to leave."
+      }
+    },
+    {
+      "id": "relic_vault",
+      "type": "safehouse",
+      "title": "Relic Vault",
+      "blurb": "Pick a relic. It is sleeved for the reverse.",
+      "map": {
+        "x": 0.78,
+        "y": 0.58
+      },
+      "requires": [
+        "train_charge"
+      ],
+      "unlocks": [
+        "crypt_breach"
+      ],
+      "safehouse": {
+        "text": "Choose one. It is logged, then sleeved into your kit for the breach.",
+        "pick_one_of": [
+          {
+            "id": "templars_char_001",
+            "label": "Knight Commander",
+            "blurb": "Other Templar bodies gain +1 Health. Sleeved into your kit.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001",
+              "illuminati_char_009"
+            ]
+          },
+          {
+            "id": "templars_char_011",
+            "label": "Healing Seraph",
+            "blurb": "End of turn: restore 2 to all friendlies. Sleeved into your kit.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001",
+              "illuminati_char_009"
+            ]
+          },
+          {
+            "id": "templars_char_007",
+            "label": "Break the Stair",
+            "blurb": "Warden of Secrets. Also collapses the nave stair \u2014 skip Charge on the way out.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001",
+              "illuminati_char_009"
+            ],
+            "skip_reverse_node": "train_charge"
+          }
+        ]
+      },
+      "rewards": {
+        "ledger_ids": [
+          "file_relic"
+        ]
+      },
+      "coach": "chaplain",
+      "dialogue": [
+        {
+          "speaker": "The Chaplain",
+          "text": "Relics are assigned. Knight Commander. Healing Seraph. Or break the stair and skip the Charge hall on the way out."
+        }
+      ]
+    },
+    {
+      "id": "crypt_breach",
+      "type": "story",
+      "title": "Auditors in the Ossuary",
+      "blurb": "Inner Circle heist team. Fight back out.",
+      "map": {
+        "x": 0.88,
+        "y": 0.32
+      },
+      "requires": [
+        "relic_vault"
+      ],
+      "unlocks": [],
+      "triggers_reverse": true,
+      "story_panels": [
+        {
+          "text": "Gold pins in the candle smoke. Inner Circle auditors. They knew the niche maps. They brought burn bags."
+        },
+        {
+          "text": "Previous halls light red on the board. Fight back the way you came. Liquid Assets: every discard pays energy next turn. They discard. You mostly do not."
+        },
+        {
+          "text": "Reach the stair. The Hierophant is waiting in the smoke. Your kit is the one you built."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_crypt_breach"
+        ],
+        "flags": {
+          "crypt_breached": true
+        }
+      },
+      "coach": "chaplain"
+    },
+    {
+      "id": "hierophant",
+      "type": "boss",
+      "title": "Heist Hierophant",
+      "blurb": "Discard engine. Liquid Assets. 24 life.",
+      "map": {
+        "x": 0.12,
+        "y": 0.22
+      },
+      "requires": [],
+      "unlocks": [],
+      "boss_requires_reverse_clear": true,
+      "ai": {
+        "difficulty": "medium",
+        "name": "Heist Hierophant",
+        "faction": "illuminati"
+      },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 24,
+      "player_deck": [
+        "templars_char_009",
+        "templars_char_009",
+        "templars_char_015",
+        "templars_char_015",
+        "templars_char_002",
+        "templars_char_002",
+        "templars_char_006",
+        "templars_char_006",
+        "templars_char_012",
+        "templars_char_012",
+        "templars_char_004",
+        "templars_char_001",
+        "templars_char_017",
+        "templars_char_016",
+        "templars_spell_003",
+        "templars_spell_003",
+        "templars_spell_001",
+        "templars_spell_001",
+        "templars_spell_004",
+        "templars_spell_011",
+        "templars_spell_012",
+        "templars_spell_005",
+        "templars_loc_001",
+        "templars_loc_007",
+        "neutral_char_007",
+        "neutral_char_007",
+        "neutral_char_022",
+        "neutral_char_022",
+        "neutral_spell_003",
+        "neutral_spell_003"
+      ],
+      "ai_deck": [
+        "illuminati_char_001",
+        "illuminati_char_001",
+        "illuminati_spell_013",
+        "illuminati_spell_013",
+        "illuminati_spell_002",
+        "illuminati_spell_002",
+        "illuminati_char_015",
+        "illuminati_char_015",
+        "illuminati_char_014",
+        "illuminati_char_014",
+        "illuminati_char_006",
+        "illuminati_char_006",
+        "illuminati_spell_005",
+        "illuminati_spell_005",
+        "illuminati_char_010",
+        "illuminati_char_005",
+        "illuminati_spell_001",
+        "illuminati_spell_001",
+        "illuminati_char_009",
+        "illuminati_char_009",
+        "illuminati_char_018",
+        "illuminati_char_018",
+        "illuminati_char_002",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_char_004",
+        "illuminati_spell_008",
+        "illuminati_spell_008",
+        "neutral_char_007",
+        "illuminati_loc_006"
+      ],
+      "teach": false,
+      "twist": {
+        "id": "liquid_assets",
+        "label": "Liquid Assets",
+        "description": "When a player discards, they gain +1 energy next turn.",
+        "match_modifiers": {
+          "discard_energy_next_turn": true
+        }
+      },
+      "dialogue": [
+        {
+          "speaker": "The Chaplain",
+          "text": "He burns files for fuel. Liquid Assets still pays. Break him. Do not die in my stair."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_hierophant",
+          "file_crypt_complete"
+        ],
+        "flags": {
+          "templars_chapter_complete": true,
+          "board_crypt_complete": true,
+          "starter_upgrade": true,
+          "reward_stub_packs": 1
+        }
+      },
+      "lesson_win": "The crypt is quiet. The heist is on file.",
+      "lesson_loss": "They discard for tempo. You wall. Face only when the hand is empty.",
+      "player_deck_mode": "run",
+      "coach": "chaplain"
+    }
+  ],
+  "ledger": {
+    "file_crypt_arrival": {
+      "title": "File: The Crypt Opens",
+      "text": "The seal held. The heist did not leave. The Chaplain took the lamp under the nave."
+    },
+    "file_recur": {
+      "title": "File: Recur",
+      "text": "Crypt Warden stands back up once. The dead are also a wall."
+    },
+    "file_shield": {
+      "title": "File: Shielding",
+      "text": "The next damage is ignored. Then the vow pops. It is not Taunt."
+    },
+    "file_charge": {
+      "title": "File: Charge",
+      "text": "Charge may hit face the turn it lands. Rush may not."
+    },
+    "file_relic": {
+      "title": "File: Relic Vault",
+      "text": "Relics are assigned, then sleeved. The stair can be broken."
+    },
+    "file_crypt_breach": {
+      "title": "File: Auditors",
+      "text": "Inner Circle knew the niche maps. Liquid Assets pays every discarded file."
+    },
+    "file_hierophant": {
+      "title": "File: Hierophant",
+      "text": "He burned the ledger for fuel. You closed the stair anyway."
+    },
+    "file_crypt_complete": {
+      "title": "File: Crypt Reverse",
+      "text": "The crypt is quiet. Vault of Faith is on file as a chapter, not a lesson."
+    },
+    "file_elevator": {
+      "title": "File: Broken Stair",
+      "text": "Warden of Secrets collapsed the nave stair. Charge hall skipped on the way out."
+    }
+  }
+}

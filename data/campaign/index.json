@@ -7,15 +7,17 @@
       "faction": "illuminati",
       "description": "City initiation, then HQ. Learn Influence by doing.",
       "status": "available",
-      "starter_board": "city"
+      "starter_board": "city",
+      "art": "/ui/campaign/hq-board.jpg"
     },
     {
       "id": "templars",
       "name": "Vault of Faith",
       "faction": "templars",
-      "description": "Hold the reliquary. Faith, walls, and Hallowed Ground.",
+      "description": "Hold the reliquary, then the crypt. Faith, Recur, and Liquid Assets.",
       "status": "sealed",
-      "starter_board": "vault"
+      "starter_board": "vault",
+      "art": "/ui/campaign/vault-tease.jpg"
     },
     {
       "id": "reptilians",
@@ -23,7 +25,8 @@
       "faction": "reptilians",
       "description": "Static Air. Psionics, Stealth, and the Slaver. Opens after the Vault.",
       "status": "sealed",
-      "starter_board": "hive"
+      "starter_board": "hive",
+      "art": "/ui/campaign/hive-tease.jpg"
     }
   ]
 }

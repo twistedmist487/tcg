@@ -650,9 +650,9 @@
           "file_guardian"
         ],
         "flags": {
-          "templars_chapter_complete": true,
           "board_vault_complete": true
-        }
+        },
+        "next_board": "crypt"
       },
       "lesson_win": "The seal holds. You held it.",
       "lesson_loss": "Taunt first. Heal second. Face only when the wall is gone.",

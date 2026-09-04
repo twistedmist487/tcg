@@ -9,12 +9,12 @@ SHIPPED
   First Contact (optional)
   Illuminati  Board 1 City + crisis + Board 2 HQ reverse + Grandmaster
   Templars    Board 1 Vault (Hallowed Ground, Guardian)
+  Templars    Board 2 Crypt Reverse + Hierophant (Liquid Assets)
   Reptilians  Board 1 Hive (Static Air, Slaver)
-  Cosmetics / field cards / Heroic per Board 1
+  Cosmetics / field cards / Heroic per Board 1 + Crypt
   CLAIM ARCHIVE (optional Google / X bind)
 
 NEXT (in order)
-  7  Templars Board 2 — Crypt Reverse
   8  Reptilians Board 2 — Inner Hive Reverse
   9  Reckless + crisis parity (Vault + Hive)
   10 The Circle Closes (crossover finale)
@@ -171,4 +171,4 @@ Same bar as Hive / Vault:
 
 ## Suggested next command
 
-**Proceed with slice 7 (Crypt Reverse).** It is the largest remaining hole: Templars have a teach board and no siege. Hive reverse waits until the Crypt pattern is proven a second time.
+**Proceed with slice 8 (Inner Hive Reverse).** Crypt Reverse is the second Board 2. Nest can copy the pattern.
