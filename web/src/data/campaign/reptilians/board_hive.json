@@ -316,9 +316,10 @@
       ],
       "rewards": {
         "ledger_ids": ["file_slaver"],
-        "flags": { "reptilians_chapter_complete": true, "board_hive_complete": true }
+        "flags": { "board_hive_complete": true },
+        "next_board": "nest"
       },
-      "lesson_win": "The hive is quiet. You were louder.",
+      "lesson_win": "The visor is cracked. The nest is waiting.",
       "lesson_loss": "Stealth first. Count spells. Face only when the visor is open.",
       "player_deck_mode": "run",
       "coach": "silent",

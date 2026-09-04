@@ -1,0 +1,951 @@
+{
+  "id": "nest",
+  "name": "Inner Hive Reverse",
+  "chapter_id": "reptilians",
+  "start_node": "nest_arrival",
+  "map_hint": "Train in the comb. When the purge hits, fight back out under Brood Pressure.",
+  "reverse_order": [
+    "train_leech",
+    "train_mimic",
+    "train_venom"
+  ],
+  "boss_node": "queen",
+  "nodes": [
+    {
+      "id": "nest_arrival",
+      "type": "story",
+      "title": "The Comb Tightens",
+      "blurb": "The Slaver is down. The comb does not go quiet.",
+      "map": {
+        "x": 0.1,
+        "y": 0.5
+      },
+      "requires": [],
+      "unlocks": [
+        "train_venom"
+      ],
+      "story_panels": [
+        {
+          "text": "The visor is cracked. The Voice does not celebrate. It pulls you past the Slaver's hall into comb that was not on the first map."
+        },
+        {
+          "text": "\"Venom. Mimic. Leech. The purge is already in the resin. We teach you how the brood kills, then you earn the right to leave.\""
+        }
+      ],
+      "story_panels_reckless": [
+        {
+          "text": "The visor is cracked. The Voice does not ask why the molt was empty. It takes you deeper anyway."
+        },
+        {
+          "text": "\"Proud at the door, proud in my nest. Venom. Mimic. Leech. Then you leave with the kit you kept.\""
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_nest_arrival"
+        ]
+      },
+      "coach": "voice"
+    },
+    {
+      "id": "train_venom",
+      "type": "combat",
+      "title": "Venom Pit",
+      "blurb": "Venom kills at one remaining. AI at 12 life.",
+      "map": {
+        "x": 0.28,
+        "y": 0.38
+      },
+      "requires": [
+        "nest_arrival"
+      ],
+      "unlocks": [
+        "train_mimic"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Needle Host",
+        "faction": "neutral"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "reptilians_char_015",
+        "reptilians_char_015",
+        "reptilians_char_007",
+        "reptilians_char_007",
+        "reptilians_char_009",
+        "reptilians_char_009",
+        "reptilians_char_016",
+        "reptilians_char_016",
+        "reptilians_char_005",
+        "reptilians_char_005",
+        "reptilians_char_001",
+        "reptilians_char_011",
+        "reptilians_char_017",
+        "reptilians_char_008",
+        "reptilians_char_003",
+        "reptilians_spell_011",
+        "reptilians_spell_011",
+        "reptilians_spell_001",
+        "reptilians_spell_001",
+        "reptilians_spell_009",
+        "reptilians_spell_004",
+        "reptilians_spell_012",
+        "reptilians_spell_013",
+        "neutral_spell_040",
+        "reptilians_loc_007",
+        "reptilians_loc_001",
+        "neutral_char_006",
+        "neutral_char_006",
+        "neutral_char_002",
+        "neutral_char_002"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050",
+        "neutral_spell_027",
+        "neutral_char_023",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050"
+      ],
+      "teach": true,
+      "teach_seed_ids": [
+        "reptilians_char_016"
+      ],
+      "steps": [
+        {
+          "id": "venom",
+          "title": "Venom",
+          "text": "Fang Brood is on loan (cost 2, Venom). Any damage it deals to a body is lethal. Play it, then bite a character \u2014 even a fat wall dies.",
+          "require": "play_named:Fang Brood",
+          "highlight": "Fang Brood"
+        },
+        {
+          "id": "free",
+          "title": "Hold the pit",
+          "text": "Finish Needle Host \u2014 12 life. Venom is not extra damage. It is a kill.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "The Voice",
+          "text": "One bite. The rest is paperwork. Fang Brood Venoms. Spend the Psionics. Let it taste a body."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_venom"
+        ]
+      },
+      "player_deck_mode": "run_teach",
+      "coach": "voice",
+      "reverse": {
+        "title": "Venom Pit \u2014 Breached",
+        "blurb": "Templar purge. Brood Pressure. Kit is live.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "Incense Interdictor",
+          "faction": "templars"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "reptilians_char_015",
+          "reptilians_char_015",
+          "reptilians_char_007",
+          "reptilians_char_007",
+          "reptilians_char_009",
+          "reptilians_char_009",
+          "reptilians_char_016",
+          "reptilians_char_016",
+          "reptilians_char_005",
+          "reptilians_char_005",
+          "reptilians_char_001",
+          "reptilians_char_011",
+          "reptilians_char_017",
+          "reptilians_char_008",
+          "reptilians_char_003",
+          "reptilians_spell_011",
+          "reptilians_spell_011",
+          "reptilians_spell_001",
+          "reptilians_spell_001",
+          "reptilians_spell_009",
+          "reptilians_spell_004",
+          "reptilians_spell_012",
+          "reptilians_spell_013",
+          "neutral_spell_040",
+          "reptilians_loc_007",
+          "reptilians_loc_001",
+          "neutral_char_006",
+          "neutral_char_006",
+          "neutral_char_002",
+          "neutral_char_002"
+        ],
+        "ai_deck": [
+          "templars_char_009",
+          "templars_char_009",
+          "templars_char_015",
+          "templars_char_002",
+          "templars_char_002",
+          "templars_char_006",
+          "templars_char_006",
+          "templars_char_012",
+          "templars_char_012",
+          "templars_char_004",
+          "templars_char_001",
+          "templars_char_007",
+          "templars_char_016",
+          "templars_spell_003",
+          "templars_spell_003",
+          "templars_spell_001",
+          "templars_spell_001",
+          "templars_spell_004",
+          "templars_spell_011",
+          "templars_spell_012",
+          "templars_spell_005",
+          "templars_loc_001",
+          "templars_loc_007",
+          "neutral_char_007",
+          "neutral_char_007",
+          "neutral_char_022",
+          "neutral_char_022",
+          "neutral_spell_003",
+          "neutral_spell_003",
+          "templars_char_018"
+        ],
+        "twist": {
+          "id": "brood_pressure",
+          "label": "Brood Pressure",
+          "description": "Every third spell dies in the air. When a character dies, the other hero gains 1 life.",
+          "match_modifiers": {
+            "negate_every_n_spells": 3,
+            "brood_pressure": true
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "The Voice",
+            "text": "Static Air still kills the third spell. Brood Pressure: a body dies, the other skull drinks."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "voice"
+      }
+    },
+    {
+      "id": "train_mimic",
+      "type": "combat",
+      "title": "Skin Walk",
+      "blurb": "Mimic enters +2/+2 stealthed. AI at 12 life.",
+      "map": {
+        "x": 0.46,
+        "y": 0.55
+      },
+      "requires": [
+        "train_venom"
+      ],
+      "unlocks": [
+        "train_leech"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Face Thief",
+        "faction": "neutral"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 12,
+      "player_deck": [
+        "reptilians_char_015",
+        "reptilians_char_015",
+        "reptilians_char_007",
+        "reptilians_char_007",
+        "reptilians_char_009",
+        "reptilians_char_009",
+        "reptilians_char_016",
+        "reptilians_char_016",
+        "reptilians_char_005",
+        "reptilians_char_005",
+        "reptilians_char_001",
+        "reptilians_char_011",
+        "reptilians_char_017",
+        "reptilians_char_008",
+        "reptilians_char_003",
+        "reptilians_spell_011",
+        "reptilians_spell_011",
+        "reptilians_spell_001",
+        "reptilians_spell_001",
+        "reptilians_spell_009",
+        "reptilians_spell_004",
+        "reptilians_spell_012",
+        "reptilians_spell_013",
+        "neutral_spell_040",
+        "reptilians_loc_007",
+        "reptilians_loc_001",
+        "neutral_char_006",
+        "neutral_char_006",
+        "neutral_char_002",
+        "neutral_char_002"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050",
+        "neutral_spell_027",
+        "neutral_char_023",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050"
+      ],
+      "teach": true,
+      "teach_seed_ids": [
+        "reptilians_char_006"
+      ],
+      "steps": [
+        {
+          "id": "mimic",
+          "title": "Mimic",
+          "text": "Mimic is on loan (cost 4, Stealth). When it lands it is +2/+2 \u2014 a 4/4 they cannot target until it strikes. Play Mimic.",
+          "require": "play_named:Mimic",
+          "highlight": "Mimic"
+        },
+        {
+          "id": "free",
+          "title": "Wear the face",
+          "text": "Finish Face Thief \u2014 12 life. Stealth is a door. The stats are the teeth.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "The Voice",
+          "text": "It wears a daughter's face. +2/+2 on enter. They cannot look at it until it bites."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_mimic"
+        ]
+      },
+      "player_deck_mode": "run_teach",
+      "coach": "voice",
+      "reverse": {
+        "title": "Skin Walk \u2014 Breached",
+        "blurb": "Templar purge. Brood Pressure. Kit is live.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "Quiet Censer",
+          "faction": "templars"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "reptilians_char_015",
+          "reptilians_char_015",
+          "reptilians_char_007",
+          "reptilians_char_007",
+          "reptilians_char_009",
+          "reptilians_char_009",
+          "reptilians_char_016",
+          "reptilians_char_016",
+          "reptilians_char_005",
+          "reptilians_char_005",
+          "reptilians_char_001",
+          "reptilians_char_011",
+          "reptilians_char_017",
+          "reptilians_char_008",
+          "reptilians_char_003",
+          "reptilians_spell_011",
+          "reptilians_spell_011",
+          "reptilians_spell_001",
+          "reptilians_spell_001",
+          "reptilians_spell_009",
+          "reptilians_spell_004",
+          "reptilians_spell_012",
+          "reptilians_spell_013",
+          "neutral_spell_040",
+          "reptilians_loc_007",
+          "reptilians_loc_001",
+          "neutral_char_006",
+          "neutral_char_006",
+          "neutral_char_002",
+          "neutral_char_002"
+        ],
+        "ai_deck": [
+          "templars_char_009",
+          "templars_char_009",
+          "templars_char_015",
+          "templars_char_002",
+          "templars_char_002",
+          "templars_char_006",
+          "templars_char_006",
+          "templars_char_012",
+          "templars_char_012",
+          "templars_char_004",
+          "templars_char_001",
+          "templars_char_007",
+          "templars_char_016",
+          "templars_spell_003",
+          "templars_spell_003",
+          "templars_spell_001",
+          "templars_spell_001",
+          "templars_spell_004",
+          "templars_spell_011",
+          "templars_spell_012",
+          "templars_spell_005",
+          "templars_loc_001",
+          "templars_loc_007",
+          "neutral_char_007",
+          "neutral_char_007",
+          "neutral_char_022",
+          "neutral_char_022",
+          "neutral_spell_003",
+          "neutral_spell_003",
+          "templars_char_018"
+        ],
+        "twist": {
+          "id": "brood_pressure",
+          "label": "Brood Pressure",
+          "description": "Every third spell dies in the air. When a character dies, the other hero gains 1 life.",
+          "match_modifiers": {
+            "negate_every_n_spells": 3,
+            "brood_pressure": true
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "The Voice",
+            "text": "Static Air still kills the third spell. Brood Pressure: a body dies, the other skull drinks."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "voice"
+      }
+    },
+    {
+      "id": "train_leech",
+      "type": "combat",
+      "title": "Thought Tax",
+      "blurb": "Leech face. Steal energy. AI at 14 life.",
+      "map": {
+        "x": 0.64,
+        "y": 0.4
+      },
+      "requires": [
+        "train_mimic"
+      ],
+      "unlocks": [
+        "queen_chamber"
+      ],
+      "ai": {
+        "difficulty": "easy",
+        "name": "Battery Clerk",
+        "faction": "neutral"
+      },
+      "player_goes_first": true,
+      "shuffle": false,
+      "ai_starting_life": 14,
+      "player_deck": [
+        "reptilians_char_015",
+        "reptilians_char_015",
+        "reptilians_char_007",
+        "reptilians_char_007",
+        "reptilians_char_009",
+        "reptilians_char_009",
+        "reptilians_char_016",
+        "reptilians_char_016",
+        "reptilians_char_005",
+        "reptilians_char_005",
+        "reptilians_char_001",
+        "reptilians_char_011",
+        "reptilians_char_017",
+        "reptilians_char_008",
+        "reptilians_char_003",
+        "reptilians_spell_011",
+        "reptilians_spell_011",
+        "reptilians_spell_001",
+        "reptilians_spell_001",
+        "reptilians_spell_009",
+        "reptilians_spell_004",
+        "reptilians_spell_012",
+        "reptilians_spell_013",
+        "neutral_spell_040",
+        "reptilians_loc_007",
+        "reptilians_loc_001",
+        "neutral_char_006",
+        "neutral_char_006",
+        "neutral_char_002",
+        "neutral_char_002"
+      ],
+      "ai_deck": [
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_char_021",
+        "neutral_char_029",
+        "neutral_char_001",
+        "neutral_spell_018",
+        "neutral_char_059",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050",
+        "neutral_spell_027",
+        "neutral_char_023",
+        "neutral_spell_028",
+        "neutral_spell_022",
+        "neutral_spell_013",
+        "neutral_char_040",
+        "neutral_char_033",
+        "neutral_loc_010",
+        "neutral_char_032",
+        "neutral_spell_017",
+        "neutral_char_050"
+      ],
+      "teach": true,
+      "teach_seed_ids": [
+        "reptilians_char_008"
+      ],
+      "steps": [
+        {
+          "id": "leech",
+          "title": "Psionic Leech",
+          "text": "Psionic Leech (cost 3) steals 1 energy when it hits the enemy hero. Play Leech, then bite face if no Taunt.",
+          "require": "play_named:Psionic Leech",
+          "highlight": "Psionic Leech"
+        },
+        {
+          "id": "free",
+          "title": "Take the tax",
+          "text": "Finish Battery Clerk \u2014 14 life. Face is a battery. Walls are a delay.",
+          "require": "free"
+        }
+      ],
+      "dialogue": [
+        {
+          "speaker": "The Voice",
+          "text": "It does not feed on flesh. It feeds on will. Hit the skull. Steal the turn."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_leech"
+        ]
+      },
+      "player_deck_mode": "run_teach",
+      "coach": "voice",
+      "reverse": {
+        "title": "Thought Tax \u2014 Breached",
+        "blurb": "Templar purge. Brood Pressure. Kit is live.",
+        "type": "combat",
+        "ai": {
+          "difficulty": "medium",
+          "name": "Shotgun Chaplain",
+          "faction": "templars"
+        },
+        "ai_starting_life": 14,
+        "player_goes_first": true,
+        "shuffle": true,
+        "player_deck": [
+          "reptilians_char_015",
+          "reptilians_char_015",
+          "reptilians_char_007",
+          "reptilians_char_007",
+          "reptilians_char_009",
+          "reptilians_char_009",
+          "reptilians_char_016",
+          "reptilians_char_016",
+          "reptilians_char_005",
+          "reptilians_char_005",
+          "reptilians_char_001",
+          "reptilians_char_011",
+          "reptilians_char_017",
+          "reptilians_char_008",
+          "reptilians_char_003",
+          "reptilians_spell_011",
+          "reptilians_spell_011",
+          "reptilians_spell_001",
+          "reptilians_spell_001",
+          "reptilians_spell_009",
+          "reptilians_spell_004",
+          "reptilians_spell_012",
+          "reptilians_spell_013",
+          "neutral_spell_040",
+          "reptilians_loc_007",
+          "reptilians_loc_001",
+          "neutral_char_006",
+          "neutral_char_006",
+          "neutral_char_002",
+          "neutral_char_002"
+        ],
+        "ai_deck": [
+          "templars_char_009",
+          "templars_char_009",
+          "templars_char_015",
+          "templars_char_002",
+          "templars_char_002",
+          "templars_char_006",
+          "templars_char_006",
+          "templars_char_012",
+          "templars_char_012",
+          "templars_char_004",
+          "templars_char_001",
+          "templars_char_007",
+          "templars_char_016",
+          "templars_spell_003",
+          "templars_spell_003",
+          "templars_spell_001",
+          "templars_spell_001",
+          "templars_spell_004",
+          "templars_spell_011",
+          "templars_spell_012",
+          "templars_spell_005",
+          "templars_loc_001",
+          "templars_loc_007",
+          "neutral_char_007",
+          "neutral_char_007",
+          "neutral_char_022",
+          "neutral_char_022",
+          "neutral_spell_003",
+          "neutral_spell_003",
+          "templars_char_018"
+        ],
+        "twist": {
+          "id": "brood_pressure",
+          "label": "Brood Pressure",
+          "description": "Every third spell dies in the air. When a character dies, the other hero gains 1 life.",
+          "match_modifiers": {
+            "negate_every_n_spells": 3,
+            "brood_pressure": true
+          }
+        },
+        "dialogue": [
+          {
+            "speaker": "The Voice",
+            "text": "Static Air still kills the third spell. Brood Pressure: a body dies, the other skull drinks."
+          }
+        ],
+        "player_deck_mode": "run",
+        "coach": "voice",
+        "skip_blurb": "The visor hall is collapsed. Thought Tax skipped. The kit still has to leave."
+      }
+    },
+    {
+      "id": "queen_chamber",
+      "type": "safehouse",
+      "title": "Molting Chamber",
+      "blurb": "Pick a hide. It is sleeved for the reverse.",
+      "map": {
+        "x": 0.78,
+        "y": 0.58
+      },
+      "requires": [
+        "train_leech"
+      ],
+      "unlocks": [
+        "nest_breach"
+      ],
+      "safehouse": {
+        "text": "Choose one. It is logged, then sleeved into your kit for the breach.",
+        "pick_one_of": [
+          {
+            "id": "reptilians_char_010",
+            "label": "Overlord Sskrath",
+            "blurb": "Board wipe 3, then your brood hides. Sleeved into your kit.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001",
+              "illuminati_char_009"
+            ]
+          },
+          {
+            "id": "reptilians_char_018",
+            "label": "Apex Stalker",
+            "blurb": "Stealth. Enraged \u2014 a second bite. Sleeved into your kit.",
+            "action": "inject",
+            "copies": 1,
+            "trim": [
+              "neutral_char_028",
+              "neutral_spell_022",
+              "neutral_char_001",
+              "illuminati_char_009"
+            ]
+          },
+          {
+            "id": "reptilians_char_008",
+            "label": "Collapse Thought Tax",
+            "blurb": "Cut a Psionic Leech. Also collapses the visor hall \u2014 skip Leech on the way out.",
+            "action": "prune",
+            "prune_id": "reptilians_char_008",
+            "skip_reverse_node": "train_leech"
+          }
+        ]
+      },
+      "rewards": {
+        "ledger_ids": [
+          "file_chamber"
+        ]
+      },
+      "coach": "voice",
+      "dialogue": [
+        {
+          "speaker": "The Voice",
+          "text": "Overlord. Apex. Or collapse the visor and skip the Leech hall on the way out."
+        }
+      ]
+    },
+    {
+      "id": "nest_breach",
+      "type": "story",
+      "title": "Incense in the Comb",
+      "blurb": "Templar purge team. Fight back out.",
+      "map": {
+        "x": 0.88,
+        "y": 0.32
+      },
+      "requires": [
+        "queen_chamber"
+      ],
+      "unlocks": [],
+      "triggers_reverse": true,
+      "story_panels": [
+        {
+          "text": "Gold tabards in the resin smoke. Incense and shotguns. They brought Faith into the comb."
+        },
+        {
+          "text": "Previous halls light red on the board. Fight back the way you came. Brood Pressure: a body dies, the other skull drinks. Static Air still kills the third spell."
+        },
+        {
+          "text": "Reach the visor. The Queen is waiting in the iris. Your kit is the one you built."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_nest_breach"
+        ],
+        "flags": {
+          "nest_breached": true
+        }
+      },
+      "coach": "voice"
+    },
+    {
+      "id": "queen",
+      "type": "boss",
+      "title": "Overlord Sskrath",
+      "blurb": "Brood Pressure. Static Air. 24 life.",
+      "map": {
+        "x": 0.12,
+        "y": 0.22
+      },
+      "requires": [],
+      "unlocks": [],
+      "boss_requires_reverse_clear": true,
+      "ai": {
+        "difficulty": "medium",
+        "name": "Overlord Sskrath",
+        "faction": "reptilians"
+      },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 24,
+      "player_deck": [
+        "reptilians_char_015",
+        "reptilians_char_015",
+        "reptilians_char_007",
+        "reptilians_char_007",
+        "reptilians_char_009",
+        "reptilians_char_009",
+        "reptilians_char_016",
+        "reptilians_char_016",
+        "reptilians_char_005",
+        "reptilians_char_005",
+        "reptilians_char_001",
+        "reptilians_char_011",
+        "reptilians_char_017",
+        "reptilians_char_008",
+        "reptilians_char_003",
+        "reptilians_spell_011",
+        "reptilians_spell_011",
+        "reptilians_spell_001",
+        "reptilians_spell_001",
+        "reptilians_spell_009",
+        "reptilians_spell_004",
+        "reptilians_spell_012",
+        "reptilians_spell_013",
+        "neutral_spell_040",
+        "reptilians_loc_007",
+        "reptilians_loc_001",
+        "neutral_char_006",
+        "neutral_char_006",
+        "neutral_char_002",
+        "neutral_char_002"
+      ],
+      "ai_deck": [
+        "reptilians_char_016",
+        "reptilians_char_016",
+        "reptilians_char_006",
+        "reptilians_char_006",
+        "reptilians_char_008",
+        "reptilians_char_008",
+        "reptilians_char_018",
+        "reptilians_char_018",
+        "reptilians_char_010",
+        "reptilians_char_010",
+        "reptilians_char_007",
+        "reptilians_char_007",
+        "reptilians_char_009",
+        "reptilians_char_009",
+        "reptilians_char_001",
+        "reptilians_char_001",
+        "reptilians_char_015",
+        "reptilians_char_015",
+        "reptilians_char_002",
+        "reptilians_char_011",
+        "reptilians_spell_011",
+        "reptilians_spell_011",
+        "reptilians_spell_001",
+        "reptilians_spell_009",
+        "reptilians_loc_001",
+        "reptilians_loc_007",
+        "neutral_char_006",
+        "neutral_char_006",
+        "neutral_char_002",
+        "neutral_spell_040"
+      ],
+      "teach": false,
+      "twist": {
+        "id": "brood_pressure",
+        "label": "Brood Pressure",
+        "description": "Every third spell dies in the air. When a character dies, the other hero gains 1 life.",
+        "match_modifiers": {
+          "negate_every_n_spells": 3,
+          "brood_pressure": true
+        }
+      },
+      "dialogue": [
+        {
+          "speaker": "The Voice",
+          "text": "She drinks every corpse. Static still kills the third spell. Break the iris. Do not feed her."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_queen",
+          "file_nest_complete"
+        ],
+        "flags": {
+          "reptilians_chapter_complete": true,
+          "board_nest_complete": true,
+          "starter_upgrade": true,
+          "reward_stub_packs": 1
+        }
+      },
+      "lesson_win": "The comb is quiet. The purge is on file.",
+      "lesson_loss": "Do not trade into walls. Stealth. Leech face. Count spells.",
+      "player_deck_mode": "run",
+      "coach": "voice"
+    }
+  ],
+  "ledger": {
+    "file_nest_arrival": {
+      "title": "File: The Comb Tightens",
+      "text": "The Slaver is down. The comb does not go quiet. The Voice goes deeper."
+    },
+    "file_venom": {
+      "title": "File: Venom",
+      "text": "Fang Brood kills a body with any damage. One bite. The rest is paperwork."
+    },
+    "file_mimic": {
+      "title": "File: Mimic",
+      "text": "It enters +2/+2 stealthed. They cannot look until it strikes."
+    },
+    "file_leech": {
+      "title": "File: Thought Tax",
+      "text": "Psionic Leech steals energy off the skull. Face is a battery."
+    },
+    "file_chamber": {
+      "title": "File: Molting Chamber",
+      "text": "Hides are assigned, then sleeved. The visor hall can be collapsed."
+    },
+    "file_nest_breach": {
+      "title": "File: Incense",
+      "text": "Templars brought Faith into the comb. Brood Pressure pays every corpse."
+    },
+    "file_queen": {
+      "title": "File: Overlord",
+      "text": "She drank the ledger. You closed the iris anyway."
+    },
+    "file_nest_complete": {
+      "title": "File: Inner Hive Reverse",
+      "text": "The comb is quiet. Psionic Hive is on file as a chapter, not a lesson."
+    },
+    "file_elevator": {
+      "title": "File: Collapsed Visor",
+      "text": "Thought Tax skipped on the way out. The kit still had to leave."
+    }
+  }
+}

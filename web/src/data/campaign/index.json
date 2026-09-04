@@ -23,7 +23,7 @@
       "id": "reptilians",
       "name": "Psionic Hive",
       "faction": "reptilians",
-      "description": "Static Air. Psionics, Stealth, and the Slaver. Opens after the Vault.",
+      "description": "The comb, then the nest. Venom, Mimic, and Brood Pressure.",
       "status": "sealed",
       "starter_board": "hive",
       "art": "/ui/campaign/hive-tease.jpg"

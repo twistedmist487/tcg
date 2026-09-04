@@ -11,11 +11,11 @@ SHIPPED
   Templars    Board 1 Vault (Hallowed Ground, Guardian)
   Templars    Board 2 Crypt Reverse + Hierophant (Liquid Assets)
   Reptilians  Board 1 Hive (Static Air, Slaver)
-  Cosmetics / field cards / Heroic per Board 1 + Crypt
+  Reptilians  Board 2 Inner Hive Reverse + Overlord Sskrath (Brood Pressure)
+  Cosmetics / field cards / Heroic per Board 1 + Crypt + Nest
   CLAIM ARCHIVE (optional Google / X bind)
 
 NEXT (in order)
-  8  Reptilians Board 2 — Inner Hive Reverse
   9  Reckless + crisis parity (Vault + Hive)
   10 The Circle Closes (crossover finale)
   11 Replay layer (NG+, constructed presets, cosmetics for Board 2)
@@ -171,4 +171,4 @@ Same bar as Hive / Vault:
 
 ## Suggested next command
 
-**Proceed with slice 8 (Inner Hive Reverse).** Crypt Reverse is the second Board 2. Nest can copy the pattern.
+**Proceed with slice 9 (Reckless + crisis parity).** Inner Hive Reverse is the third Board 2. Vault and Hive still lack City's extras.

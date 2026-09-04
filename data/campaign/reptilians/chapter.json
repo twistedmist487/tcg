@@ -4,7 +4,8 @@
   "faction": "reptilians",
   "starter_deck_id": "campaign_reptilians_hive_starter",
   "boards": [
-    "hive"
+    "hive",
+    "nest"
   ],
   "difficulties": {
     "normal": {
