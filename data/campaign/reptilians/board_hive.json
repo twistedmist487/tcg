@@ -280,7 +280,7 @@
       "blurb": "High life. Stealth. Static Air. Dominators in the dark.",
       "map": { "x": 0.92, "y": 0.28 },
       "requires": ["inner_comb"],
-      "unlocks": [],
+      "unlocks": ["abduct"],
       "ai": { "difficulty": "medium", "name": "Psionic Slaver", "faction": "reptilians" },
       "player_goes_first": true,
       "shuffle": true,
@@ -315,12 +315,55 @@
         { "text": "\"Kneel.\" The Voice is gone. There is only the grip. Steal the board back, or the hive keeps you." }
       ],
       "rewards": {
-        "ledger_ids": ["file_slaver"],
+        "ledger_ids": ["file_slaver"]
+      },
+      "lesson_win": "The visor is cracked. The dark is not empty.",
+      "lesson_loss": "Stealth first. Count spells. Face only when the visor is open.",
+      "player_deck_mode": "run",
+      "coach": "silent",
+      "dialogue": []
+    },
+    {
+      "id": "abduct",
+      "type": "crisis",
+      "title": "Abduct",
+      "blurb": "Survive 5 of your turns. Tractor dark. AI at 18 life (you do not need the kill).",
+      "map": { "x": 0.96, "y": 0.12 },
+      "requires": ["slaver"],
+      "unlocks": [],
+      "ai": { "difficulty": "medium", "name": "Tractor Crew", "faction": "templars" },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 18,
+      "ai_deck": [
+        "templars_char_009", "templars_char_002", "templars_char_012", "templars_spell_001", "templars_char_006",
+        "templars_spell_004", "templars_char_009", "templars_char_002", "templars_char_012", "templars_spell_001",
+        "templars_char_006", "templars_spell_004", "templars_char_004", "templars_char_005", "templars_char_007",
+        "templars_spell_012", "templars_loc_001", "neutral_char_007", "neutral_spell_003", "templars_char_015",
+        "templars_char_001", "templars_spell_005", "templars_char_017", "neutral_char_005", "templars_spell_011",
+        "templars_spell_002", "templars_char_013", "templars_spell_003", "templars_char_004", "templars_char_005"
+      ],
+      "crisis": { "win": "survive_turns", "turns": 5, "label": "Outlast the tractor" },
+      "teach": true,
+      "steps": [
+        {
+          "id": "survive",
+          "title": "Crisis: Survive",
+          "text": "Win condition is the clock \u2014 survive 5 of your turns. Stealth and walls first. Killing them is optional.",
+          "require": "free"
+        }
+      ],
+      "story_panels_on_enter": [
+        { "text": "The visor cracks. The comb does not go quiet. A black van at the loading dock. Gold tabards. A tractor beam that smells like ozone and incense." },
+        { "text": "\"Do not kneel.\" The Voice is a hiss. Five turns. Live. The nest will still be there." }
+      ],
+      "rewards": {
+        "ledger_ids": ["file_abduct"],
         "flags": { "board_hive_complete": true },
         "next_board": "nest"
       },
-      "lesson_win": "The visor is cracked. The nest is waiting.",
-      "lesson_loss": "Stealth first. Count spells. Face only when the visor is open.",
+      "lesson_win": "The tractor missed. The nest is waiting.",
+      "lesson_loss": "Stall with Stealth and walls. Face damage only if it keeps you alive.",
       "player_deck_mode": "run",
       "coach": "silent",
       "dialogue": []
@@ -334,6 +377,7 @@
     "file_static": { "title": "File: Static Air", "text": "Every third spell either player casts is negated. Count or die." },
     "file_comb": { "title": "File: Inner Comb", "text": "The Infiltrator is a door. The Lodge still thinks in Influence." },
     "file_slaver": { "title": "File: Slaver", "text": "The visor does not negotiate. You did." },
+    "file_abduct": { "title": "File: Abduct", "text": "Tractor dark after the visor. Sometimes the win condition is the clock, not the corpse." },
     "file_reckless": { "title": "File: Proud", "text": "You skipped the molt. The Voice noticed. The kit stayed as-issued." }
   }
 }

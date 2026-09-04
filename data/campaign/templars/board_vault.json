@@ -579,7 +579,9 @@
       "requires": [
         "inner_gate"
       ],
-      "unlocks": [],
+      "unlocks": [
+        "last_watch"
+      ],
       "ai": {
         "difficulty": "medium",
         "name": "Guardian of the Seal",
@@ -648,14 +650,100 @@
       "rewards": {
         "ledger_ids": [
           "file_guardian"
+        ]
+      },
+      "lesson_win": "The seal holds. The incense is already in the hall.",
+      "lesson_loss": "Taunt first. Heal second. Face only when the wall is gone.",
+      "player_deck_mode": "run",
+      "coach": "silent",
+      "dialogue": []
+    },
+    {
+      "id": "last_watch",
+      "type": "crisis",
+      "title": "Last Watch",
+      "blurb": "Survive 5 of your turns. Incense flood. AI at 18 life (you do not need the kill).",
+      "map": {
+        "x": 0.96,
+        "y": 0.12
+      },
+      "requires": [
+        "guardian"
+      ],
+      "unlocks": [],
+      "ai": {
+        "difficulty": "medium",
+        "name": "Incense Handler",
+        "faction": "illuminati"
+      },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 18,
+      "ai_deck": [
+        "illuminati_char_001",
+        "illuminati_char_015",
+        "illuminati_spell_013",
+        "illuminati_char_014",
+        "illuminati_spell_002",
+        "illuminati_char_001",
+        "illuminati_char_015",
+        "illuminati_spell_013",
+        "illuminati_char_014",
+        "illuminati_spell_002",
+        "illuminati_char_006",
+        "illuminati_char_010",
+        "illuminati_char_009",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_008",
+        "illuminati_spell_004",
+        "illuminati_spell_009",
+        "illuminati_char_006",
+        "illuminati_loc_006",
+        "illuminati_char_009",
+        "neutral_char_007",
+        "neutral_char_010",
+        "illuminati_char_002",
+        "illuminati_char_004",
+        "illuminati_spell_008",
+        "neutral_char_007",
+        "neutral_char_022",
+        "illuminati_spell_005",
+        "illuminati_spell_001"
+      ],
+      "crisis": {
+        "win": "survive_turns",
+        "turns": 5,
+        "label": "Hold the incense"
+      },
+      "teach": true,
+      "steps": [
+        {
+          "id": "survive",
+          "title": "Crisis: Survive",
+          "text": "Win condition is the clock \u2014 survive 5 of your turns. Taunt and heals first. Killing them is optional.",
+          "require": "free"
+        }
+      ],
+      "story_panels_on_enter": [
+        {
+          "text": "The Guardian falls. Incense floods the nave. Gold eyes in the smoke. The heist team is not leaving without a body."
+        },
+        {
+          "text": "\"Hold.\" The Chaplain's radio is a cough. Five turns. Live. The crypt will still be there."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": [
+          "file_last_watch"
         ],
         "flags": {
           "board_vault_complete": true
         },
         "next_board": "crypt"
       },
-      "lesson_win": "The seal holds. You held it.",
-      "lesson_loss": "Taunt first. Heal second. Face only when the wall is gone.",
+      "lesson_win": "The incense cleared. The crypt is waiting.",
+      "lesson_loss": "Stall with Taunt and healing. Face damage only if it keeps you alive.",
       "player_deck_mode": "run",
       "coach": "silent",
       "dialogue": []
@@ -689,6 +777,10 @@
     "file_guardian": {
       "title": "File: Guardian",
       "text": "The Seal does not negotiate. You did."
+    },
+    "file_last_watch": {
+      "title": "File: Last Watch",
+      "text": "Incense after the seal. Sometimes the win condition is the clock, not the corpse."
     },
     "file_reckless": {
       "title": "File: Proud",
