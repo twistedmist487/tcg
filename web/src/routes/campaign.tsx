@@ -40,7 +40,9 @@ function chapterSealed(id: string, archive: { chapterCleared: boolean; vaultClea
 function resumeLabel(boardId: string | undefined) {
   if (boardId === "hq") return "RESUME LODGE";
   if (boardId === "vault") return "RESUME VAULT";
+  if (boardId === "crypt") return "RESUME CRYPT";
   if (boardId === "hive") return "RESUME HIVE";
+  if (boardId === "nest") return "RESUME NEST";
   return "RESUME CITY BOARD";
 }
 
@@ -91,7 +93,7 @@ function CampaignHub() {
             />
             <p className="max-w-xl font-mono text-[12px] leading-relaxed text-muted">
               Walk a chapter. Salvage the kit. Field cards land in Collection. Sleeves and plates unlock in the
-              Locker. First Contact stays optional. Close The Inner Circle to unseal the Vault. Close the Vault to unseal the Hive.
+              Locker. First Contact stays optional. Close The Inner Circle to unseal the Vault. Close the Vault to open the Crypt. Close the Crypt and the Hive listens. Close the Hive and the Nest tightens. Skip a contact for a greedy title.
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -122,9 +124,11 @@ function CampaignHub() {
                 const live = Boolean(archive.campaignRun) && archive.campaignRun?.chapterId === ch.id;
                 const done =
                   (ch.id === "illuminati" && archive.chapterCleared) ||
-                  (ch.id === "templars" && archive.vaultCleared) ||
-                  (ch.id === "reptilians" && archive.hiveCleared);
+                  (ch.id === "templars" && archive.cryptCleared) ||
+                  (ch.id === "reptilians" && archive.nestCleared);
                 const city = ch.id === "illuminati" && archive.cityCleared && !archive.chapterCleared;
+                const vaultOpen = ch.id === "templars" && archive.vaultCleared && !archive.cryptCleared;
+                const hiveOpen = ch.id === "reptilians" && archive.hiveCleared && !archive.nestCleared;
                 return (
                   <button
                     key={ch.id}
@@ -172,7 +176,11 @@ function CampaignHub() {
                                 : "RUN AGAIN"
                               : city
                                 ? "CITY ON FILE · NEW RUN"
-                                : diff === "heroic"
+                                : vaultOpen
+                                ? "VAULT ON FILE · CRYPT UNSEALED"
+                                : hiveOpen
+                                  ? "HIVE ON FILE · NEST UNSEALED"
+                                  : diff === "heroic"
                                   ? "BEGIN HEROIC"
                                   : ch.id === "templars"
                                     ? "BEGIN VAULT"
@@ -226,7 +234,7 @@ function InvestigationBoard({ run }: { run: CampaignRun }) {
   useEffect(() => {
     if (!board) return;
     if (run.phase !== "forward") return;
-    if (run.boardId !== "hq" && run.boardId !== "vault" && run.boardId !== "hive") return;
+    if (run.boardId !== "hq" && run.boardId !== "vault" && run.boardId !== "hive" && run.boardId !== "crypt" && run.boardId !== "nest") return;
     if (run.cleared.includes(board.start_node)) return;
     const start = getNode(board, board.start_node);
     if (start?.type === "story") {
@@ -234,6 +242,18 @@ function InvestigationBoard({ run }: { run: CampaignRun }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.boardId, run.phase, board?.start_node]);
+
+  useEffect(() => {
+    if (!board) return;
+    if (run.phase !== "forward") return;
+    const open = board.nodes.filter((n) => nodeStatus(run, n, board) === "open");
+    if (open.length !== 1) return;
+    const next = open[0]!;
+    setSelectedId((cur) => cur ?? next.id);
+    if (next.type !== "crisis" || !next.story_panels_on_enter?.length) return;
+    setStory((cur) => cur ?? { node: next, panels: next.story_panels_on_enter!, after: "match" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [run.boardId, run.phase, run.cleared.join("|")]);
 
   if (!board) {
     return (
@@ -463,10 +483,16 @@ function InvestigationBoard({ run }: { run: CampaignRun }) {
       {ledgerOpen && (
         <LedgerOverlay run={run} onClose={() => setLedgerOpen(false)} />
       )}
+      {run.boardId === "vault" && run.phase === "done" && !story && !safe && (
+        <VaultCompleteBanner onEnter={() => archive.enterCampaignCrypt()} />
+      )}
+      {run.boardId === "hive" && run.phase === "done" && !story && !safe && (
+        <HiveCompleteBanner onEnter={() => archive.enterCampaignNest()} />
+      )}
       {run.phase === "city_complete" && !story && !safe && (
         <CityCompleteBanner onEnter={() => archive.enterCampaignHq()} />
       )}
-      {run.phase === "done" && !story && !safe && <ChapterCompleteBanner />}
+      {run.phase === "done" && run.boardId !== "vault" && run.boardId !== "hive" && !story && !safe && <ChapterCompleteBanner />}
     </TerminalFrame>
   );
 }
@@ -576,7 +602,7 @@ function SafehouseOverlay({
         <img src={storyArtFor(node)} alt="" className="h-40 w-full object-cover" />
         <div className="p-5">
           <div className="font-mono text-[10px] tracking-[0.2em] text-phosphor">
-            {armory ? "BLACK BUDGET" : node.id === "vestry" ? "VESTRY" : node.id === "molt" ? "MOLT" : "SAFE DROP"}
+            {armory ? "BLACK BUDGET" : node.id === "vestry" ? "VESTRY" : node.id === "molt" ? "MOLT" : node.id === "relic_vault" ? "RELIC VAULT" : node.id === "queen_chamber" ? "MOLTING CHAMBER" : "SAFE DROP"}
           </div>
           <h2 className="mt-1 font-ui text-2xl font-semibold text-ink">{node.title}</h2>
           <p className="mt-2 font-mono text-[13px] leading-relaxed text-muted">{node.safehouse?.text}</p>
@@ -661,32 +687,101 @@ function CityCompleteBanner({ onEnter }: { onEnter: () => void }) {
   );
 }
 
+function VaultCompleteBanner({ onEnter }: { onEnter: () => void }) {
+  return (
+    <div className="absolute bottom-4 left-1/2 z-20 w-[min(520px,92%)] -translate-x-1/2 rounded-md bg-void/90 p-3 outline outline-1 outline-phosphor/40">
+      <div className="font-mono text-[10px] tracking-[0.2em] text-phosphor">VAULT CLEARED</div>
+      <p className="mt-1 font-mono text-[12px] leading-relaxed text-ink">
+        The seal holds. Callsign OATHKEEPER is on file. The crypt is open. The Chaplain already has the lamp.
+      </p>
+      <button
+        type="button"
+        className="metal-btn-live mt-3 min-h-11 w-full rounded-md font-ui tracking-[0.16em] text-phosphor"
+        onClick={onEnter}
+      >
+        ENTER THE CRYPT
+      </button>
+    </div>
+  );
+}
+
+function HiveCompleteBanner({ onEnter }: { onEnter: () => void }) {
+  return (
+    <div className="absolute bottom-4 left-1/2 z-20 w-[min(520px,92%)] -translate-x-1/2 rounded-md bg-void/90 p-3 outline outline-1 outline-phosphor/40">
+      <div className="font-mono text-[10px] tracking-[0.2em] text-phosphor">HIVE CLEARED</div>
+      <p className="mt-1 font-mono text-[12px] leading-relaxed text-ink">
+        The visor is cracked. Callsign HIVEBORN is on file. The nest is open. The Voice is already deeper.
+      </p>
+      <button
+        type="button"
+        className="metal-btn-live mt-3 min-h-11 w-full rounded-md font-ui tracking-[0.16em] text-phosphor"
+        onClick={onEnter}
+      >
+        ENTER THE NEST
+      </button>
+    </div>
+  );
+}
+
 function ChapterCompleteBanner() {
   const archive = useArchive();
   const nav = useNavigate();
   const run = archive.campaignRun;
   const heroic = run?.difficulty === "heroic";
-  const vault = run?.chapterId === "templars";
-  const hive = run?.chapterId === "reptilians";
+  const crypt = run?.boardId === "crypt";
+  const vault = run?.chapterId === "templars" && !crypt;
+  const nest = run?.boardId === "nest";
+  const hive = run?.chapterId === "reptilians" && !nest;
+  const oathbreaker = Boolean(run?.flags.skipped_vestry);
+  const skinless = Boolean(run?.flags.skipped_molt);
+  const reckless = Boolean(run?.flags.skipped_safe_drop);
   return (
     <div className="absolute inset-0 z-30 flex items-end justify-center bg-void/55 p-4 sm:items-center">
       <div className="w-full max-w-lg rounded-md bg-void/95 p-4 outline outline-1 outline-phosphor/40">
         <div className="font-mono text-[10px] tracking-[0.2em] text-phosphor">
-          {hive ? "HIVE — QUIET" : vault ? "VAULT — SECURE" : "INNER CIRCLE — CLOSED"}
+          {nest
+            ? "NEST — QUIET"
+            : hive
+              ? "HIVE — SECURE"
+              : crypt
+                ? "CRYPT — QUIET"
+                : vault
+                  ? "VAULT — SECURE"
+                  : "INNER CIRCLE — CLOSED"}
           {heroic ? " · HEROIC" : ""}
         </div>
         <p className="mt-2 font-mono text-[13px] leading-relaxed text-ink">
-          {hive
+          {nest
             ? heroic
-              ? "The visor is cracked on Heroic. Scale Sleeve, Hive Plate, and MINDKILLER are in the Locker. The archive is quiet."
-              : "The visor is cracked. Scale Sleeve and HIVEBORN are in the Locker. Run Heroic for Mindkiller. The archive is quiet."
-            : vault
+              ? skinless
+                ? "The comb is quiet on Heroic. Nest Sleeve, Nest Plate, QUEENKILLER, and SKINLESS are in the Locker. The archive is quiet."
+                : "The comb is quiet on Heroic. Nest Sleeve, Nest Plate, and QUEENKILLER are in the Locker. The archive is quiet."
+              : skinless
+                ? "The comb is quiet. Nest Sleeve, COMB WRIGHT, and SKINLESS are in the Locker. Run Heroic for Queenkiller. The archive is quiet."
+                : "The comb is quiet. Nest Sleeve and COMB WRIGHT are in the Locker. Run Heroic for Queenkiller. The archive is quiet."
+            : hive
+            ? heroic
+              ? "The visor is cracked on Heroic. Scale Sleeve, Hive Plate, and MINDKILLER are in the Locker. The nest is waiting."
+              : "The visor is cracked. Scale Sleeve and HIVEBORN are in the Locker. Run Heroic for Mindkiller. The nest is waiting."
+            : crypt
               ? heroic
-                ? "The seal holds on Heroic. Reliquary Sleeve, Faith Plate, and SEAL WARDEN are in the Locker. The Hive is listening."
-                : "The seal holds. Reliquary Sleeve and OATHKEEPER are in the Locker. Run Heroic for Seal Warden. The Hive is listening."
-              : heroic
-                ? "HQ holds. Field cards are in Collection. Grandmaster Foil is yours. The Vault of Faith is open."
-                : "HQ holds. Field cards are in Collection. Sleeves and plates unlocked in the Locker. The Vault of Faith is open. Run Heroic for the gold foil."}
+                ? oathbreaker
+                  ? "The crypt is quiet on Heroic. Ossuary Sleeve, Crypt Plate, SEALBREAKER, and OATHBREAKER are in the Locker. The Hive is listening."
+                  : "The crypt is quiet on Heroic. Ossuary Sleeve, Crypt Plate, and SEALBREAKER are in the Locker. The Hive is listening."
+                : oathbreaker
+                  ? "The crypt is quiet. Ossuary Sleeve, CRYPT WRIGHT, and OATHBREAKER are in the Locker. Run Heroic for Sealbreaker. The Hive is listening."
+                  : "The crypt is quiet. Ossuary Sleeve and CRYPT WRIGHT are in the Locker. Run Heroic for Sealbreaker. The Hive is listening."
+              : vault
+                ? heroic
+                  ? "The seal holds on Heroic. Reliquary Sleeve, Faith Plate, and SEAL WARDEN are in the Locker. The Hive is listening."
+                  : "The seal holds. Reliquary Sleeve and OATHKEEPER are in the Locker. Run Heroic for Seal Warden. The Hive is listening."
+                : heroic
+                  ? reckless
+                    ? "HQ holds. Field cards are in Collection. Grandmaster Foil and RECKLESS are yours. The Vault of Faith is open."
+                    : "HQ holds. Field cards are in Collection. Grandmaster Foil is yours. The Vault of Faith is open."
+                  : reckless
+                    ? "HQ holds. Field cards are in Collection. Sleeves, plates, and RECKLESS unlocked in the Locker. The Vault of Faith is open. Run Heroic for the gold foil."
+                    : "HQ holds. Field cards are in Collection. Sleeves and plates unlocked in the Locker. The Vault of Faith is open. Run Heroic for the gold foil."}
         </p>
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <button
@@ -701,13 +796,13 @@ function ChapterCompleteBanner() {
             className="metal-btn min-h-11 rounded-md font-ui tracking-[0.16em]"
             onClick={() =>
               archive.setCampaignRun(
-                newCampaignRun(hive ? "reptilians" : vault ? "templars" : "illuminati", heroic ? "normal" : "heroic"),
+                newCampaignRun(hive || nest ? "reptilians" : vault || crypt ? "templars" : "illuminati", heroic ? "normal" : "heroic"),
               )
             }
           >
             {heroic ? "RUN NORMAL" : "RUN HEROIC"}
           </button>
-          {vault && (
+          {(vault || crypt) && (
             <button
               type="button"
               className="metal-btn-live min-h-11 rounded-md font-ui tracking-[0.16em] text-phosphor sm:col-span-2"
@@ -716,7 +811,7 @@ function ChapterCompleteBanner() {
               ENTER THE HIVE
             </button>
           )}
-          {!vault && !hive && (
+          {!vault && !hive && !crypt && !nest && (
             <button
               type="button"
               className="metal-btn-live min-h-11 rounded-md font-ui tracking-[0.16em] text-phosphor sm:col-span-2"

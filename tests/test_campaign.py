@@ -214,6 +214,16 @@ def test_safe_drop_keep_walking():
     assert flags["skipped_safe_drop"] is True
 
 
+def test_vestry_and_molt_skip_set_distinct_flags():
+    deck = starter_deck_ids("campaign_illuminati_city_starter")
+    _, vestry = apply_safehouse_pick(deck, {"id": "walk", "action": "skip"}, "vestry")
+    assert vestry["skipped_vestry"] is True
+    assert "skipped_safe_drop" not in vestry
+    _, molt = apply_safehouse_pick(deck, {"id": "walk", "action": "skip"}, "molt")
+    assert molt["skipped_molt"] is True
+    assert "skipped_vestry" not in molt
+    assert "skipped_safe_drop" not in molt
+
 def test_armory_inject_and_puppet_skip():
     deck = starter_deck_ids("campaign_illuminati_city_starter")
     pick = {

@@ -664,8 +664,8 @@
       "title": "Last Watch",
       "blurb": "Survive 5 of your turns. Incense flood. AI at 18 life (you do not need the kill).",
       "map": {
-        "x": 0.96,
-        "y": 0.12
+        "x": 0.78,
+        "y": 0.16
       },
       "requires": [
         "guardian"

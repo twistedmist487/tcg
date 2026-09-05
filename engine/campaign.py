@@ -129,13 +129,17 @@ def prune_card(deck: list[str], card_id: str) -> list[str]:
     return out
 
 
-def apply_safehouse_pick(deck: list[str], pick: dict[str, Any]) -> tuple[list[str], dict[str, Any]]:
-    """Apply a Safe Drop / Armory pick to the run deck.
+def apply_safehouse_pick(
+    deck: list[str],
+    pick: dict[str, Any],
+    node_id: str | None = None,
+) -> tuple[list[str], dict[str, Any]]:
+    """Apply a Safe Drop / Vestry / Molt / Armory pick to the run deck.
 
     Pick actions:
       add / inject — add copies, trim to 30
       prune — remove one copy of prune_id
-      skip — no deck change
+      skip — no deck change (Vestry → skipped_vestry, Molt → skipped_molt)
 
     Returns (new_deck, flag_updates).
     """
@@ -159,7 +163,13 @@ def apply_safehouse_pick(deck: list[str], pick: dict[str, Any]) -> tuple[list[st
         deck = prune_card(deck, card_id)
         flags["last_deck_change"] = f"pruned:{card_id}"
     elif action == "skip":
-        flags["skipped_safe_drop"] = True
+        nid = (node_id or pick.get("node") or pick.get("node_id") or "").lower()
+        if nid == "vestry":
+            flags["skipped_vestry"] = True
+        elif nid == "molt":
+            flags["skipped_molt"] = True
+        else:
+            flags["skipped_safe_drop"] = True
         flags["last_deck_change"] = "skipped"
     else:
         raise ValueError(f"Unknown safehouse action: {action!r}")
