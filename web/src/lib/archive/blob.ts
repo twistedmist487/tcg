@@ -29,8 +29,15 @@ export type ArchiveBlob = {
   recklessCleared: boolean;
   vaultCleared: boolean;
   vaultHeroicCleared: boolean;
+  vaultRecklessCleared: boolean;
   hiveCleared: boolean;
   hiveHeroicCleared: boolean;
+  hiveRecklessCleared: boolean;
+  cryptCleared: boolean;
+  cryptHeroicCleared: boolean;
+  nestCleared: boolean;
+  nestHeroicCleared: boolean;
+  circleCleared: boolean;
   campaignRun: CampaignRun | null;
 };
 
@@ -41,8 +48,15 @@ const FLAG_KEYS = [
   "recklessCleared",
   "vaultCleared",
   "vaultHeroicCleared",
+  "vaultRecklessCleared",
   "hiveCleared",
   "hiveHeroicCleared",
+  "hiveRecklessCleared",
+  "cryptCleared",
+  "cryptHeroicCleared",
+  "nestCleared",
+  "nestHeroicCleared",
+  "circleCleared",
 ] as const;
 
 function num(v: unknown, fallback: number) {
@@ -135,8 +149,15 @@ export function toArchiveBlob(raw: unknown): ArchiveBlob {
     recklessCleared: bool(s.recklessCleared),
     vaultCleared: bool(s.vaultCleared),
     vaultHeroicCleared: bool(s.vaultHeroicCleared),
+    vaultRecklessCleared: bool(s.vaultRecklessCleared),
     hiveCleared: bool(s.hiveCleared),
     hiveHeroicCleared: bool(s.hiveHeroicCleared),
+    hiveRecklessCleared: bool(s.hiveRecklessCleared),
+    cryptCleared: bool(s.cryptCleared),
+    cryptHeroicCleared: bool(s.cryptHeroicCleared),
+    nestCleared: bool(s.nestCleared),
+    nestHeroicCleared: bool(s.nestHeroicCleared),
+    circleCleared: bool(s.circleCleared),
     campaignRun,
   };
 }
@@ -168,6 +189,7 @@ function mergeCollection(a: Record<string, number>, b: Record<string, number>) {
 }
 
 function chapterRank(id: string | undefined) {
+  if (id === "circle") return 4;
   if (id === "reptilians") return 3;
   if (id === "templars") return 2;
   if (id === "illuminati") return 1;
@@ -220,8 +242,15 @@ export function mergeArchives(local: ArchiveBlob, cloud: ArchiveBlob): ArchiveBl
     recklessCleared: local.recklessCleared || cloud.recklessCleared,
     vaultCleared: local.vaultCleared || cloud.vaultCleared,
     vaultHeroicCleared: local.vaultHeroicCleared || cloud.vaultHeroicCleared,
+    vaultRecklessCleared: local.vaultRecklessCleared || cloud.vaultRecklessCleared,
     hiveCleared: local.hiveCleared || cloud.hiveCleared,
     hiveHeroicCleared: local.hiveHeroicCleared || cloud.hiveHeroicCleared,
+    hiveRecklessCleared: local.hiveRecklessCleared || cloud.hiveRecklessCleared,
+    cryptCleared: local.cryptCleared || cloud.cryptCleared,
+    cryptHeroicCleared: local.cryptHeroicCleared || cloud.cryptHeroicCleared,
+    nestCleared: local.nestCleared || cloud.nestCleared,
+    nestHeroicCleared: local.nestHeroicCleared || cloud.nestHeroicCleared,
+    circleCleared: local.circleCleared || cloud.circleCleared,
     campaignRun: mergeRun(local.campaignRun, cloud.campaignRun),
   };
 }

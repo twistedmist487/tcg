@@ -27,6 +27,15 @@
       "status": "sealed",
       "starter_board": "hive",
       "art": "/ui/campaign/hive-tease.jpg"
+    },
+    {
+      "id": "circle",
+      "name": "The Circle Closes",
+      "faction": "archive",
+      "description": "Three coaches. One file. Bring the kit you finished. Then the Archive.",
+      "status": "sealed",
+      "starter_board": "circle",
+      "art": "/ui/campaign/circle-tease.jpg"
     }
   ]
 }

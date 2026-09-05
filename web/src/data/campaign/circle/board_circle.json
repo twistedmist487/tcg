@@ -1,0 +1,181 @@
+{
+  "id": "circle",
+  "name": "The Circle Closes",
+  "chapter_id": "circle",
+  "start_node": "circle_arrival",
+  "map_hint": "Three coaches. One file. Bring the kit you finished. The Archive already knows the top of your deck.",
+  "nodes": [
+    {
+      "id": "circle_arrival",
+      "type": "story",
+      "title": "Three Coaches",
+      "blurb": "Ops, the Chaplain, and the Voice in one room. They hate this.",
+      "map": { "x": 0.14, "y": 0.54 },
+      "requires": [],
+      "unlocks": ["hired_guns"],
+      "story_panels": [
+        {
+          "text": "Ops has a room that is not on any floor plan. The Chaplain is already standing. The Voice is a hiss in the vent. None of them look at each other."
+        },
+        {
+          "text": "\"You closed three wings,\" Ops says. \"Congratulations. The file still has a hole.\" The Chaplain: \"This is pride.\" The Voice: \"This is molt.\" They agree on nothing except you."
+        },
+        {
+          "text": "A Network cell is in the hall. After that, one card from each pile. Then the Archive itself — thirty life, silent, the top of your deck face-up. Live."
+        }
+      ],
+      "rewards": { "ledger_ids": ["file_three_coaches"] },
+      "coach": "ops"
+    },
+    {
+      "id": "hired_guns",
+      "type": "combat",
+      "title": "Hired Guns",
+      "blurb": "Mixed Network list. No teach. AI at 16 life. This is a test.",
+      "map": { "x": 0.38, "y": 0.58 },
+      "requires": ["circle_arrival"],
+      "unlocks": ["tri_armory"],
+      "ai": { "difficulty": "medium", "name": "Courier Cell", "faction": "illuminati" },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 16,
+      "ai_deck": [
+        "neutral_char_021", "neutral_char_029", "neutral_char_001", "neutral_spell_018", "neutral_char_059",
+        "neutral_char_021", "neutral_char_029", "neutral_char_001", "neutral_spell_018", "neutral_char_059",
+        "neutral_spell_028", "neutral_spell_022", "neutral_spell_013", "neutral_char_040", "neutral_char_033",
+        "neutral_loc_010", "neutral_char_032", "neutral_spell_017", "neutral_char_050", "neutral_spell_027",
+        "neutral_char_023", "neutral_spell_028", "neutral_spell_022", "neutral_spell_013", "neutral_char_040",
+        "neutral_char_033", "neutral_loc_010", "neutral_char_032", "neutral_spell_017", "neutral_char_007"
+      ],
+      "teach": false,
+      "dialogue": [
+        { "speaker": "Ops", "text": "Freelancers. Anyone can hire them. Do not teach them your kit." }
+      ],
+      "rewards": { "ledger_ids": ["file_hired"] },
+      "player_deck_mode": "run",
+      "coach": "ops"
+    },
+    {
+      "id": "tri_armory",
+      "type": "safehouse",
+      "title": "Three Piles",
+      "blurb": "One card from each faction's field pool.",
+      "map": { "x": 0.62, "y": 0.46 },
+      "requires": ["hired_guns"],
+      "unlocks": ["the_archive"],
+      "safehouse": {
+        "text": "Three envelopes on the table. Lodge, Faith, Comb. Take one. The Archive does not care which pile you insult.",
+        "pick_one_of": [
+          {
+            "id": "illuminati_char_005",
+            "label": "Lodge pile",
+            "blurb": "Puppet Master. Take control of a small body. One spare card is cut to stay at 30.",
+            "action": "add",
+            "copies": 1,
+            "trim": ["neutral_char_028", "neutral_spell_022", "neutral_char_001"]
+          },
+          {
+            "id": "templars_char_007",
+            "label": "Faith pile",
+            "blurb": "Warden of Secrets. Taunt that draws on death. One spare card is cut to stay at 30.",
+            "action": "add",
+            "copies": 1,
+            "trim": ["templars_char_015", "neutral_spell_003", "templars_spell_011"]
+          },
+          {
+            "id": "reptilians_char_018",
+            "label": "Comb pile",
+            "blurb": "Apex Stalker. Stealth. Enraged. One spare card is cut to stay at 30.",
+            "action": "add",
+            "copies": 1,
+            "trim": ["reptilians_char_007", "reptilians_spell_004", "neutral_spell_040"]
+          }
+        ]
+      },
+      "rewards": { "ledger_ids": ["file_three_piles"] },
+      "coach": "silent",
+      "dialogue": [
+        { "speaker": "The Archive", "text": "Choose. The file will remember the envelope you opened." }
+      ]
+    },
+    {
+      "id": "the_archive",
+      "type": "boss",
+      "title": "The Archive",
+      "blurb": "Thirty life. Silent. Black Room — your top card is face-up. No teach.",
+      "map": { "x": 0.86, "y": 0.32 },
+      "requires": ["tri_armory"],
+      "unlocks": [],
+      "ai": { "difficulty": "hard", "name": "The Archive", "faction": "illuminati" },
+      "player_goes_first": true,
+      "shuffle": true,
+      "ai_starting_life": 30,
+      "ai_deck": [
+        "illuminati_char_001", "illuminati_char_001",
+        "illuminati_spell_001", "illuminati_spell_001",
+        "illuminati_char_015", "illuminati_char_006",
+        "illuminati_spell_002", "illuminati_spell_013",
+        "templars_char_009", "templars_char_009",
+        "templars_char_002", "templars_char_004",
+        "templars_char_007", "templars_spell_001",
+        "reptilians_char_009", "reptilians_char_009",
+        "reptilians_char_001", "reptilians_char_015",
+        "reptilians_spell_011", "reptilians_char_006",
+        "neutral_char_007", "neutral_char_007",
+        "neutral_char_010", "neutral_spell_003",
+        "illuminati_char_008", "illuminati_loc_006",
+        "templars_loc_001", "reptilians_loc_001",
+        "neutral_char_031", "illuminati_char_018"
+      ],
+      "twist": {
+        "id": "black_room",
+        "label": "Black Room",
+        "description": "The top card of your deck is face-up. The Archive already knows what you draw.",
+        "match_modifiers": { "reveal_top_card": true }
+      },
+      "teach": false,
+      "story_panels_on_enter": [
+        {
+          "text": "The door does not open. It was never closed. A phosphor lamp over a steel table. Your deck is already face-up on it."
+        },
+        {
+          "text": "No coach on the radio. Thirty life. The file has been waiting since City."
+        }
+      ],
+      "rewards": {
+        "ledger_ids": ["file_archive", "file_circle_closed"],
+        "flags": {
+          "board_circle_complete": true,
+          "circle_chapter_complete": true
+        }
+      },
+      "lesson_win": "The Circle closes. ARCHIVE_WALKER is on file. The spine is quiet.",
+      "lesson_loss": "The top card is not a secret. Play what it gives you. Thirty life is a stall, not a race.",
+      "player_deck_mode": "run",
+      "coach": "silent",
+      "dialogue": []
+    }
+  ],
+  "ledger": {
+    "file_three_coaches": {
+      "title": "File: Three Coaches",
+      "text": "Ops called the meeting. The Chaplain brought a lamp. The Voice came as a hiss. They still do not like each other."
+    },
+    "file_hired": {
+      "title": "File: Hired Guns",
+      "text": "The Network works for whoever pays. Tonight they worked for the hole in the file."
+    },
+    "file_three_piles": {
+      "title": "File: Three Piles",
+      "text": "Lodge, Faith, Comb. One envelope. The Archive logged the choice."
+    },
+    "file_archive": {
+      "title": "File: The Archive",
+      "text": "Thirty life. Top card face-up. No coach. The file does not negotiate."
+    },
+    "file_circle_closed": {
+      "title": "File: The Circle Closes",
+      "text": "City, Vault, Hive, Crypt, Nest. Then this room. ARCHIVE_WALKER is the name the file kept."
+    }
+  }
+}

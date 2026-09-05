@@ -4,8 +4,12 @@ import cityBoardJson from "@/data/campaign/illuminati/board_city.json";
 import hqBoardJson from "@/data/campaign/illuminati/board_hq.json";
 import templarsChapter from "@/data/campaign/templars/chapter.json";
 import vaultBoardJson from "@/data/campaign/templars/board_vault.json";
+import cryptBoardJson from "@/data/campaign/templars/board_crypt.json";
 import reptiliansChapter from "@/data/campaign/reptilians/chapter.json";
 import hiveBoardJson from "@/data/campaign/reptilians/board_hive.json";
+import nestBoardJson from "@/data/campaign/reptilians/board_nest.json";
+import circleChapter from "@/data/campaign/circle/chapter.json";
+import circleBoardJson from "@/data/campaign/circle/board_circle.json";
 import { expandDeck, getCard } from "./catalog";
 import rawDecks from "@/data/decks.json";
 import type {
@@ -48,7 +52,10 @@ export const CAMPAIGN_CHAPTERS = (
 const CITY_BOARD = cityBoardJson as CampaignBoard;
 const HQ_BOARD = hqBoardJson as CampaignBoard;
 const VAULT_BOARD = vaultBoardJson as CampaignBoard;
+const CRYPT_BOARD = cryptBoardJson as CampaignBoard;
 const HIVE_BOARD = hiveBoardJson as CampaignBoard;
+const NEST_BOARD = nestBoardJson as CampaignBoard;
+const CIRCLE_BOARD = circleBoardJson as CampaignBoard;
 
 type ChapterMeta = {
   id: string;
@@ -62,13 +69,19 @@ export function loadChapter(chapterId: string) {
   if (chapterId === "templars") {
     return {
       ...(templarsChapter as ChapterMeta),
-      board_data: { vault: VAULT_BOARD } as Record<string, CampaignBoard>,
+      board_data: { vault: VAULT_BOARD, crypt: CRYPT_BOARD } as Record<string, CampaignBoard>,
     };
   }
   if (chapterId === "reptilians") {
     return {
       ...(reptiliansChapter as ChapterMeta),
-      board_data: { hive: HIVE_BOARD } as Record<string, CampaignBoard>,
+      board_data: { hive: HIVE_BOARD, nest: NEST_BOARD } as Record<string, CampaignBoard>,
+    };
+  }
+  if (chapterId === "circle") {
+    return {
+      ...(circleChapter as ChapterMeta),
+      board_data: { circle: CIRCLE_BOARD } as Record<string, CampaignBoard>,
     };
   }
   if (chapterId !== "illuminati") return null;
@@ -152,6 +165,7 @@ export function pruneCardFromDeck(deck: string[], cardId: string): string[] {
 export function applySafehousePick(
   deck: string[],
   pick: SafehousePick,
+  nodeId?: string,
 ): {
   deck: string[];
   flags: Record<string, boolean | string>;
@@ -171,7 +185,9 @@ export function applySafehousePick(
     next = pruneCardFromDeck(next, pick.prune_id || pick.id);
     flags.last_deck_change = `pruned:${pick.prune_id || pick.id}`;
   } else if (action === "skip") {
-    flags.skipped_safe_drop = true;
+    if (nodeId === "vestry") flags.skipped_vestry = true;
+    else if (nodeId === "molt") flags.skipped_molt = true;
+    else flags.skipped_safe_drop = true;
     flags.last_deck_change = "skipped";
     ledgerExtra.push("file_reckless");
   }
@@ -194,6 +210,7 @@ export function seedTeachFront(deck: string[], seedIds: string[]): string[] {
 
 export function campaignCoachId(run: CampaignRun | null, node?: CampaignNode): "recruiter" | "ops" | "silent" | "chaplain" | "voice" {
   if (node?.coach === "silent") return "silent";
+  if (run?.chapterId === "circle") return node?.coach === "voice" || node?.coach === "chaplain" ? node.coach : "ops";
   if (node?.coach === "voice" || run?.chapterId === "reptilians") return "voice";
   if (node?.coach === "chaplain" || run?.chapterId === "templars") return "chaplain";
   if (run?.flags.recruiter_dead || run?.boardId === "hq") return "ops";
@@ -240,7 +257,7 @@ export function nodeStatus(run: CampaignRun, node: CampaignNode, board: Campaign
   const skip = run.flags.skip_reverse_node;
 
   if (node.boss_requires_reverse_clear) {
-    if (run.flags.illuminati_chapter_complete || run.phase === "done") return "cleared";
+    if (run.flags.illuminati_chapter_complete || run.flags.templars_chapter_complete || run.flags.reptilians_chapter_complete || run.flags.circle_chapter_complete || run.phase === "done") return "cleared";
     if (run.phase === "boss" || (run.phase === "reverse" && reverseAllClear(run, board))) return "open";
     return "locked";
   }
@@ -302,7 +319,7 @@ export function applyNodeClear(run: CampaignRun, node: CampaignNode, board: Camp
     if (reverseAllClear(next, board)) next.phase = "boss";
   }
 
-  if (next.flags.illuminati_chapter_complete || next.flags.templars_chapter_complete || next.flags.reptilians_chapter_complete) next.phase = "done";
+  if (next.flags.illuminati_chapter_complete || next.flags.templars_chapter_complete || next.flags.reptilians_chapter_complete || next.flags.circle_chapter_complete) next.phase = "done";
 
   if (rewards.next_board && rewards.next_board !== next.boardId) {
     next = {
@@ -329,8 +346,38 @@ export function enterHq(run: CampaignRun): CampaignRun {
   };
 }
 
+export function enterCrypt(run: CampaignRun): CampaignRun {
+  const flags: Record<string, boolean | string> = { ...run.flags, board_vault_complete: true };
+  delete flags.templars_chapter_complete;
+  return {
+    ...run,
+    boardId: "crypt",
+    phase: "forward",
+    cleared: [],
+    reverseCleared: [],
+    currentNodeId: null,
+    flags,
+  };
+}
+
+export function enterNest(run: CampaignRun): CampaignRun {
+  const flags: Record<string, boolean | string> = { ...run.flags, board_hive_complete: true };
+  delete flags.reptilians_chapter_complete;
+  return {
+    ...run,
+    boardId: "nest",
+    phase: "forward",
+    cleared: [],
+    reverseCleared: [],
+    currentNodeId: null,
+    flags,
+  };
+}
+
 export function storyPanelsFor(run: CampaignRun, node: CampaignNode): StoryPanel[] {
-  if (run.flags.skipped_safe_drop && node.story_panels_reckless?.length) return node.story_panels_reckless;
+  const reckless =
+    Boolean(run.flags.skipped_safe_drop) || Boolean(run.flags.skipped_vestry) || Boolean(run.flags.skipped_molt);
+  if (reckless && node.story_panels_reckless?.length) return node.story_panels_reckless;
   return node.story_panels ?? [{ text: node.blurb }];
 }
 
@@ -359,19 +406,34 @@ export function mapLinks(board: CampaignBoard, run: CampaignRun): { from: Campai
 export function boardArt(boardId: string) {
   if (boardId === "hq") return "/ui/campaign/hq-board.jpg";
   if (boardId === "vault") return "/ui/campaign/vault-board.jpg";
+  if (boardId === "crypt") return "/ui/campaign/crypt-board.jpg";
   if (boardId === "hive") return "/ui/campaign/hive-board.jpg";
+  if (boardId === "nest") return "/ui/campaign/nest-board.jpg";
+  if (boardId === "circle") return "/ui/campaign/circle-board.jpg";
   return "/ui/campaign/city-board.jpg";
 }
 
 export function boardHint(run: CampaignRun, board: CampaignBoard) {
   if (run.phase === "reverse") {
+    if (board.id === "nest") return "Fight back through the comb. Brood Pressure drinks every corpse. Static Air is live. Your kit is the one you built.";
+    if (board.id === "crypt") return "Fight back through the ossuary. Liquid Assets pays every discard. Your kit is the one you built.";
+    if (board.id === "hive") return "Fight back through the comb. Static Air is live. Your kit is the one you built.";
     return "Fight back through the halls. Righteous Fortitude is active. Your kit is the one you built.";
   }
-  if (run.phase === "boss") return "The Grandmaster holds the entrance. Ops is on the radio.";
+  if (run.phase === "boss") {
+    if (board.id === "circle") return "The Archive is waiting. Black Room. The top of your deck is already known.";
+    if (board.id === "nest") return "The Queen holds the iris. The Voice is on the radio.";
+    if (board.id === "crypt") return "The Hierophant holds the stair. The Chaplain is on the radio.";
+    if (board.id === "hive") return "The visor is waiting. The Voice is on the radio.";
+    return "The Grandmaster holds the entrance. Ops is on the radio.";
+  }
   if (run.phase === "done") {
-    if (board.id === "hive") return "The hive is quiet. Review the ledger or abandon to restart.";
+    if (board.id === "circle") return "The Circle is closed. Review the ledger or abandon to restart.";
+    if (board.id === "nest") return "The comb is quiet. Review the ledger or abandon to restart.";
+    if (board.id === "hive") return "The visor is cracked. The nest is waiting.";
+    if (board.id === "crypt") return "The crypt is quiet. Review the ledger or abandon to restart.";
     return board.id === "vault"
-      ? "The seal holds. Review the ledger or abandon to restart."
+      ? "The seal holds. The crypt is waiting."
       : "Chapter complete. Review the ledger or abandon to restart.";
   }
   if (run.phase === "city_complete") return "You escaped. The Lodge is waiting.";
@@ -380,9 +442,25 @@ export function boardHint(run: CampaignRun, board: CampaignBoard) {
 
 export function boardKicker(run: CampaignRun, board: CampaignBoard) {
   const heroic = run.difficulty === "heroic" ? " · HEROIC" : "";
+  if (board.id === "circle") {
+    if (run.phase === "done") return `// THE CIRCLE — CLOSED${heroic}`;
+    return `// THE CIRCLE CLOSES${heroic}`;
+  }
   if (board.id === "hive") {
-    if (run.phase === "done") return `// HIVE — QUIET${heroic}`;
+    if (run.phase === "done") return `// HIVE — SECURE${heroic}`;
     return `// PSIONIC HIVE${heroic}`;
+  }
+  if (board.id === "nest") {
+    if (run.phase === "reverse") return `// NEST — BREACH${heroic}`;
+    if (run.phase === "boss") return `// NEST — IRIS${heroic}`;
+    if (run.phase === "done") return `// PSIONIC HIVE — CLOSED${heroic}`;
+    return `// INNER HIVE REVERSE${heroic}`;
+  }
+  if (board.id === "crypt") {
+    if (run.phase === "reverse") return `// CRYPT — BREACH${heroic}`;
+    if (run.phase === "boss") return `// CRYPT — EXIT${heroic}`;
+    if (run.phase === "done") return `// VAULT OF FAITH — CLOSED${heroic}`;
+    return `// CRYPT REVERSE${heroic}`;
   }
   if (board.id === "vault") {
     if (run.phase === "done") return `// VAULT — SECURE${heroic}`;
@@ -406,7 +484,9 @@ export function ledgerFile(id: string, run: CampaignRun): { title: string; text:
         : "A tool was taken from the black budget.",
     };
   }
-  return CITY_BOARD.ledger[id] ?? HQ_BOARD.ledger[id] ?? VAULT_BOARD.ledger[id] ?? HIVE_BOARD.ledger[id];
+  const current = getBoard(run.chapterId, run.boardId);
+  if (current?.ledger[id]) return current.ledger[id];
+  return CITY_BOARD.ledger[id] ?? HQ_BOARD.ledger[id] ?? VAULT_BOARD.ledger[id] ?? CRYPT_BOARD.ledger[id] ?? HIVE_BOARD.ledger[id] ?? NEST_BOARD.ledger[id] ?? CIRCLE_BOARD.ledger[id];
 }
 
 export const NODE_ART: Record<string, string> = {
@@ -431,6 +511,14 @@ export const NODE_ART: Record<string, string> = {
   crypt_rush: "/ui/campaign/story-heist.jpg",
   inner_gate: "/ui/campaign/vault-board.jpg",
   guardian: "/ui/campaign/guardian.jpg",
+  last_watch: "/ui/campaign/story-heist.jpg",
+  crypt_arrival: "/ui/campaign/crypt-board.jpg",
+  train_recur: "/ui/campaign/story-ossuary.jpg",
+  train_shield: "/ui/campaign/story-relic.jpg",
+  train_charge: "/ui/campaign/chaplain.jpg",
+  relic_vault: "/ui/campaign/story-relic.jpg",
+  crypt_breach: "/ui/campaign/story-crypt-breach.jpg",
+  hierophant: "/ui/campaign/hierophant.jpg",
   hive_intro: "/ui/campaign/voice.jpg",
   comb_watch: "/ui/campaign/story-nest.jpg",
   psi_den: "/ui/campaign/voice.jpg",
@@ -438,6 +526,18 @@ export const NODE_ART: Record<string, string> = {
   static_field: "/ui/campaign/story-static.jpg",
   inner_comb: "/ui/campaign/hive-board.jpg",
   slaver: "/ui/campaign/slaver.jpg",
+  abduct: "/ui/campaign/story-abduct.jpg",
+  nest_arrival: "/ui/campaign/story-comb-tightens.jpg",
+  train_venom: "/ui/campaign/story-nest.jpg",
+  train_mimic: "/ui/campaign/story-abduct.jpg",
+  train_leech: "/ui/campaign/story-static.jpg",
+  queen_chamber: "/ui/campaign/story-queen-chamber.jpg",
+  nest_breach: "/ui/campaign/story-nest-breach.jpg",
+  queen: "/ui/campaign/queen.jpg",
+  circle_arrival: "/ui/campaign/story-coaches.jpg",
+  hired_guns: "/ui/campaign/story-hired.jpg",
+  tri_armory: "/ui/campaign/story-black-room.jpg",
+  the_archive: "/ui/campaign/archive.jpg",
 };
 
 export const NODE_FIRST_CLEAR: Record<string, { credits: number; cards: string[] }> = {
@@ -465,6 +565,17 @@ export const NODE_FIRST_CLEAR: Record<string, { credits: number; cards: string[]
   crypt_rush: { credits: 50, cards: ["templars_char_012"] },
   inner_gate: { credits: 50, cards: ["templars_char_001"] },
   guardian: { credits: 200, cards: ["templars_char_005"] },
+  last_watch: { credits: 120, cards: [] },
+  crypt_arrival: { credits: 20, cards: [] },
+  train_recur: { credits: 50, cards: ["templars_char_018"] },
+  train_shield: { credits: 50, cards: ["templars_char_015"] },
+  train_charge: { credits: 50, cards: ["templars_char_012"] },
+  relic_vault: { credits: 40, cards: [] },
+  crypt_breach: { credits: 40, cards: [] },
+  hierophant: { credits: 200, cards: ["templars_char_007", "templars_char_010"] },
+  "reverse:train_charge": { credits: 70, cards: [] },
+  "reverse:train_shield": { credits: 70, cards: [] },
+  "reverse:train_recur": { credits: 70, cards: [] },
   hive_intro: { credits: 20, cards: [] },
   comb_watch: { credits: 40, cards: ["reptilians_char_015"] },
   psi_den: { credits: 40, cards: ["reptilians_char_009"] },
@@ -472,6 +583,21 @@ export const NODE_FIRST_CLEAR: Record<string, { credits: number; cards: string[]
   static_field: { credits: 50, cards: ["reptilians_spell_011"] },
   inner_comb: { credits: 50, cards: ["reptilians_char_001"] },
   slaver: { credits: 200, cards: ["reptilians_char_002"] },
+  abduct: { credits: 120, cards: [] },
+  nest_arrival: { credits: 20, cards: [] },
+  train_venom: { credits: 50, cards: ["reptilians_char_016"] },
+  train_mimic: { credits: 50, cards: ["reptilians_char_006"] },
+  train_leech: { credits: 50, cards: ["reptilians_char_008"] },
+  queen_chamber: { credits: 40, cards: [] },
+  nest_breach: { credits: 40, cards: [] },
+  queen: { credits: 200, cards: ["reptilians_char_010", "reptilians_char_018"] },
+  "reverse:train_leech": { credits: 70, cards: [] },
+  "reverse:train_mimic": { credits: 70, cards: [] },
+  "reverse:train_venom": { credits: 70, cards: [] },
+  circle_arrival: { credits: 20, cards: [] },
+  hired_guns: { credits: 80, cards: [] },
+  tri_armory: { credits: 40, cards: [] },
+  the_archive: { credits: 250, cards: [] },
 };
 
 export function rewardKey(run: CampaignRun, nodeId: string) {
@@ -481,10 +607,23 @@ export function rewardKey(run: CampaignRun, nodeId: string) {
 export function newCampaignRun(
   chapterId = "illuminati",
   difficulty: CampaignRun["difficulty"] = "normal",
+  opts?: { kitFaction?: "illuminati" | "templars" | "reptilians"; deck?: string[]; deckId?: string },
 ): CampaignRun {
   const chapter = loadChapter(chapterId);
-  const starterId = chapter?.starter_deck_id ?? "campaign_illuminati_city_starter";
-  const boardId = chapter?.boards[0] ?? "city";
+  let starterId = chapter?.starter_deck_id ?? "campaign_illuminati_city_starter";
+  let boardId = chapter?.boards[0] ?? "city";
+  const flags: Record<string, boolean | string> = {};
+  if (chapterId === "circle") {
+    const kit = opts?.kitFaction ?? "illuminati";
+    flags.kit_faction = kit;
+    starterId =
+      opts?.deckId ??
+      (kit === "templars"
+        ? "campaign_templars_vault_starter"
+        : kit === "reptilians"
+          ? "campaign_reptilians_hive_starter"
+          : "campaign_illuminati_city_starter");
+  }
   return {
     version: 1,
     chapterId,
@@ -494,11 +633,11 @@ export function newCampaignRun(
     cleared: [],
     reverseCleared: [],
     ledger: [],
-    flags: {},
+    flags,
     armoryPicks: [],
     deckId: starterId,
-    deck: expandPresetIds(starterId),
-    deckLive: false,
+    deck: opts?.deck?.length ? [...opts.deck] : expandPresetIds(starterId),
+    deckLive: chapterId === "circle",
     rewardsGranted: [],
     currentNodeId: null,
   };
@@ -534,11 +673,20 @@ export function storyArtFor(node: CampaignNode): string {
   if (node.id.startsWith("hq") || node.id.startsWith("train") || node.id === "grandmaster") {
     return "/ui/campaign/hq-board.jpg";
   }
-  if (node.id === "guardian" || node.id.startsWith("vault") || node.id.startsWith("nave") || node.id === "vestry" || node.id === "infirmary" || node.id === "crypt_rush" || node.id === "inner_gate") {
+  if (node.id === "guardian" || node.id === "last_watch" || node.id.startsWith("vault") || node.id.startsWith("nave") || node.id === "vestry" || node.id === "infirmary" || node.id === "crypt_rush" || node.id === "inner_gate") {
     return "/ui/campaign/vault-board.jpg";
   }
-  if (node.id === "slaver" || node.id.startsWith("hive") || node.id === "comb_watch" || node.id === "psi_den" || node.id === "molt" || node.id === "static_field" || node.id === "inner_comb") {
+  if (node.id === "hierophant" || node.id.startsWith("crypt") || node.id.startsWith("train_recur") || node.id === "train_shield" || node.id === "train_charge" || node.id === "relic_vault") {
+    return "/ui/campaign/crypt-board.jpg";
+  }
+  if (node.id === "queen" || node.id.startsWith("nest") || node.id === "train_venom" || node.id === "train_mimic" || node.id === "train_leech" || node.id === "queen_chamber") {
+    return "/ui/campaign/nest-board.jpg";
+  }
+  if (node.id === "slaver" || node.id === "abduct" || node.id.startsWith("hive") || node.id === "comb_watch" || node.id === "psi_den" || node.id === "molt" || node.id === "static_field" || node.id === "inner_comb") {
     return "/ui/campaign/hive-board.jpg";
+  }
+  if (node.id === "the_archive" || node.id === "circle_arrival" || node.id === "hired_guns" || node.id === "tri_armory") {
+    return "/ui/campaign/circle-board.jpg";
   }
   return "/ui/campaign/city-board.jpg";
 }

@@ -11,6 +11,8 @@ import {
   applyNodeClear,
   applySafehousePick,
   enterHq,
+  enterCrypt,
+  enterNest,
   getBoard,
   getNode,
   rewardKey,
@@ -53,8 +55,15 @@ type AgentState = {
   recklessCleared: boolean;
   vaultCleared: boolean;
   vaultHeroicCleared: boolean;
+  vaultRecklessCleared: boolean;
   hiveCleared: boolean;
   hiveHeroicCleared: boolean;
+  hiveRecklessCleared: boolean;
+  cryptCleared: boolean;
+  cryptHeroicCleared: boolean;
+  nestCleared: boolean;
+  nestHeroicCleared: boolean;
+  circleCleared: boolean;
   cloudBoundUserId: string | null;
 };
 
@@ -75,6 +84,8 @@ type Store = AgentState & {
   completeCampaignNode: (nodeId: string) => void;
   applyCampaignSafehouse: (nodeId: string, pick: SafehousePick) => void;
   enterCampaignHq: () => void;
+  enterCampaignCrypt: () => void;
+  enterCampaignNest: () => void;
   equipCosmetic: (id: string) => void;
   applyCloudArchive: (blob: ArchiveBlob, userId: string) => void;
   resetArchive: () => void;
@@ -92,6 +103,7 @@ const STARTER_MISSIONS: Record<string, MissionStatus> = {
   challenge_black_room: "locked",
   challenge_street_war: "locked",
   challenge_unquiet: "locked",
+  circle: "locked",
 };
 
 function starterCollection(): Collection {
@@ -107,7 +119,7 @@ function starterDecks(): DeckList[] {
   return CURATED_DECKS.map((d) => ({ ...d, custom: false }));
 }
 
-function progressOf(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared" | "vaultCleared" | "vaultHeroicCleared" | "hiveCleared" | "hiveHeroicCleared">): CosmeticProgress {
+function progressOf(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared" | "vaultCleared" | "vaultHeroicCleared" | "vaultRecklessCleared" | "hiveCleared" | "hiveHeroicCleared" | "hiveRecklessCleared" | "cryptCleared" | "cryptHeroicCleared" | "nestCleared" | "nestHeroicCleared" | "circleCleared">): CosmeticProgress {
   return {
     cityCleared: Boolean(s.cityCleared),
     chapterCleared: Boolean(s.chapterCleared),
@@ -115,8 +127,15 @@ function progressOf(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "hero
     recklessCleared: Boolean(s.recklessCleared),
     vaultCleared: Boolean(s.vaultCleared),
     vaultHeroicCleared: Boolean(s.vaultHeroicCleared),
+    vaultRecklessCleared: Boolean(s.vaultRecklessCleared),
     hiveCleared: Boolean(s.hiveCleared),
     hiveHeroicCleared: Boolean(s.hiveHeroicCleared),
+    hiveRecklessCleared: Boolean(s.hiveRecklessCleared),
+    cryptCleared: Boolean(s.cryptCleared),
+    cryptHeroicCleared: Boolean(s.cryptHeroicCleared),
+    nestCleared: Boolean(s.nestCleared),
+    nestHeroicCleared: Boolean(s.nestHeroicCleared),
+    circleCleared: Boolean(s.circleCleared),
   };
 }
 
@@ -128,8 +147,15 @@ function mergeUnlocks(s: AgentState, extra: CosmeticProgress): string[] {
     recklessCleared: s.recklessCleared || extra.recklessCleared,
     vaultCleared: s.vaultCleared || extra.vaultCleared,
     vaultHeroicCleared: s.vaultHeroicCleared || extra.vaultHeroicCleared,
+    vaultRecklessCleared: s.vaultRecklessCleared || extra.vaultRecklessCleared,
     hiveCleared: s.hiveCleared || extra.hiveCleared,
     hiveHeroicCleared: s.hiveHeroicCleared || extra.hiveHeroicCleared,
+    hiveRecklessCleared: s.hiveRecklessCleared || extra.hiveRecklessCleared,
+    cryptCleared: s.cryptCleared || extra.cryptCleared,
+    cryptHeroicCleared: s.cryptHeroicCleared || extra.cryptHeroicCleared,
+    nestCleared: s.nestCleared || extra.nestCleared,
+    nestHeroicCleared: s.nestHeroicCleared || extra.nestHeroicCleared,
+    circleCleared: s.circleCleared || extra.circleCleared,
   });
   return [...new Set([...s.cosmeticsUnlocked, ...ids])];
 }
@@ -155,8 +181,15 @@ const initial = (): AgentState => ({
     recklessCleared: false,
     vaultCleared: false,
     vaultHeroicCleared: false,
+    vaultRecklessCleared: false,
     hiveCleared: false,
     hiveHeroicCleared: false,
+    hiveRecklessCleared: false,
+    cryptCleared: false,
+    cryptHeroicCleared: false,
+    nestCleared: false,
+    nestHeroicCleared: false,
+    circleCleared: false,
   }),
   cosmeticsLoadout: { ...STARTER_LOADOUT },
   fieldAcquired: [],
@@ -166,8 +199,15 @@ const initial = (): AgentState => ({
   recklessCleared: false,
   vaultCleared: false,
   vaultHeroicCleared: false,
+  vaultRecklessCleared: false,
   hiveCleared: false,
   hiveHeroicCleared: false,
+  hiveRecklessCleared: false,
+  cryptCleared: false,
+  cryptHeroicCleared: false,
+  nestCleared: false,
+  nestHeroicCleared: false,
+  circleCleared: false,
   cloudBoundUserId: null,
 });
 
@@ -254,17 +294,34 @@ export const useArchive = create<Store>()(
           const recklessCleared =
             s.recklessCleared ||
             (Boolean(nextRun.flags.illuminati_chapter_complete) && Boolean(nextRun.flags.skipped_safe_drop));
-          const vaultCleared = s.vaultCleared || Boolean(nextRun.flags.templars_chapter_complete);
+          const vaultCleared = s.vaultCleared || Boolean(nextRun.flags.board_vault_complete) || Boolean(nextRun.flags.templars_chapter_complete && nextRun.boardId !== "crypt");
           const vaultHeroicCleared =
             s.vaultHeroicCleared ||
-            (Boolean(nextRun.flags.templars_chapter_complete) && run.difficulty === "heroic");
-          const hiveCleared = s.hiveCleared || Boolean(nextRun.flags.reptilians_chapter_complete);
+            ((Boolean(nextRun.flags.board_vault_complete) || Boolean(nextRun.flags.templars_chapter_complete)) && run.difficulty === "heroic" && run.boardId !== "crypt");
+          const vaultRecklessCleared =
+            s.vaultRecklessCleared ||
+            (Boolean(nextRun.flags.templars_chapter_complete) && Boolean(nextRun.flags.skipped_vestry));
+          const hiveCleared = s.hiveCleared || Boolean(nextRun.flags.board_hive_complete) || Boolean(nextRun.flags.reptilians_chapter_complete && nextRun.boardId !== "nest");
           const hiveHeroicCleared =
             s.hiveHeroicCleared ||
-            (Boolean(nextRun.flags.reptilians_chapter_complete) && run.difficulty === "heroic");
+            ((Boolean(nextRun.flags.board_hive_complete) || Boolean(nextRun.flags.reptilians_chapter_complete)) && run.difficulty === "heroic" && run.boardId !== "nest");
+          const hiveRecklessCleared =
+            s.hiveRecklessCleared ||
+            (Boolean(nextRun.flags.reptilians_chapter_complete) && Boolean(nextRun.flags.skipped_molt));
+          const cryptCleared = s.cryptCleared || Boolean(nextRun.flags.board_crypt_complete);
+          const cryptHeroicCleared =
+            s.cryptHeroicCleared ||
+            (Boolean(nextRun.flags.board_crypt_complete) && run.difficulty === "heroic");
+          const nestCleared = s.nestCleared || Boolean(nextRun.flags.board_nest_complete);
+          const nestHeroicCleared =
+            s.nestHeroicCleared ||
+            (Boolean(nextRun.flags.board_nest_complete) && run.difficulty === "heroic");
+          const circleCleared = s.circleCleared || Boolean(nextRun.flags.circle_chapter_complete) || Boolean(nextRun.flags.board_circle_complete);
           if (!s.heroicCleared && heroicCleared) credits += 150;
           if (!s.vaultHeroicCleared && vaultHeroicCleared) credits += 150;
           if (!s.hiveHeroicCleared && hiveHeroicCleared) credits += 150;
+          if (!s.cryptHeroicCleared && cryptHeroicCleared) credits += 150;
+          if (!s.nestHeroicCleared && nestHeroicCleared) credits += 150;
           const cosmeticsUnlocked = mergeUnlocks(s, {
             cityCleared,
             chapterCleared,
@@ -272,8 +329,15 @@ export const useArchive = create<Store>()(
             recklessCleared,
             vaultCleared,
             vaultHeroicCleared,
+            vaultRecklessCleared,
             hiveCleared,
             hiveHeroicCleared,
+            hiveRecklessCleared,
+            cryptCleared,
+            cryptHeroicCleared,
+            nestCleared,
+            nestHeroicCleared,
+            circleCleared,
           });
           const missions = { ...s.missions };
           if (nextRun.flags.board_city_complete) missions.illuminati = "complete";
@@ -285,7 +349,11 @@ export const useArchive = create<Store>()(
             missions.templars = "complete";
             if (missions.reptilians === "locked") missions.reptilians = "available";
           }
+          if (nextRun.flags.board_vault_complete && missions.templars === "locked") missions.templars = "available";
+          if (nextRun.flags.board_hive_complete && missions.reptilians === "locked") missions.reptilians = "available";
           if (nextRun.flags.reptilians_chapter_complete) missions.reptilians = "complete";
+          if (chapterCleared && cryptCleared && nestCleared && missions.circle === "locked") missions.circle = "available";
+          if (nextRun.flags.circle_chapter_complete || nextRun.flags.board_circle_complete) missions.circle = "complete";
           return {
             campaignRun: nextRun,
             credits,
@@ -297,8 +365,15 @@ export const useArchive = create<Store>()(
             recklessCleared,
             vaultCleared,
             vaultHeroicCleared,
+            vaultRecklessCleared,
             hiveCleared,
             hiveHeroicCleared,
+            hiveRecklessCleared,
+            cryptCleared,
+            cryptHeroicCleared,
+            nestCleared,
+            nestHeroicCleared,
+            circleCleared,
             cosmeticsUnlocked,
             missions,
           };
@@ -308,6 +383,16 @@ export const useArchive = create<Store>()(
           if (!s.campaignRun) return {};
           return { campaignRun: enterHq(s.campaignRun) };
         }),
+      enterCampaignCrypt: () =>
+        set((s) => {
+          if (!s.campaignRun) return {};
+          return { campaignRun: enterCrypt(s.campaignRun) };
+        }),
+      enterCampaignNest: () =>
+        set((s) => {
+          if (!s.campaignRun) return {};
+          return { campaignRun: enterNest(s.campaignRun) };
+        }),
       applyCampaignSafehouse: (nodeId, pick) =>
         set((s) => {
           const run = s.campaignRun;
@@ -315,12 +400,12 @@ export const useArchive = create<Store>()(
           const board = getBoard(run.chapterId, run.boardId);
           const node = board ? getNode(board, nodeId) : undefined;
           if (!node) return {};
-          const applied = applySafehousePick(run.deck, pick);
+          const applied = applySafehousePick(run.deck, pick, nodeId);
           const ledger = [...run.ledger];
           for (const id of [...(node.rewards?.ledger_ids ?? []), ...applied.ledgerExtra]) {
             if (!ledger.includes(id)) ledger.push(id);
           }
-          if (node.id === "hq_armory" && (pick.action === "add" || pick.action === "inject") && !ledger.includes("file_armory_pick")) {
+          if ((node.id === "hq_armory" || node.id === "relic_vault" || node.id === "queen_chamber" || node.id === "tri_armory") && (pick.action === "add" || pick.action === "inject") && !ledger.includes("file_armory_pick")) {
             ledger.push("file_armory_pick");
           }
           const already = run.rewardsGranted.includes(nodeId);
@@ -346,7 +431,7 @@ export const useArchive = create<Store>()(
             campaignRun: {
               ...run,
               deck: applied.deck,
-              deckLive: node.id === "vestry" || node.id === "molt" ? true : pick.action !== "skip" ? true : run.deckLive,
+              deckLive: node.id === "vestry" || node.id === "molt" || node.id === "relic_vault" || node.id === "queen_chamber" || node.id === "tri_armory" ? true : pick.action !== "skip" ? true : run.deckLive,
               flags: { ...run.flags, ...applied.flags },
               ledger,
               cleared,
@@ -397,8 +482,15 @@ export const useArchive = create<Store>()(
             recklessCleared: next.recklessCleared,
             vaultCleared: next.vaultCleared,
             vaultHeroicCleared: next.vaultHeroicCleared,
+            vaultRecklessCleared: next.vaultRecklessCleared,
             hiveCleared: next.hiveCleared,
             hiveHeroicCleared: next.hiveHeroicCleared,
+            hiveRecklessCleared: next.hiveRecklessCleared,
+            cryptCleared: next.cryptCleared,
+            cryptHeroicCleared: next.cryptHeroicCleared,
+            nestCleared: next.nestCleared,
+            nestHeroicCleared: next.nestHeroicCleared,
+            circleCleared: next.circleCleared,
             campaignRun: next.campaignRun,
             cloudBoundUserId: userId,
           };
@@ -435,8 +527,15 @@ export const useArchive = create<Store>()(
         recklessCleared: s.recklessCleared,
         vaultCleared: s.vaultCleared,
         vaultHeroicCleared: s.vaultHeroicCleared,
+        vaultRecklessCleared: s.vaultRecklessCleared,
         hiveCleared: s.hiveCleared,
         hiveHeroicCleared: s.hiveHeroicCleared,
+        hiveRecklessCleared: s.hiveRecklessCleared,
+        cryptCleared: s.cryptCleared,
+        cryptHeroicCleared: s.cryptHeroicCleared,
+        nestCleared: s.nestCleared,
+        nestHeroicCleared: s.nestHeroicCleared,
+        circleCleared: s.circleCleared,
         cloudBoundUserId: s.cloudBoundUserId,
       }),
     },
@@ -451,7 +550,7 @@ export function discoveredCount(collection: Collection) {
   return Object.values(collection).filter((n) => n > 0).length;
 }
 
-export function archiveProgress(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared" | "vaultCleared" | "vaultHeroicCleared" | "hiveCleared" | "hiveHeroicCleared">): CosmeticProgress {
+export function archiveProgress(s: Pick<AgentState, "cityCleared" | "chapterCleared" | "heroicCleared" | "recklessCleared" | "vaultCleared" | "vaultHeroicCleared" | "vaultRecklessCleared" | "hiveCleared" | "hiveHeroicCleared" | "hiveRecklessCleared" | "cryptCleared" | "cryptHeroicCleared" | "nestCleared" | "nestHeroicCleared" | "circleCleared">): CosmeticProgress {
   return progressOf(s);
 }
 

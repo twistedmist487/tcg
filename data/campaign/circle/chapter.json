@@ -1,0 +1,19 @@
+{
+  "id": "circle",
+  "name": "The Circle Closes",
+  "faction": "illuminati",
+  "starter_deck_id": "campaign_illuminati_city_starter",
+  "boards": [
+    "circle"
+  ],
+  "difficulties": {
+    "normal": {
+      "ai_default": "medium",
+      "label": "Normal"
+    },
+    "heroic": {
+      "ai_default": "hard",
+      "label": "Heroic"
+    }
+  }
+}

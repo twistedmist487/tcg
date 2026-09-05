@@ -1,6 +1,6 @@
 export type CosmeticSlot = "cardBack" | "tableFelt" | "nameplate" | "title";
 
-export type UnlockRule = "starter" | "city" | "chapter" | "heroic" | "reckless" | "vault" | "vaultHeroic" | "hive" | "hiveHeroic";
+export type UnlockRule = "starter" | "city" | "chapter" | "heroic" | "reckless" | "vault" | "vaultHeroic" | "vaultReckless" | "hive" | "hiveHeroic" | "hiveReckless" | "crypt" | "cryptHeroic" | "nest" | "nestHeroic" | "circle";
 
 export type Cosmetic = {
   id: string;
@@ -26,8 +26,15 @@ export type CosmeticProgress = {
   recklessCleared: boolean;
   vaultCleared: boolean;
   vaultHeroicCleared: boolean;
+  vaultRecklessCleared: boolean;
   hiveCleared: boolean;
   hiveHeroicCleared: boolean;
+  hiveRecklessCleared: boolean;
+  cryptCleared: boolean;
+  cryptHeroicCleared: boolean;
+  nestCleared: boolean;
+  nestHeroicCleared: boolean;
+  circleCleared: boolean;
 };
 
 export const STARTER_LOADOUT: CosmeticLoadout = {
@@ -210,6 +217,15 @@ export const COSMETICS: Cosmetic[] = [
     hint: "Close Vault of Faith on Heroic.",
   },
   {
+    id: "title-oathbreaker",
+    slot: "title",
+    name: "OATHBREAKER",
+    blurb: "No Vestry. Still standing. The Chaplain logged the pride.",
+    src: "",
+    unlock: "vaultReckless",
+    hint: "Skip Vestry, then close Crypt Reverse.",
+  },
+  {
     id: "back-hive",
     slot: "cardBack",
     name: "Scale Sleeve",
@@ -245,6 +261,105 @@ export const COSMETICS: Cosmetic[] = [
     unlock: "hiveHeroic",
     hint: "Close Psionic Hive on Heroic.",
   },
+  {
+    id: "title-skinless",
+    slot: "title",
+    name: "SKINLESS",
+    blurb: "No Molt. Still standing. The Voice logged the pride.",
+    src: "",
+    unlock: "hiveReckless",
+    hint: "Skip Molt, then close Inner Hive Reverse.",
+  },
+  {
+    id: "back-crypt",
+    slot: "cardBack",
+    name: "Ossuary Sleeve",
+    blurb: "Bone gold on dark stock. Issued after the stair closed.",
+    src: "/ui/cosmetics/back-crypt.jpg",
+    unlock: "crypt",
+    hint: "Close Crypt Reverse.",
+  },
+  {
+    id: "plate-crypt",
+    slot: "nameplate",
+    name: "Crypt Plate",
+    blurb: "Templar hardware, under the nave. The Chaplain logged the name.",
+    src: "/ui/cosmetics/plate-crypt.jpg",
+    unlock: "crypt",
+    hint: "Close Crypt Reverse.",
+  },
+  {
+    id: "title-crypt-wright",
+    slot: "title",
+    name: "CRYPT WRIGHT",
+    blurb: "The ossuary is quiet. The heist is on file.",
+    src: "",
+    unlock: "crypt",
+    hint: "Close Crypt Reverse.",
+  },
+  {
+    id: "title-sealbreaker",
+    slot: "title",
+    name: "SEALBREAKER",
+    blurb: "Heroic. You walked the crypt on the hard path.",
+    src: "",
+    unlock: "cryptHeroic",
+    hint: "Close Crypt Reverse on Heroic.",
+  },
+  {
+    id: "back-nest",
+    slot: "cardBack",
+    name: "Nest Sleeve",
+    blurb: "Gold iris on teal comb. Issued after the visor closed.",
+    src: "/ui/cosmetics/back-nest.jpg",
+    unlock: "nest",
+    hint: "Close Inner Hive Reverse.",
+  },
+  {
+    id: "plate-nest",
+    slot: "nameplate",
+    name: "Nest Plate",
+    blurb: "Reptilian hardware, inner comb. The Voice logged the name.",
+    src: "/ui/cosmetics/plate-nest.jpg",
+    unlock: "nest",
+    hint: "Close Inner Hive Reverse.",
+  },
+  {
+    id: "title-comb-wright",
+    slot: "title",
+    name: "COMB WRIGHT",
+    blurb: "The comb is quiet. The purge is on file.",
+    src: "",
+    unlock: "nest",
+    hint: "Close Inner Hive Reverse.",
+  },
+  {
+    id: "title-queenkiller",
+    slot: "title",
+    name: "QUEENKILLER",
+    blurb: "Heroic. You walked the nest on the hard path.",
+    src: "",
+    unlock: "nestHeroic",
+    hint: "Close Inner Hive Reverse on Heroic.",
+  },
+  {
+    id: "felt-circle",
+    slot: "tableFelt",
+    name: "Circle Felt",
+    blurb: "Gold ring on black wool. Issued when the spine closed.",
+    src: "/ui/cosmetics/felt-circle.jpg",
+    unlock: "circle",
+    hint: "Close The Circle.",
+  },
+  {
+    id: "title-archive-walker",
+    slot: "title",
+    name: "ARCHIVE_WALKER",
+    blurb: "The file kept your name. The Circle is closed.",
+    src: "",
+    unlock: "circle",
+    hint: "Close The Circle.",
+  },
 ];
 
 export const SLOT_LABEL: Record<CosmeticSlot, string> = {
@@ -270,8 +385,15 @@ export function isCosmeticUnlocked(c: Cosmetic, progress: CosmeticProgress): boo
   if (c.unlock === "reckless") return progress.recklessCleared;
   if (c.unlock === "vault") return progress.vaultCleared;
   if (c.unlock === "vaultHeroic") return progress.vaultHeroicCleared;
+  if (c.unlock === "vaultReckless") return progress.vaultRecklessCleared;
   if (c.unlock === "hive") return progress.hiveCleared;
   if (c.unlock === "hiveHeroic") return progress.hiveHeroicCleared;
+  if (c.unlock === "hiveReckless") return progress.hiveRecklessCleared;
+  if (c.unlock === "crypt") return progress.cryptCleared;
+  if (c.unlock === "cryptHeroic") return progress.cryptHeroicCleared;
+  if (c.unlock === "nest") return progress.nestCleared;
+  if (c.unlock === "nestHeroic") return progress.nestHeroicCleared;
+  if (c.unlock === "circle") return progress.circleCleared;
   return false;
 }
 

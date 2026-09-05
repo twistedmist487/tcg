@@ -22,7 +22,7 @@ import {
   storyPanelsFor,
 } from "@/lib/game/campaign";
 import { matchFromCampaignNode } from "@/lib/game/launch";
-import { getCard } from "@/lib/game/catalog";
+import { expandDeck, getCard } from "@/lib/game/catalog";
 import { callsignOf, cosmeticSrc, STARTER_LOADOUT } from "@/lib/game/cosmetics";
 import { useArchive } from "@/lib/store";
 import { cn } from "@/lib/utils";
@@ -30,10 +30,14 @@ import type { CampaignNode, CampaignRun, SafehousePick, StoryPanel } from "@/lib
 
 export const Route = createFileRoute("/campaign")({ component: CampaignPage });
 
-function chapterSealed(id: string, archive: { chapterCleared: boolean; vaultCleared: boolean }) {
+function chapterSealed(
+  id: string,
+  archive: { chapterCleared: boolean; vaultCleared: boolean; cryptCleared: boolean; nestCleared: boolean },
+) {
   if (id === "illuminati") return false;
   if (id === "templars") return !archive.chapterCleared;
   if (id === "reptilians") return !archive.vaultCleared;
+  if (id === "circle") return !(archive.chapterCleared && archive.cryptCleared && archive.nestCleared);
   return true;
 }
 
@@ -43,6 +47,7 @@ function resumeLabel(boardId: string | undefined) {
   if (boardId === "crypt") return "RESUME CRYPT";
   if (boardId === "hive") return "RESUME HIVE";
   if (boardId === "nest") return "RESUME NEST";
+  if (boardId === "circle") return "RESUME ARCHIVE";
   return "RESUME CITY BOARD";
 }
 
@@ -57,6 +62,7 @@ function CampaignHub() {
   const archive = useArchive();
   const nav = useNavigate();
   const [diffPick, setDiffPick] = useState<"normal" | "heroic" | null>(null);
+  const [kitPick, setKitPick] = useState(false);
   const diff = diffPick ?? (archive.heroicCleared ? "heroic" : "normal");
   const loadout = archive.cosmeticsLoadout ?? STARTER_LOADOUT;
   const sleeve = cosmeticSrc(loadout.cardBack, "/cards/backs/illuminati-back.jpg");
@@ -93,7 +99,7 @@ function CampaignHub() {
             />
             <p className="max-w-xl font-mono text-[12px] leading-relaxed text-muted">
               Walk a chapter. Salvage the kit. Field cards land in Collection. Sleeves and plates unlock in the
-              Locker. First Contact stays optional. Close The Inner Circle to unseal the Vault. Close the Vault to open the Crypt. Close the Crypt and the Hive listens. Close the Hive and the Nest tightens. Skip a contact for a greedy title.
+              Locker. First Contact stays optional. Close The Inner Circle to unseal the Vault. Close the Vault to open the Crypt. Close the Crypt and the Hive listens. Close the Hive and the Nest tightens. Close Crypt, Nest, and Inner Circle to unseal the Archive. Skip a contact for a greedy title.
             </p>
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -119,7 +125,7 @@ function CampaignHub() {
             </div>
 
             <div className="mt-6 grid gap-3 md:grid-cols-3">
-              {CAMPAIGN_CHAPTERS.map((ch) => {
+              {CAMPAIGN_CHAPTERS.filter((ch) => ch.id !== "circle").map((ch) => {
                 const sealed = chapterSealed(ch.id, archive);
                 const live = Boolean(archive.campaignRun) && archive.campaignRun?.chapterId === ch.id;
                 const done =
@@ -194,6 +200,60 @@ function CampaignHub() {
               })}
             </div>
 
+            {(() => {
+              const ch = CAMPAIGN_CHAPTERS.find((c) => c.id === "circle");
+              if (!ch) return null;
+              const sealed = chapterSealed(ch.id, archive);
+              const live = Boolean(archive.campaignRun) && archive.campaignRun?.chapterId === "circle";
+              const done = Boolean(archive.circleCleared);
+              return (
+                <button
+                  type="button"
+                  disabled={sealed}
+                  onClick={() => {
+                    if (sealed) return;
+                    if (!live) setKitPick(true);
+                  }}
+                  className={cn(
+                    "relative mt-3 w-full overflow-hidden rounded-lg p-0 text-left",
+                    sealed ? "metal-btn opacity-70" : "metal-btn-live",
+                  )}
+                >
+                  <img src={ch.art ?? "/ui/campaign/circle-tease.jpg"} alt="" className="h-28 w-full object-cover sm:h-36" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-void via-void/55 to-transparent" />
+                  <div className="relative z-10 p-4">
+                    <div className="flex items-center justify-between gap-2 font-mono text-[10px] tracking-[0.2em] text-phosphor">
+                      <span>ARCHIVE</span>
+                      {sealed ? (
+                        <span className="flex items-center gap-1 text-muted">
+                          <Lock className="size-3" /> SEALED
+                        </span>
+                      ) : live ? (
+                        <span className="text-watch">LIVE</span>
+                      ) : done ? (
+                        <span>ON FILE</span>
+                      ) : (
+                        <span>OPEN</span>
+                      )}
+                    </div>
+                    <div className="mt-1 font-ui text-2xl font-semibold text-ink">{ch.name}</div>
+                    <p className="mt-2 max-w-xl font-mono text-[11px] leading-relaxed text-muted">{ch.description}</p>
+                    <div className="mt-3 font-mono text-[10px] tracking-[0.16em] text-watch">
+                      {sealed
+                        ? "CLOSE CRYPT, NEST, AND INNER CIRCLE FIRST"
+                        : live
+                          ? resumeLabel(archive.campaignRun?.boardId)
+                          : done
+                            ? diff === "heroic"
+                              ? "RUN HEROIC"
+                              : "WALK IT AGAIN"
+                            : "BRING A KIT"}
+                    </div>
+                  </div>
+                </button>
+              );
+            })()}
+
             <button
               type="button"
               onClick={() => void nav({ to: "/locker" })}
@@ -217,7 +277,88 @@ function CampaignHub() {
           </div>
         </section>
       </div>
+      {kitPick && (
+        <KitPickOverlay
+          diff={diff}
+          onClose={() => setKitPick(false)}
+          onPick={(opts) => {
+            archive.setCampaignRun(newCampaignRun("circle", diff, opts));
+            setKitPick(false);
+          }}
+        />
+      )}
     </TerminalFrame>
+  );
+}
+
+function KitPickOverlay({
+  diff,
+  onPick,
+  onClose,
+}: {
+  diff: "normal" | "heroic";
+  onPick: (opts: { kitFaction: "illuminati" | "templars" | "reptilians"; deck?: string[]; deckId?: string }) => void;
+  onClose: () => void;
+}) {
+  const archive = useArchive();
+  const active = archive.decks.find((d) => d.id === archive.activeDeckId);
+  const lastKit: "illuminati" | "templars" | "reptilians" = archive.nestCleared
+    ? "reptilians"
+    : archive.cryptCleared
+      ? "templars"
+      : "illuminati";
+  const kits: { id: "illuminati" | "templars" | "reptilians"; label: string; blurb: string }[] = [
+    { id: "illuminati", label: "Lodge kit", blurb: "City / HQ Influence list. Silence, discard, denial." },
+    { id: "templars", label: "Faith kit", blurb: "Vault / Crypt Faith list. Walls, relics, Charge." },
+    { id: "reptilians", label: "Comb kit", blurb: "Hive / Nest Psionics list. Stealth, Venom, Mimic." },
+  ];
+  return (
+    <div className="absolute inset-0 z-40 flex items-center justify-center bg-void/85 p-4">
+      <article className="panel max-h-[90dvh] w-full max-w-2xl overflow-auto rounded-lg">
+        <img src="/ui/campaign/circle-tease.jpg" alt="" className="h-40 w-full object-cover" />
+        <div className="p-5">
+          <div className="font-mono text-[10px] tracking-[0.2em] text-phosphor">BRING A KIT{diff === "heroic" ? " · HEROIC" : ""}</div>
+          <h2 className="mt-1 font-ui text-2xl font-semibold text-ink">The Circle Closes</h2>
+          <p className="mt-2 font-mono text-[13px] leading-relaxed text-muted">
+            Player picks the faction kit they finished last, or the active dossier. The Archive does not teach.
+          </p>
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {kits.map((kit) => (
+              <button
+                key={kit.id}
+                type="button"
+                onClick={() => onPick({ kitFaction: kit.id })}
+                className="metal-btn flex flex-col rounded-lg p-3 text-left hover:brightness-110"
+              >
+                <span className="font-ui text-lg font-semibold text-ink">{kit.label}</span>
+                {kit.id === lastKit && (
+                  <span className="mt-1 font-mono text-[10px] tracking-[0.16em] text-phosphor">LAST WING</span>
+                )}
+                <span className="mt-1 font-mono text-[11px] leading-relaxed text-muted">{kit.blurb}</span>
+              </button>
+            ))}
+          </div>
+          {active && (
+            <button
+              type="button"
+              onClick={() =>
+                onPick({
+                  kitFaction: active.faction,
+                  deck: expandDeck(active.cards),
+                  deckId: active.id,
+                })
+              }
+              className="metal-btn-live mt-3 min-h-11 w-full rounded-md p-3 text-left font-ui tracking-[0.12em] text-phosphor"
+            >
+              ACTIVE DOSSIER · {active.name}
+            </button>
+          )}
+          <button type="button" className="mt-4 font-mono text-[11px] text-muted" onClick={onClose}>
+            Back to archive
+          </button>
+        </div>
+      </article>
+    </div>
   );
 }
 
@@ -234,7 +375,7 @@ function InvestigationBoard({ run }: { run: CampaignRun }) {
   useEffect(() => {
     if (!board) return;
     if (run.phase !== "forward") return;
-    if (run.boardId !== "hq" && run.boardId !== "vault" && run.boardId !== "hive" && run.boardId !== "crypt" && run.boardId !== "nest") return;
+    if (run.boardId !== "hq" && run.boardId !== "vault" && run.boardId !== "hive" && run.boardId !== "crypt" && run.boardId !== "nest" && run.boardId !== "circle") return;
     if (run.cleared.includes(board.start_node)) return;
     const start = getNode(board, board.start_node);
     if (start?.type === "story") {
@@ -602,7 +743,7 @@ function SafehouseOverlay({
         <img src={storyArtFor(node)} alt="" className="h-40 w-full object-cover" />
         <div className="p-5">
           <div className="font-mono text-[10px] tracking-[0.2em] text-phosphor">
-            {armory ? "BLACK BUDGET" : node.id === "vestry" ? "VESTRY" : node.id === "molt" ? "MOLT" : node.id === "relic_vault" ? "RELIC VAULT" : node.id === "queen_chamber" ? "MOLTING CHAMBER" : "SAFE DROP"}
+            {armory ? "BLACK BUDGET" : node.id === "vestry" ? "VESTRY" : node.id === "molt" ? "MOLT" : node.id === "relic_vault" ? "RELIC VAULT" : node.id === "queen_chamber" ? "MOLTING CHAMBER" : node.id === "tri_armory" ? "THREE PILES" : "SAFE DROP"}
           </div>
           <h2 className="mt-1 font-ui text-2xl font-semibold text-ink">{node.title}</h2>
           <p className="mt-2 font-mono text-[13px] leading-relaxed text-muted">{node.safehouse?.text}</p>
@@ -732,6 +873,7 @@ function ChapterCompleteBanner() {
   const vault = run?.chapterId === "templars" && !crypt;
   const nest = run?.boardId === "nest";
   const hive = run?.chapterId === "reptilians" && !nest;
+  const circle = run?.chapterId === "circle" || run?.boardId === "circle";
   const oathbreaker = Boolean(run?.flags.skipped_vestry);
   const skinless = Boolean(run?.flags.skipped_molt);
   const reckless = Boolean(run?.flags.skipped_safe_drop);
@@ -739,7 +881,9 @@ function ChapterCompleteBanner() {
     <div className="absolute inset-0 z-30 flex items-end justify-center bg-void/55 p-4 sm:items-center">
       <div className="w-full max-w-lg rounded-md bg-void/95 p-4 outline outline-1 outline-phosphor/40">
         <div className="font-mono text-[10px] tracking-[0.2em] text-phosphor">
-          {nest
+          {circle
+            ? "THE CIRCLE — CLOSED"
+            : nest
             ? "NEST — QUIET"
             : hive
               ? "HIVE — SECURE"
@@ -751,7 +895,11 @@ function ChapterCompleteBanner() {
           {heroic ? " · HEROIC" : ""}
         </div>
         <p className="mt-2 font-mono text-[13px] leading-relaxed text-ink">
-          {nest
+          {circle
+            ? heroic
+              ? "The spine is quiet on Heroic. Circle Felt and ARCHIVE_WALKER are in the Locker. The file kept your name."
+              : "The spine is quiet. Circle Felt and ARCHIVE_WALKER are in the Locker. The file kept your name."
+            : nest
             ? heroic
               ? skinless
                 ? "The comb is quiet on Heroic. Nest Sleeve, Nest Plate, QUEENKILLER, and SKINLESS are in the Locker. The archive is quiet."
@@ -796,13 +944,25 @@ function ChapterCompleteBanner() {
             className="metal-btn min-h-11 rounded-md font-ui tracking-[0.16em]"
             onClick={() =>
               archive.setCampaignRun(
-                newCampaignRun(hive || nest ? "reptilians" : vault || crypt ? "templars" : "illuminati", heroic ? "normal" : "heroic"),
+                circle
+                  ? newCampaignRun("circle", heroic ? "normal" : "heroic", {
+                      kitFaction:
+                        run?.flags.kit_faction === "templars" || run?.flags.kit_faction === "reptilians"
+                          ? run.flags.kit_faction
+                          : "illuminati",
+                      deck: run?.deck,
+                      deckId: run?.deckId,
+                    })
+                  : newCampaignRun(
+                      hive || nest ? "reptilians" : vault || crypt ? "templars" : "illuminati",
+                      heroic ? "normal" : "heroic",
+                    ),
               )
             }
           >
             {heroic ? "RUN NORMAL" : "RUN HEROIC"}
           </button>
-          {(vault || crypt) && (
+          {!circle && (vault || crypt) && (
             <button
               type="button"
               className="metal-btn-live min-h-11 rounded-md font-ui tracking-[0.16em] text-phosphor sm:col-span-2"
@@ -811,13 +971,28 @@ function ChapterCompleteBanner() {
               ENTER THE HIVE
             </button>
           )}
-          {!vault && !hive && !crypt && !nest && (
+          {!circle && !vault && !hive && !crypt && !nest && (
             <button
               type="button"
               className="metal-btn-live min-h-11 rounded-md font-ui tracking-[0.16em] text-phosphor sm:col-span-2"
               onClick={() => archive.setCampaignRun(newCampaignRun("templars", "normal"))}
             >
               ENTER THE VAULT
+            </button>
+          )}
+          {!circle && archive.chapterCleared && archive.cryptCleared && archive.nestCleared && (
+            <button
+              type="button"
+              className="metal-btn-live min-h-11 rounded-md font-ui tracking-[0.16em] text-phosphor sm:col-span-2"
+              onClick={() =>
+                archive.setCampaignRun(
+                  newCampaignRun("circle", "normal", {
+                    kitFaction: nest ? "reptilians" : crypt ? "templars" : "illuminati",
+                  }),
+                )
+              }
+            >
+              ENTER THE ARCHIVE
             </button>
           )}
           <button

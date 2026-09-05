@@ -12,12 +12,12 @@ SHIPPED
   Templars    Board 2 Crypt Reverse + Hierophant (Liquid Assets)
   Reptilians  Board 1 Hive (Static Air, Slaver) + Abduct + Reckless Molt
   Reptilians  Board 2 Inner Hive Reverse + Overlord Sskrath (Brood Pressure)
-  Cosmetics / field cards / Heroic per Board 1 + Crypt + Nest
+  The Circle Closes (crossover finale — kit pick, Hired Guns, Three Piles, The Archive / Black Room)
+  Cosmetics / field cards / Heroic per Board 1 + Crypt + Nest + Circle Felt / ARCHIVE_WALKER
   Reckless titles: RECKLESS / OATHBREAKER / SKINLESS
   CLAIM ARCHIVE (optional Google / X bind)
 
 NEXT (in order)
-  10 The Circle Closes (crossover finale)
   11 Replay layer (NG+, constructed presets, cosmetics for Board 2)
 
 LATER
@@ -131,6 +131,10 @@ One short board, player picks the faction kit they finished last (or Locker load
 Unlock: `cryptCleared && nestCleared && chapterCleared`.
 
 Reward: sleeve `back-heroic` already exists for Inner Circle Heroic — add `felt-circle`, title ARCHIVE_WALKER. This is the cosmetic that says you finished the spine.
+
+**Shipped.** Hub capstone (not a 4th starter). Kit pick overlay (Lodge / Faith / Comb / active dossier). Black Room is information-only: the top of the player deck is face-up. Archive is 30 life, silent, no teach. 250 credits on the Archive. No extra field cards.
+
+---
 
 ---
 

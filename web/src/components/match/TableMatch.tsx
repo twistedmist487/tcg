@@ -453,6 +453,9 @@ export function TableMatch({
             {match.twist.negateEveryN
               ? ` ${match.twist.spellsCast % match.twist.negateEveryN}/${match.twist.negateEveryN}`
               : ""}
+            {match.twist.discardEnergyNext ? ` · banked ${match.player.pendingEnergy}` : ""}
+            {match.twist.broodPressure ? " · brood" : ""}
+            {match.twist.revealTop ? " · top revealed" : ""}
             : {match.twist.description}
           </div>
         )}
@@ -565,8 +568,23 @@ export function TableMatch({
           </button>
         </div>
         <div className="mt-auto flex flex-col items-center max-lg:mt-0" data-drop="deck">
-          <h3 className="font-mono text-[10px] tracking-[0.2em] text-gold">DECK</h3>
-          <CardBack faction={match.player.faction} src={sleeveSrc} className="mt-1 w-16" />
+          <h3 className="font-mono text-[10px] tracking-[0.2em] text-gold">
+            {match.twist?.revealTop ? "BLACK ROOM" : "DECK"}
+          </h3>
+          {match.twist?.revealTop && match.player.deck[0] ? (
+            <button
+              type="button"
+              className="mt-1 w-16"
+              onClick={() => onInspect?.(match.player.deck[0]!)}
+            >
+              {(() => {
+                const top = resolveCard(match.player.deck[0]!);
+                return top ? <CardFace card={top} compact /> : <CardBack faction={match.player.faction} src={sleeveSrc} className="w-16" />;
+              })()}
+            </button>
+          ) : (
+            <CardBack faction={match.player.faction} src={sleeveSrc} className="mt-1 w-16" />
+          )}
           <div className="mt-1 font-display text-lg text-cream">{match.player.deck.length}</div>
         </div>
         <Link to="/play" className="font-mono text-[10px] tracking-[0.16em] text-muted no-underline hover:text-phosphor">
@@ -873,7 +891,12 @@ function HeroCenter({
         className={cn("hero-frame", faceTarget && "face-targetable", heroTarget && "hero-targetable")}
         aria-label={`${name} hero`}
       >
-        <img src={portraitFor(faction)} alt="" className="hero-portrait" draggable={false} />
+        <img
+          src={side === "ai" && /the archive/i.test(name) ? "/ui/campaign/archive.jpg" : portraitFor(faction)}
+          alt=""
+          className="hero-portrait"
+          draggable={false}
+        />
       </button>
       <div
         className="nameplate-banner"
@@ -945,6 +968,8 @@ function MinionRow({
               exhausted={m.exhausted}
               taunt={m.taunt}
               stealth={m.stealth}
+              shielding={m.shielding}
+              venom={m.venom}
               selected={selected}
               targetable={targetable}
               ready={ready}

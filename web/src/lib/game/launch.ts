@@ -90,6 +90,9 @@ function heroicTwist(run: CampaignRun, twist: MatchState["twist"]): MatchState["
     firstCharacterHealthBonus: 0,
     negateEveryN: 0,
     spellsCast: 0,
+    discardEnergyNext: false,
+    broodPressure: false,
+    revealTop: false,
   };
 }
 
@@ -123,6 +126,9 @@ export function matchFromCampaignNode(
           firstCharacterHealthBonus: twistDef.match_modifiers?.first_character_health_bonus ?? 0,
           negateEveryN: twistDef.match_modifiers?.negate_every_n_spells ?? 0,
           spellsCast: 0,
+          discardEnergyNext: Boolean(twistDef.match_modifiers?.discard_energy_next_turn),
+          broodPressure: Boolean(twistDef.match_modifiers?.brood_pressure),
+          revealTop: Boolean(twistDef.match_modifiers?.reveal_top_card),
         }
       : null,
   );
@@ -132,7 +138,7 @@ export function matchFromCampaignNode(
   return startMatch({
     playerName,
     aiName: resolved.ai?.name ?? "Handler",
-    playerFaction: asHeroFaction(run.chapterId),
+    playerFaction: asHeroFaction(String(run.flags.kit_faction || run.chapterId)),
     aiFaction,
     playerDeck: payload.ids,
     aiDeck: flattenDeckIds(resolved.ai_deck),

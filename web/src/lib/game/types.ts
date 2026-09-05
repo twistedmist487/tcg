@@ -71,6 +71,7 @@ export type SideState = {
   powerUsed: boolean;
   fatigue: number;
   hallowedUsed: boolean;
+  pendingEnergy: number;
 };
 
 export type Phase = "mulligan" | "main" | "ai" | "over";
@@ -144,6 +145,9 @@ export type CampaignTwist = {
     enemy_character_health_bonus?: number;
     first_character_health_bonus?: number;
     negate_every_n_spells?: number;
+    discard_energy_next_turn?: boolean;
+    brood_pressure?: boolean;
+    reveal_top_card?: boolean;
   };
 };
 
@@ -264,6 +268,9 @@ export type TwistState = {
   firstCharacterHealthBonus: number;
   negateEveryN: number;
   spellsCast: number;
+  discardEnergyNext: boolean;
+  broodPressure: boolean;
+  revealTop: boolean;
 };
 
 

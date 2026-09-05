@@ -35,12 +35,17 @@ function MissionsPage() {
     {
       id: "templars",
       title: "Vault of Faith",
-      blurb: "Hold the reliquary. Hallowed Ground blesses the first body each turn. Opens after Inner Circle.",
+      blurb: "Hold the reliquary, then the crypt. Last Watch after the Guardian. Skip Vestry for OATHBREAKER.",
     },
     {
       id: "reptilians",
       title: "Psionic Hive",
-      blurb: "Static Air kills every third spell. Stealth and the Slaver. Opens after the Vault.",
+      blurb: "The comb, then the nest. Abduct after the Slaver. Skip Molt for SKINLESS.",
+    },
+    {
+      id: "circle",
+      title: "The Circle Closes",
+      blurb: "Three coaches. One file. Bring the kit you finished. Then the Archive — thirty life, Black Room.",
     },
   ];
 
@@ -62,12 +67,18 @@ function MissionsPage() {
             {campaign.map((c) => {
               const raw = archive.missions[c.id] ?? "available";
               const st =
-                c.id === "reptilians" && archive.vaultCleared && raw === "locked"
-                  ? "available"
-                  : c.id === "templars" && archive.chapterCleared && raw === "locked"
+                c.id === "circle"
+                  ? archive.circleCleared || raw === "complete"
+                    ? "complete"
+                    : archive.chapterCleared && archive.cryptCleared && archive.nestCleared
+                      ? "available"
+                      : "locked"
+                  : c.id === "reptilians" && archive.vaultCleared && raw === "locked"
                     ? "available"
-                    : raw;
-              const live = Boolean(archive.campaignRun);
+                    : c.id === "templars" && archive.chapterCleared && raw === "locked"
+                      ? "available"
+                      : raw;
+              const live = Boolean(archive.campaignRun) && archive.campaignRun?.chapterId === c.id;
               return (
                 <button
                   key={c.id}
@@ -76,6 +87,7 @@ function MissionsPage() {
                   onClick={() => void nav({ to: "/campaign" })}
                   className={cn(
                     "rounded-lg p-4 text-left",
+                    c.id === "circle" && "md:col-span-2",
                     st === "complete" || live ? "metal-btn-live" : "metal-btn",
                   )}
                 >
@@ -85,14 +97,20 @@ function MissionsPage() {
                   </div>
                   <p className="mt-2 font-mono text-[11px] leading-relaxed text-muted">{c.blurb}</p>
                   <div className="mt-2 font-mono text-[10px] tracking-[0.16em] text-watch">
-                    {live && archive.campaignRun?.chapterId === c.id
+                    {live
                       ? archive.campaignRun?.boardId === "hq"
                         ? "RESUME LODGE"
                         : archive.campaignRun?.boardId === "vault"
                           ? "RESUME VAULT"
-                          : archive.campaignRun?.boardId === "hive"
-                            ? "RESUME HIVE"
-                            : "RESUME CITY BOARD"
+                          : archive.campaignRun?.boardId === "crypt"
+                            ? "RESUME CRYPT"
+                            : archive.campaignRun?.boardId === "hive"
+                              ? "RESUME HIVE"
+                              : archive.campaignRun?.boardId === "nest"
+                                ? "RESUME NEST"
+                                : archive.campaignRun?.boardId === "circle"
+                                  ? "RESUME ARCHIVE"
+                                  : "RESUME CITY BOARD"
                       : st === "complete"
                         ? "CHAPTER ON FILE"
                         : st === "locked"
@@ -101,7 +119,9 @@ function MissionsPage() {
                             ? "OPEN VAULT"
                             : c.id === "reptilians"
                               ? "OPEN HIVE"
-                              : "OPEN INITIATION"}
+                              : c.id === "circle"
+                                ? "BRING A KIT"
+                                : "OPEN INITIATION"}
                   </div>
                 </button>
               );
